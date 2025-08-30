@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Registro Gratuito</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .floating-shapes::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .floating-shapes::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 30%;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: 20%;
+            left: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white py-4 px-6">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-tools text-2xl"></i>
+                <span class="text-2xl font-bold">Fixly Taller</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-shield-alt text-green-300"></i>
+                <span class="text-sm">Registro Seguro</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-4xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-center space-x-8">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">1</div>
+                    <span class="ml-2 text-sm font-medium text-blue-600">Registro</span>
+                </div>
+                <div class="w-16 h-1 bg-gray-200 rounded"></div>
+                <div class="flex items-center">
+                    <div id="step2" class="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center text-sm font-semibold">2</div>
+                    <span class="ml-2 text-sm font-medium text-gray-500">Acceso</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-2xl mx-auto px-6 py-12">
+        <!-- Formulario de Registro -->
+        <div id="registration-form" class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-user-plus text-2xl text-blue-600"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Empezá tu prueba gratuita</h1>
+                <p class="text-gray-600">15 días completos para probar todas las funcionalidades</p>
+            </div>
+
+            <form id="registrationForm" class="space-y-6">
+                <!-- Información del Taller -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-store mr-1"></i>Nombre del Taller *
+                        </label>
+                        <input type="text" id="nombreTaller" name="nombreTaller" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="Ej: Electrónica Rivadavia">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-envelope mr-1"></i>Email *
+                        </label>
+                        <input type="email" id="email" name="email" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="tu@email.com">
+                        <p class="text-xs text-gray-500 mt-1">Te enviaremos las credenciales de acceso aquí</p>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-phone mr-1"></i>Teléfono *
+                        </label>
+                        <input type="tel" id="telefono" name="telefono" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="Ej: +54 11 1234-5678">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt mr-1"></i>Ciudad *
+                        </label>
+                        <input type="text" id="ciudad" name="ciudad" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                               placeholder="Ej: Buenos Aires">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-tools mr-1"></i>¿Qué reparás principalmente? *
+                    </label>
+                    <select id="especialidad" name="especialidad" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        <option value="">Seleccionar especialidad</option>
+                        <option value="celulares">Celulares y Smartphones</option>
+                        <option value="tablets">Tablets y iPads</option>
+                        <option value="notebooks">Notebooks y Laptops</option>
+                        <option value="consolas">Consolas de Videojuegos</option>
+                        <option value="electrodomesticos">Electrodomésticos</option>
+                        <option value="audio">Equipos de Audio</option>
+                        <option value="varios">Electrónica en General</option>
+                    </select>
+                </div>
+
+                <!-- Términos y Condiciones -->
+                <div class="flex items-start space-x-3">
+                    <input type="checkbox" id="terminos" name="terminos" required 
+                           class="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="terminos" class="text-sm text-gray-600">
+                        Acepto los <a href="#" class="text-blue-600 hover:underline">Términos de Servicio</a> y la 
+                        <a href="#" class="text-blue-600 hover:underline">Política de Privacidad</a>. 
+                        Entiendo que la prueba gratuita dura 15 días.
+                    </label>
+                </div>
+
+                <!-- Botón de Envío -->
+                <button type="submit" id="submitBtn" 
+                        class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center space-x-2">
+                    <i class="fas fa-rocket"></i>
+                    <span>Crear mi cuenta demo gratuita</span>
+                </button>
+
+                <div class="text-center text-sm text-gray-500">
+                    <i class="fas fa-lock mr-1"></i>Tus datos están protegidos con encriptación SSL
+                </div>
+            </form>
+        </div>
+
+        <!-- Página de Confirmación -->
+        <div id="confirmation-page" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-check-circle text-3xl text-green-600 pulse-animation"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-4">¡Cuenta creada exitosamente!</h1>
+                <p class="text-gray-600 mb-8">Te hemos enviado las credenciales de acceso a tu email. Ya podés empezar a usar Fixly Taller por 15 días gratis.</p>
+                
+                <!-- Código de Activación -->
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 mb-8">
+                    <div class="flex items-center justify-between">
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-blue-800">Tu código de activación:</h3>
+                            <div id="activation-code" class="text-2xl font-mono font-bold text-blue-600 mt-2">FXT-XXXX-XXXX</div>
+                        </div>
+                        <button id="copy-code" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-copy mr-2"></i>Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Próximos pasos -->
+                <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                    <h3 class="font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-list-ol text-blue-600 mr-2"></i>Próximos pasos:
+                    </h3>
+                    <div class="text-left space-y-3">
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
+                            <span class="text-sm">Revisá tu email (incluyendo spam) con las instrucciones completas</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
+                            <span class="text-sm">Usá el código de activación para acceder al sistema</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
+                            <span class="text-sm">¡Empezá a gestionar tu taller profesionalmente!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información de la prueba -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+                    <div class="flex items-center">
+                        <i class="fas fa-clock text-yellow-600 mr-2"></i>
+                        <div class="text-left">
+                            <div class="font-semibold text-yellow-800">Tu prueba vence: <span id="expiry-date"></span></div>
+                            <div class="text-sm text-yellow-700">Después podés continuar con el plan Pro por $14.999/mes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="space-y-4">
+                    <a href="https://test.fixlytaller.com/login.html" 
+                       class="w-full bg-blue-600 text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-300 inline-block">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Ingresar al Sistema
+                    </a>
+                    <div class="text-sm text-gray-500">
+                        ¿Problemas? <a href="mailto:soporte@fixlytaller.com" class="text-blue-600 hover:underline">Contactá soporte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generar código único de activación
+        function generateActivationCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = 'FXT-';
+            for (let i = 0; i < 4; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            result += '-';
+            for (let i = 0; i < 4; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        // Calcular fecha de expiración (15 días)
+        function getExpiryDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + 15);
+            return date.toLocaleDateString('es-AR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Guardar código en localStorage (simular base de datos)
+        function saveActivationCode(code, userData) {
+            const codes = JSON.parse(localStorage.getItem('fixly_activation_codes') || '{}');
+            codes[code] = {
+                ...userData,
+                createdAt: new Date().toISOString(),
+                expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+                status: 'active'
+            };
+            localStorage.setItem('fixly_activation_codes', JSON.stringify(codes));
+        }
+
+        // Simular envío de email
+        function simulateEmailSend(email, code, userData) {
+            console.log('📧 Email enviado a:', email);
+            console.log('🔑 Código:', code);
+            console.log('👤 Datos:', userData);
+            
+            // Simular delay de envío
+            const emailStatus = document.createElement('div');
+            emailStatus.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg slide-in';
+            emailStatus.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Email enviado correctamente';
+            document.body.appendChild(emailStatus);
+            
+            setTimeout(() => {
+                emailStatus.remove();
+            }, 3000);
+        }
+
+        // Copiar código al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const copyBtn = document.getElementById('copy-code');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>¡Copiado!';
+                copyBtn.className = copyBtn.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-green-600');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                    copyBtn.className = copyBtn.className.replace('bg-green-600', 'bg-blue-600 hover:bg-blue-700');
+                }, 2000);
+            });
+        }
+
+        // Manejar envío del formulario
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Obtener datos del formulario
+            const formData = new FormData(this);
+            const userData = {
+                nombreTaller: formData.get('nombreTaller'),
+                email: formData.get('email'),
+                telefono: formData.get('telefono'),
+                ciudad: formData.get('ciudad'),
+                especialidad: formData.get('especialidad')
+            };
+
+            // Validación básica
+            if (!userData.nombreTaller || !userData.email || !userData.telefono || !userData.ciudad || !userData.especialidad) {
+                alert('Por favor completá todos los campos obligatorios');
+                return;
+            }
+
+            // Generar código de activación
+            const activationCode = generateActivationCode();
+            
+            // Guardar en localStorage
+            saveActivationCode(activationCode, userData);
+            
+            // Simular envío de email
+            simulateEmailSend(userData.email, activationCode, userData);
+            
+            // Mostrar página de confirmación
+            document.getElementById('registration-form').classList.add('hidden');
+            document.getElementById('confirmation-page').classList.remove('hidden');
+            document.getElementById('confirmation-page').classList.add('slide-in');
+            
+            // Actualizar UI
+            document.getElementById('activation-code').textContent = activationCode;
+            document.getElementById('expiry-date').textContent = getExpiryDate();
+            document.getElementById('step2').className = document.getElementById('step2').className.replace('bg-gray-200 text-gray-500', 'bg-green-600 text-white');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Event listener para copiar código
+        document.getElementById('copy-code').addEventListener('click', function() {
+            const code = document.getElementById('activation-code').textContent;
+            copyToClipboard(code);
+        });
+
+        // Validación en tiempo real del email
+        document.getElementById('email').addEventListener('blur', function() {
+            const email = this.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            if (email && !emailRegex.test(email)) {
+                this.classList.add('border-red-500');
+                this.classList.remove('border-gray-300');
+                
+                let errorMsg = this.nextElementSibling?.nextElementSibling;
+                if (!errorMsg || !errorMsg.classList.contains('error-message')) {
+                    errorMsg = document.createElement('p');
+                    errorMsg.className = 'text-xs text-red-500 mt-1 error-message';
+                    errorMsg.textContent = 'Por favor ingresá un email válido';
+                    this.parentNode.appendChild(errorMsg);
+                }
+            } else {
+                this.classList.remove('border-red-500');
+                this.classList.add('border-gray-300');
+                
+                const errorMsg = this.parentNode.querySelector('.error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            }
+        });
+
+        // Autocompletar campo teléfono
+        document.getElementById('telefono').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = '+54 ' + value;
+                } else if (value.length <= 4) {
+                    value = '+54 ' + value.slice(2, 4) + ' ' + value.slice(4);
+                } else {
+                    value = '+54 ' + value.slice(2, 4) + ' ' + value.slice(4, 8) + '-' + value.slice(8, 12);
+                }
+            }
+            e.target.value = value;
+        });
+
+        console.log('🚀 Fixly Registration System Initialized');
+        console.log('📊 Form validation active');
+        console.log('🔑 Code generation ready');
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDpzaC%2B%2Bg9mFYOZKSM6962HkMC2oyjdWpWEhR8%2FhshKY%2FbYmiIij3Sy%2BkyocyfjSzKJ7kZs4pEktkb40Fo4vuR6XISknNoKcFndY0MQo%2BkOwTJUQSg%2FQFq%2FRdsZOvWSdGZnG0P8T4chzD0r9ojgKSDM26gj7pQC4m%2BvE23rqZN%2F14w1ugKcwQOH25hlBT%2F8%2FGM%2FrgyRMVgulSmhJ7ijrpMsLpalWlznZLe6lliiYyI%2FzH5bJw5pYizJ8Xt9rTUvJuh6iG4GIrv3mKv3zou6RGvdHn4m3TzynMmjGY%2Fz3As1EgcoaPQn%2F7f2iguOsQgIiAQuQo7eNpppHUC3WfvNQ86d71sprKVX%2BftOoW5LSct2mvNouZcU%2FPAVYo%2FFGyvBixkH5jrQCEDTimbJV2FTCSGDxpag2g4wpAAmtsBUsNKaf%2Bxtc8eoa%2FYWOFCWDB3JxYvyL6tDWEShTr6RuHmA0aUTdy7QX2VuDR1NQqMltEHMK3HW2BbW29AEKcN%2FV3H%2BxhL32KwptlnbqJvLY3ubbZ6Z4%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDpzaC++g9mFYOZKSM6962HkMC2oyjdWpWEhR8/hshKY/bYmiIij3Sy+kyocyfjSzKJ7kZs4pEktkb40Fo4vuR6XISknNoKcFndY0MQo+kOwTJUQSg/QFq/RdsZOvWSdGZnG0P8T4chzD0r9ojgKSDM26gj7pQC4m+vE23rqZN/14w1ugKcwQOH25hlBT/8/GM/rgyRMVgulSmhJ7ijrpMsLpalWlznZLe6lliiYyI/zH5bJw5pYizJ8Xt9rTUvJuh6iG4GIrv3mKv3zou6RGvdHn4m3TzynMmjGY/z3As1EgcoaPQn/7f2iguOsQgIiAQuQo7eNpppHUC3WfvNQ86d71sprKVX+ftOoW5LSct2mvNouZcU/PAVYo/FGyvBixkH5jrQCEDTimbJV2FTCSGDxpag2g4wpAAmtsBUsNKaf+xtc8eoa/YWOFCWDB3JxYvyL6tDWEShTr6RuHmA0aUTdy7QX2VuDR1NQqMltEHMK3HW2BbW29AEKcN/V3H+xhL32KwptlnbqJvLY3ubbZ6Z4=";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Gestión de Códigos</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .status-active { background-color: #d1fae5; color: #065f46; }
+        .status-expired { background-color: #fee2e2; color: #991b1b; }
+        .status-pending { background-color: #fef3c7; color: #92400e; }
+        .status-converted { background-color: #dbeafe; color: #1e40af; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-tools text-2xl"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">Fixly Taller</h1>
+                        <p class="text-sm opacity-90">Panel Administrativo</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        Admin
+                    </div>
+                    <button class="bg-white bg-opacity-20 px-4 py-2 rounded-lg hover:bg-opacity-30 transition-colors">
+                        <i class="fas fa-cog mr-2"></i>Configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4">
+            <nav class="flex space-x-8">
+                <button class="tab-btn py-4 px-2 border-b-2 border-blue-500 text-blue-600 font-semibold" onclick="showTab('dashboard')">
+                    <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                </button>
+                <button class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" onclick="showTab('codes')">
+                    <i class="fas fa-key mr-2"></i>Códigos de Activación
+                </button>
+                <button class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" onclick="showTab('users')">
+                    <i class="fas fa-users mr-2"></i>Usuarios Activos
+                </button>
+                <button class="tab-btn py-4 px-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700" onclick="showTab('stats')">
+                    <i class="fas fa-chart-pie mr-2"></i>Estadísticas
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content">
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Códigos Activos</p>
+                            <p class="text-3xl font-bold text-green-600" id="active-codes">15</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-key text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Usuarios en Prueba</p>
+                            <p class="text-3xl font-bold text-blue-600" id="trial-users">23</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Conversiones Mes</p>
+                            <p class="text-3xl font-bold text-purple-600" id="conversions">8</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6 card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Ingresos Mes</p>
+                            <p class="text-3xl font-bold text-green-600" id="revenue">$119.992</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold mb-4">Acciones Rápidas</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors" onclick="generateCode()">
+                        <i class="fas fa-plus mr-2"></i>Generar Código
+                    </button>
+                    <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors" onclick="sendReminders()">
+                        <i class="fas fa-envelope mr-2"></i>Enviar Recordatorios
+                    </button>
+                    <button class="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors" onclick="exportData()">
+                        <i class="fas fa-download mr-2"></i>Exportar Datos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Actividad Reciente</h3>
+                <div class="space-y-4" id="recent-activity">
+                    <!-- Activity items will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Codes Tab -->
+        <div id="codes" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold">Gestión de Códigos de Activación</h3>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" onclick="generateCode()">
+                        <i class="fas fa-plus mr-2"></i>Nuevo Código
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" placeholder="Buscar código..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <select class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activo</option>
+                        <option value="expired">Expirado</option>
+                        <option value="used">Usado</option>
+                    </select>
+                    <input type="date" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <button class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                        <i class="fas fa-filter mr-2"></i>Filtrar
+                    </button>
+                </div>
+
+                <!-- Codes Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Creado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expira</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200" id="codes-table">
+                            <!-- Table rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-content hidden">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold">Usuarios Activos en Prueba</h3>
+                    <div class="flex space-x-2">
+                        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-envelope mr-2"></i>Enviar Recordatorio
+                        </button>
+                        <button class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                            <i class="fas fa-crown mr-2"></i>Convertir a Pro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Último Acceso</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actividad</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200" id="users-table">
+                            <!-- Table rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Tab -->
+        <div id="stats" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Conversion Rate Chart -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Tasa de Conversión</h3>
+                    <div style="height: 300px;">
+                        <canvas id="conversionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Usage Statistics -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Uso del Sistema</h3>
+                    <div style="height: 300px;">
+                        <canvas id="usageChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Monthly Revenue -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Ingresos Mensuales</h3>
+                    <div style="height: 300px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Code Generation Trends -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Tendencias de Códigos</h3>
+                    <div style="height: 300px;">
+                        <canvas id="codesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'text-blue-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.remove('hidden');
+            
+            // Activate selected tab button
+            event.target.classList.remove('border-transparent', 'text-gray-500');
+            event.target.classList.add('border-blue-500', 'text-blue-600');
+            
+            // Load tab-specific data
+            if (tabName === 'stats') {
+                initCharts();
+            }
+        }
+
+        // Generate random code
+        function generateCode() {
+            const code = 'FXT-' + Math.random().toString(36).substr(2, 4).toUpperCase() + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+            alert(`Nuevo código generado: ${code}`);
+            loadCodesData();
+        }
+
+        // Send reminders
+        function sendReminders() {
+            alert('Recordatorios enviados a usuarios próximos a expirar');
+        }
+
+        // Export data
+        function exportData() {
+            alert('Datos exportados exitosamente');
+        }
+
+        // Load mock data
+        function loadCodesData() {
+            const codesTable = document.getElementById('codes-table');
+            const mockCodes = [
+                { code: 'FXT-A7B9-C3D1', client: 'Electrónica Rivadavia', status: 'active', created: '2024-08-15', expires: '2024-08-30', days: 5 },
+                { code: 'FXT-X5Y2-Z8W4', client: 'Taller El Progreso', status: 'active', created: '2024-08-18', expires: '2024-09-02', days: 8 },
+                { code: 'FXT-M1N6-P9Q2', client: 'AudioFix', status: 'expired', created: '2024-07-20', expires: '2024-08-04', days: -21 },
+                { code: 'FXT-R3S7-T4U8', client: 'TecnoRepair', status: 'used', created: '2024-08-10', expires: '2024-08-25', days: 0 },
+                { code: 'FXT-K5L1-J9H6', client: 'CelPhone Fix', status: 'active', created: '2024-08-20', expires: '2024-09-04', days: 10 }
+            ];
+
+            codesTable.innerHTML = mockCodes.map(code => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-mono text-sm">${code.code}</td>
+                    <td class="px-6 py-4">${code.client}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium status-${code.status}">
+                            ${code.status === 'active' ? 'Activo' : code.status === 'expired' ? 'Expirado' : 'Usado'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">${code.created}</td>
+                    <td class="px-6 py-4 text-sm">${code.expires}</td>
+                    <td class="px-6 py-4 text-sm ${code.days < 0 ? 'text-red-600' : code.days < 5 ? 'text-yellow-600' : 'text-green-600'}">
+                        ${code.days < 0 ? 'Expirado' : `${code.days} días`}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-800" title="Extender">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                            <button class="text-red-600 hover:text-red-800" title="Revocar">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadUsersData() {
+            const usersTable = document.getElementById('users-table');
+            const mockUsers = [
+                { taller: 'Electrónica Rivadavia', email: 'rivadavia@email.com', code: 'FXT-A7B9-C3D1', days: 5, lastAccess: '2024-08-24', activity: 'Alta' },
+                { taller: 'Taller El Progreso', email: 'progreso@email.com', code: 'FXT-X5Y2-Z8W4', days: 8, lastAccess: '2024-08-23', activity: 'Media' },
+                { taller: 'AudioFix', email: 'audiofix@email.com', code: 'FXT-M1N6-P9Q2', days: -21, lastAccess: '2024-08-01', activity: 'Baja' },
+                { taller: 'CelPhone Fix', email: 'celphone@email.com', code: 'FXT-K5L1-J9H6', days: 10, lastAccess: '2024-08-24', activity: 'Alta' }
+            ];
+
+            usersTable.innerHTML = mockUsers.map(user => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 font-semibold">${user.taller}</td>
+                    <td class="px-6 py-4">${user.email}</td>
+                    <td class="px-6 py-4 font-mono text-sm">${user.code}</td>
+                    <td class="px-6 py-4 text-sm ${user.days < 0 ? 'text-red-600' : user.days < 5 ? 'text-yellow-600' : 'text-green-600'}">
+                        ${user.days < 0 ? 'Expirado' : `${user.days} días`}
+                    </td>
+                    <td class="px-6 py-4 text-sm">${user.lastAccess}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${user.activity === 'Alta' ? 'bg-green-100 text-green-800' : user.activity === 'Media' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}">
+                            ${user.activity}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex space-x-2">
+                            <button class="text-blue-600 hover:text-blue-800" title="Ver perfil">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <button class="text-green-600 hover:text-green-800" title="Enviar email">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="text-purple-600 hover:text-purple-800" title="Convertir">
+                                <i class="fas fa-crown"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadRecentActivity() {
+            const activityDiv = document.getElementById('recent-activity');
+            const activities = [
+                { icon: 'fas fa-user-plus', text: 'Nuevo registro: Electrónica Martín', time: 'Hace 2 horas', color: 'text-green-600' },
+                { icon: 'fas fa-key', text: 'Código activado: FXT-A7B9-C3D1', time: 'Hace 3 horas', color: 'text-blue-600' },
+                { icon: 'fas fa-dollar-sign', text: 'Conversión a Pro: TecnoRepair', time: 'Hace 5 horas', color: 'text-purple-600' },
+                { icon: 'fas fa-clock', text: 'Código próximo a expirar: FXT-X5Y2-Z8W4', time: 'Hace 1 día', color: 'text-yellow-600' },
+                { icon: 'fas fa-ban', text: 'Código expirado: FXT-M1N6-P9Q2', time: 'Hace 2 días', color: 'text-red-600' }
+            ];
+
+            activityDiv.innerHTML = activities.map(activity => `
+                <div class="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg">
+                    <div class="flex-shrink-0">
+                        <i class="${activity.icon} ${activity.color}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">${activity.text}</p>
+                        <p class="text-sm text-gray-500">${activity.time}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initCharts() {
+            // Conversion Rate Chart
+            const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+            new Chart(conversionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Convertidos', 'En Prueba', 'Expirados'],
+                    datasets: [{
+                        data: [35, 45, 20],
+                        backgroundColor: ['#10b981', '#3b82f6', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Usage Chart
+            const usageCtx = document.getElementById('usageChart').getContext('2d');
+            new Chart(usageCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Reparaciones', 'WhatsApp', 'Pedidos', 'Historial', 'Clientes'],
+                    datasets: [{
+                        label: 'Uso (%)',
+                        data: [85, 72, 45, 63, 38],
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago'],
+                    datasets: [{
+                        label: 'Ingresos ($)',
+                        data: [45000, 52000, 48000, 65000, 78000, 89000, 95000, 120000],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Codes Chart
+            const codesCtx = document.getElementById('codesChart').getContext('2d');
+            new Chart(codesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'],
+                    datasets: [{
+                        label: 'Códigos Generados',
+                        data: [8, 12, 6, 15],
+                        backgroundColor: '#6366f1'
+                    }, {
+                        label: 'Códigos Activados',
+                        data: [6, 9, 4, 11],
+                        backgroundColor: '#8b5cf6'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCodesData();
+            loadUsersData();
+            loadRecentActivity();
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDvxmWv4xcsDwrn98GVqqNGIMr5cHVKrVhRaaU6OTKrsShPKff7pNQQB7xc76dONWK8dLUIUNKRmXHpSxmEOwHJ8mpseHaJfNQFynrVbSmr0Gh46Txl15GZKfHCcOxIdvT78K2dtaZaKzC0lcRv83X%2F3WNQQzIYHaYhdTK0cXvJfcILVR%2BjDIsGyir03RhxZVkySJn46pYhmQSycelZZ3jg17WpD9r6lY3%2BLbaNJoWzCUBoBjSo01jdZ5Z7M7Dzb3c6emKHacrchMt6MHNQ%2BtokR6f5bjPLxOxd%2F77mgji8vt1zt3lSdcTrxn6NIzw7iOwDJ7JS0t3%2BIqGqcs6uo6bSzJ7T2fUAG3pXhUsQWZ%2FoEg3Tw7Ohf%2Fi1G6%2B8LQWLvzZf9NzByFLsneq39BExYXGvk45aH64tSM5qW8afUBWBISZzuaV%2BEYTrVU2bvYrahNHg%2FrYVq098qplV%2ByQY1GUlSIyXqPJ3pwprmALdodcr56cN3KWRjANk7MCdRVJJhYig%3D%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDvxmWv4xcsDwrn98GVqqNGIMr5cHVKrVhRaaU6OTKrsShPKff7pNQQB7xc76dONWK8dLUIUNKRmXHpSxmEOwHJ8mpseHaJfNQFynrVbSmr0Gh46Txl15GZKfHCcOxIdvT78K2dtaZaKzC0lcRv83X/3WNQQzIYHaYhdTK0cXvJfcILVR+jDIsGyir03RhxZVkySJn46pYhmQSycelZZ3jg17WpD9r6lY3+LbaNJoWzCUBoBjSo01jdZ5Z7M7Dzb3c6emKHacrchMt6MHNQ+tokR6f5bjPLxOxd/77mgji8vt1zt3lSdcTrxn6NIzw7iOwDJ7JS0t3+IqGqcs6uo6bSzJ7T2fUAG3pXhUsQWZ/oEg3Tw7Ohf/i1G6+8LQWLvzZf9NzByFLsneq39BExYXGvk45aH64tSM5qW8afUBWBISZzuaV+EYTrVU2bvYrahNHg/rYVq098qplV+yQY1GUlSIyXqPJ3pwprmALdodcr56cN3KWRjANk7MCdRVJJhYig==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    

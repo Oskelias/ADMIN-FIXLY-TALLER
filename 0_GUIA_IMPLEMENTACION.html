@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly SaaS - Guía de Implementación Completa</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .step-number {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+        .code-block {
+            background-color: #1a1a1a;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e5e7eb;
+        }
+        .timeline-dot {
+            position: relative;
+            z-index: 10;
+            background: white;
+            border: 3px solid #4F46E5;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-12">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="flex items-center mb-6">
+                <i class="fas fa-tools text-3xl mr-4"></i>
+                <h1 class="text-4xl font-bold">Fixly SaaS</h1>
+            </div>
+            <h2 class="text-2xl font-light mb-4">Guía de Implementación Completa</h2>
+            <p class="text-lg opacity-90">Sistema completo de gestión para talleres con suscripciones y códigos de activación</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <nav class="flex space-x-8 overflow-x-auto">
+                <a href="#overview" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">📋 Vista General</a>
+                <a href="#architecture" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">🏗️ Arquitectura</a>
+                <a href="#files" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">📁 Archivos</a>
+                <a href="#flows" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">🔄 Flujos</a>
+                <a href="#mercadopago" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">💳 MercadoPago</a>
+                <a href="#deployment" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">🚀 Deployment</a>
+                <a href="#checklist" class="text-blue-600 hover:text-blue-800 whitespace-nowrap">✅ Checklist</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-8 space-y-12">
+
+        <!-- Overview -->
+        <section id="overview" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">1</div>
+                <h2 class="text-3xl font-bold">Vista General del Sistema</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-600">🎯 Objetivos</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i> Sistema SaaS completo con suscripciones</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i> Pruebas gratuitas de 15 días con códigos</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i> Pagos directos sin prueba</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i> Emails automáticos de activación</li>
+                        <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i> Control de acceso y expiración</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-purple-600">💰 Modelos de Monetización</h3>
+                    <div class="space-y-4">
+                        <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                            <h4 class="font-semibold text-yellow-800">Freemium (15 días)</h4>
+                            <p class="text-yellow-700 text-sm">Registro → Código → Prueba → Conversión</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+                            <h4 class="font-semibold text-green-800">Pago Directo ($19.900/mes)</h4>
+                            <p class="text-green-700 text-sm">Pago → Credenciales → Acceso Inmediato</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture -->
+        <section id="architecture" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">2</div>
+                <h2 class="text-3xl font-bold">Arquitectura del Sistema</h2>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg mb-6">
+                <h3 class="text-xl font-semibold mb-4">📊 Componentes Principales</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-globe text-2xl text-blue-600 mb-2"></i>
+                        <h4 class="font-semibold text-blue-800">Frontend</h4>
+                        <p class="text-sm text-blue-600">Landing, Registro, Login, Sistema</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-server text-2xl text-green-600 mb-2"></i>
+                        <h4 class="font-semibold text-green-800">Backend</h4>
+                        <p class="text-sm text-green-600">Códigos, Validación, Emails</p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg text-center">
+                        <i class="fas fa-credit-card text-2xl text-purple-600 mb-2"></i>
+                        <h4 class="font-semibold text-purple-800">Pagos</h4>
+                        <p class="text-sm text-purple-600">MercadoPago, Webhooks</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block text-white p-4 rounded-lg">
+                <p class="text-green-400 mb-2">// Estructura de Dominio</p>
+                <pre class="text-sm">
+https://test.fixlytaller.com/
+├── index.html                    (Sistema principal)
+├── login.html                    (Login con códigos)
+├── registro.html                 (Formulario actualizado)
+├── backend_admin.html            (Panel administrativo)
+├── mercadopago.html              (Configuración pagos)
+└── api/
+    ├── generate-code.js          (Generar códigos)
+    ├── validate-code.js          (Validar acceso)
+    ├── send-email.js             (Emails automáticos)
+    └── webhook-mp.js             (Webhook MercadoPago)
+                </pre>
+            </div>
+        </section>
+
+        <!-- Files -->
+        <section id="files" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">3</div>
+                <h2 class="text-3xl font-bold">Archivos del Sistema</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Login System -->
+                <div class="border rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-sign-in-alt text-blue-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">login.html</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Sistema de login con validación de códigos de activación y credenciales de clientes pagos.</p>
+                    <div class="bg-gray-50 p-3 rounded text-sm">
+                        <strong>Funciones:</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li>• Validación de códigos FXT-XXXX</li>
+                            <li>• Control de 15 días de prueba</li>
+                            <li>• Login de clientes pagos</li>
+                            <li>• Redirección al sistema principal</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Registration -->
+                <div class="border rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-user-plus text-green-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">registro_nuevo.html</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Formulario de registro actualizado que genera códigos automáticamente.</p>
+                    <div class="bg-gray-50 p-3 rounded text-sm">
+                        <strong>Funciones:</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li>• Generación automática de códigos</li>
+                            <li>• Simulación de envío de emails</li>
+                            <li>• Validación de formularios</li>
+                            <li>• Redirección a login</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Backend Admin -->
+                <div class="border rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-cogs text-purple-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">backend_admin.html</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Panel administrativo para gestionar códigos, usuarios y emails.</p>
+                    <div class="bg-gray-50 p-3 rounded text-sm">
+                        <strong>Funciones:</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li>• Dashboard de códigos activos</li>
+                            <li>• Gestión de usuarios</li>
+                            <li>• Control de expiraciones</li>
+                            <li>• Estadísticas de conversión</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- MercadoPago -->
+                <div class="border rounded-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-credit-card text-orange-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-semibold">mercadopago.html</h3>
+                    </div>
+                    <p class="text-gray-600 mb-4">Configuración completa de MercadoPago para suscripciones.</p>
+                    <div class="bg-gray-50 p-3 rounded text-sm">
+                        <strong>Funciones:</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li>• Botón de suscripción $19.900</li>
+                            <li>• Webhook para confirmación</li>
+                            <li>• Generación de credenciales</li>
+                            <li>• Email post-pago</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flows -->
+        <section id="flows" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">4</div>
+                <h2 class="text-3xl font-bold">Flujos de Usuario</h2>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Flow A: Free Trial -->
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-yellow-800">🆓 Flujo A: Prueba Gratuita</h3>
+                    <div class="timeline relative pl-8">
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">1. Landing Page</h4>
+                            <p class="text-gray-600">Usuario hace clic en "Prueba Gratis"</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">2. Formulario de Registro</h4>
+                            <p class="text-gray-600">Completa datos del taller y especialidad</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">3. Generación de Código</h4>
+                            <p class="text-gray-600">Sistema genera código único FXT-2024-XXXX</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">4. Email Automático</h4>
+                            <p class="text-gray-600">Envío de código de activación</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">5. Login con Código</h4>
+                            <p class="text-gray-600">Usuario ingresa código en login.html</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2"></div>
+                            <h4 class="font-semibold text-gray-800">6. Acceso al Sistema</h4>
+                            <p class="text-gray-600">15 días de prueba activados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flow B: Direct Payment -->
+                <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg">
+                    <h3 class="text-xl font-semibold mb-4 text-green-800">💳 Flujo B: Pago Directo</h3>
+                    <div class="timeline relative pl-8">
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">1. Landing Page</h4>
+                            <p class="text-gray-600">Usuario hace clic en "Empezar Ahora" (Plan Pro)</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">2. MercadoPago</h4>
+                            <p class="text-gray-600">Proceso de pago $19.900/mes</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">3. Webhook Confirmación</h4>
+                            <p class="text-gray-600">Sistema recibe confirmación de pago</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">4. Generación de Credenciales</h4>
+                            <p class="text-gray-600">Usuario y contraseña únicos</p>
+                        </div>
+                        <div class="timeline-item relative mb-6">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">5. Email con Credenciales</h4>
+                            <p class="text-gray-600">Envío automático de acceso</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <div class="timeline-dot w-6 h-6 rounded-full absolute -left-11 top-2 border-green-500"></div>
+                            <h4 class="font-semibold text-gray-800">6. Acceso Ilimitado</h4>
+                            <p class="text-gray-600">Login directo al sistema completo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MercadoPago Setup -->
+        <section id="mercadopago" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">5</div>
+                <h2 class="text-3xl font-bold">Configuración MercadoPago</h2>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Step 1: Account Setup -->
+                <div class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-lg">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-2">🏦 1. Configuración de Cuenta</h3>
+                    <p class="text-blue-700 mb-3">Crear cuenta de vendedor en MercadoPago Argentina</p>
+                    <div class="code-block text-white p-3 rounded text-sm">
+                        <p class="text-green-400">// Datos necesarios:</p>
+                        <p>- CUIT/CUIL</p>
+                        <p>- Cuenta bancaria</p>
+                        <p>- Datos fiscales completos</p>
+                        <p>- Verificación de identidad</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Subscription Setup -->
+                <div class="border-l-4 border-green-500 bg-green-50 p-4 rounded-r-lg">
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">📋 2. Crear Suscripción Recurrente</h3>
+                    <p class="text-green-700 mb-3">Configurar plan mensual de $19.900</p>
+                    <div class="code-block text-white p-3 rounded text-sm">
+                        <pre>
+// Configuración de Plan
+{
+  "auto_recurring": {
+    "frequency": 1,
+    "frequency_type": "months",
+    "transaction_amount": 19900,
+    "currency_id": "ARS"
+  },
+  "back_url_success": "https://test.fixlytaller.com/success",
+  "back_url_failure": "https://test.fixlytaller.com/failure",
+  "back_url_pending": "https://test.fixlytaller.com/pending"
+}
+                        </pre>
+                    </div>
+                </div>
+
+                <!-- Step 3: Webhook -->
+                <div class="border-l-4 border-purple-500 bg-purple-50 p-4 rounded-r-lg">
+                    <h3 class="text-lg font-semibold text-purple-800 mb-2">🔗 3. Configurar Webhook</h3>
+                    <p class="text-purple-700 mb-3">URL para recibir notificaciones de pago</p>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="font-mono text-sm">https://test.fixlytaller.com/api/webhook-mp</p>
+                    </div>
+                    <p class="text-purple-600 text-sm mt-2">Eventos: payment.created, payment.updated</p>
+                </div>
+
+                <!-- Step 4: Button Integration -->
+                <div class="border-l-4 border-orange-500 bg-orange-50 p-4 rounded-r-lg">
+                    <h3 class="text-lg font-semibold text-orange-800 mb-2">🔘 4. Botón de Pago</h3>
+                    <p class="text-orange-700 mb-3">Integrar en la landing page</p>
+                    <div class="code-block text-white p-3 rounded text-sm">
+                        <pre>
+&lt;a href="https://mpago.la/2XXXXXX" target="_blank" 
+   class="bg-white text-green-500 hover:bg-gray-100 w-full py-3 px-6 
+          rounded-lg font-semibold mb-6 transition-colors duration-300 
+          inline-block text-center"&gt;
+  Empezar Ahora - $19.900/mes
+&lt;/a&gt;
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deployment -->
+        <section id="deployment" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">6</div>
+                <h2 class="text-3xl font-bold">Deployment y Configuración</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- File Structure -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-blue-600">📁 Estructura de Archivos</h3>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <div class="font-mono text-sm space-y-1">
+                            <div>📄 index.html <span class="text-gray-500">(Landing conectada)</span></div>
+                            <div>📄 login.html <span class="text-gray-500">(Sistema de acceso)</span></div>
+                            <div>📄 registro.html <span class="text-gray-500">(Formulario actualizado)</span></div>
+                            <div>📄 sistema.html <span class="text-gray-500">(Dashboard principal)</span></div>
+                            <div>📄 backend_admin.html <span class="text-gray-500">(Panel administrativo)</span></div>
+                            <div>📁 assets/ <span class="text-gray-500">(CSS, JS, imágenes)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration -->
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-green-600">⚙️ Configuraciones Clave</h3>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 p-3 rounded">
+                            <h4 class="font-semibold text-blue-800">Dominio Principal</h4>
+                            <p class="text-blue-600 font-mono text-sm">https://test.fixlytaller.com/</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded">
+                            <h4 class="font-semibold text-green-800">Email Service</h4>
+                            <p class="text-green-600 text-sm">EmailJS o SMTP configurado</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded">
+                            <h4 class="font-semibold text-purple-800">Storage</h4>
+                            <p class="text-purple-600 text-sm">LocalStorage + Base de datos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deployment Steps -->
+            <div class="mt-8">
+                <h3 class="text-xl font-semibold mb-4">🚀 Pasos de Deployment</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                        <div>
+                            <h4 class="font-semibold">Subir archivos a servidor</h4>
+                            <p class="text-gray-600">Usar FTP, Git, o panel de hosting</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                        <div>
+                            <h4 class="font-semibold">Configurar SSL</h4>
+                            <p class="text-gray-600">Certificado HTTPS obligatorio</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                        <div>
+                            <h4 class="font-semibold">Probar flujos completos</h4>
+                            <p class="text-gray-600">Verificar registro, login y pagos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-4">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
+                        <div>
+                            <h4 class="font-semibold">Configurar monitoreo</h4>
+                            <p class="text-gray-600">Google Analytics, logs de errores</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist -->
+        <section id="checklist" class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center mb-6">
+                <div class="step-number w-10 h-10 rounded-full flex items-center justify-center text-white font-bold mr-4">7</div>
+                <h2 class="text-3xl font-bold">Checklist de Lanzamiento</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Pre-Launch -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-blue-600">🚀 Pre-Lanzamiento</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Landing page conectada funcionando</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Formulario de registro generando códigos</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Sistema de login validando códigos</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Emails automáticos configurados</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>MercadoPago configurado y probado</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Webhook funcionando correctamente</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-blue-600">
+                            <span>Sistema principal accesible</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Post-Launch -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-green-600">📊 Post-Lanzamiento</h3>
+                    <div class="space-y-3">
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Monitoreo de conversiones activo</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Backup de base de datos configurado</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Soporte al cliente preparado</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Métricas de uso implementadas</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Estrategia de marketing activada</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Plan de escalamiento definido</span>
+                        </label>
+                        <label class="flex items-center space-x-3">
+                            <input type="checkbox" class="form-checkbox text-green-600">
+                            <span>Feedback de primeros usuarios</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Metrics -->
+            <div class="mt-8 bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">💰 Métricas de Éxito</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-green-600">5%</div>
+                        <p class="text-gray-600">Tasa de conversión mínima</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-blue-600">$199K</div>
+                        <p class="text-gray-600">Ingresos con 10 clientes</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-purple-600">15 días</div>
+                        <p class="text-gray-600">Duración de prueba</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center py-8 text-gray-500">
+            <div class="flex items-center justify-center mb-4">
+                <i class="fas fa-tools text-2xl mr-2"></i>
+                <span class="text-xl font-bold">Fixly Taller</span>
+            </div>
+            <p>Sistema SaaS completo para gestión de talleres</p>
+            <p class="text-sm mt-2">Implementación completa lista para generar ingresos recurrentes</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Interactive checklist
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    this.parentElement.style.opacity = '0.7';
+                    this.parentElement.style.textDecoration = 'line-through';
+                } else {
+                    this.parentElement.style.opacity = '1';
+                    this.parentElement.style.textDecoration = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDg9jpXaU%2BfcUVW716iujSs50Vd4Gl7lQecIcAK0GbP41GZiE0a2P50ukU771kuNb3SqH89amfp7wkbroEvdFxmDVz2FI1vF0xvXBxLJQvfBZJQbE0gJkl62O4pbkHtXT0jD3AjxY8eFcJZ4ird01E89Q5M19gg%2Bpezd3szsiZx2D00WSEeBolazd%2FR3jnQGP8A%2Bq1EGyUFejMTniVSCQPBb%2BOyY3hhqYhmG0JCICOI70z%2FKUb0I1dwudsGqhOf3k6LFEExsPxQkDzoqoIll4NhAlYbHbLAO5RZUhCSsCsRPvxPklg2CMnJMKyrFO38U66BItWv46X7Tn1UAe7Bszh4ZP1naSseHfzOL1JbCdzl37Mb2HPDSJTVETzjCW57K3QSNnL6nL23OzrQ0UzaizI2MBfhyMD25HFEEWBFzAMKR0VXJcFT%2BmyJJeTvb7yCQANv5ZLvRSfFl3%2FYbCf2%2BS1l2moTxv9vwebxdQsPFKdryMNfBdsOFlJ3zBkYQnVHdhmGiIV5NbA%2FWBC3XNBsQ9%2Fk8%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDg9jpXaU+fcUVW716iujSs50Vd4Gl7lQecIcAK0GbP41GZiE0a2P50ukU771kuNb3SqH89amfp7wkbroEvdFxmDVz2FI1vF0xvXBxLJQvfBZJQbE0gJkl62O4pbkHtXT0jD3AjxY8eFcJZ4ird01E89Q5M19gg+pezd3szsiZx2D00WSEeBolazd/R3jnQGP8A+q1EGyUFejMTniVSCQPBb+OyY3hhqYhmG0JCICOI70z/KUb0I1dwudsGqhOf3k6LFEExsPxQkDzoqoIll4NhAlYbHbLAO5RZUhCSsCsRPvxPklg2CMnJMKyrFO38U66BItWv46X7Tn1UAe7Bszh4ZP1naSseHfzOL1JbCdzl37Mb2HPDSJTVETzjCW57K3QSNnL6nL23OzrQ0UzaizI2MBfhyMD25HFEEWBFzAMKR0VXJcFT+myJJeTvb7yCQANv5ZLvRSfFl3/YbCf2+S1l2moTxv9vwebxdQsPFKdryMNfBdsOFlJ3zBkYQnVHdhmGiIV5NbA/WBC3XNBsQ9/k8=";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    

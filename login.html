@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Taller - Acceso al Sistema</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .floating-shapes::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .floating-shapes::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 30%;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: 20%;
+            left: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        .code-input {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg relative overflow-hidden floating-shapes">
+    
+    <!-- Contenido Principal -->
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full">
+            
+            <!-- Logo y Título -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-tools text-4xl text-white mr-3"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Fixly Taller</h1>
+                        <p class="text-blue-200">Sistema de Gestión</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Login -->
+            <div class="bg-white rounded-2xl shadow-2xl p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Activar Prueba Gratuita</h2>
+                    <p class="text-gray-600">Ingresa tu código de activación</p>
+                </div>
+
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-key mr-2"></i>Código de Activación
+                        </label>
+                        <input 
+                            type="text" 
+                            id="activationCode"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 code-input text-center text-lg"
+                            placeholder="FXT-XXXX-XXXX"
+                            maxlength="12"
+                            required
+                        >
+                        <p class="text-sm text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Revisa tu email para encontrar el código
+                        </p>
+                    </div>
+
+                    <button 
+                        type="submit"
+                        id="submitBtn"
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-200 font-semibold"
+                    >
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Activar y Acceder
+                    </button>
+                </form>
+
+                <!-- Mensaje de Estado -->
+                <div id="statusMessage" class="mt-6 hidden">
+                    <div class="p-4 rounded-lg">
+                        <p id="statusText" class="text-sm"></p>
+                    </div>
+                </div>
+
+                <!-- Información de Prueba -->
+                <div id="trialInfo" class="mt-6 hidden">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-green-800 mb-2">
+                            <i class="fas fa-check-circle mr-2"></i>Prueba Activada
+                        </h3>
+                        <p class="text-green-700 text-sm mb-2">
+                            Te quedan <span id="remainingDays" class="font-bold"></span> días de prueba gratuita
+                        </p>
+                        <div class="w-full bg-green-200 rounded-full h-2">
+                            <div id="progressBar" class="bg-green-600 h-2 rounded-full transition-all duration-300"></div>
+                        </div>
+                        <p class="text-xs text-green-600 mt-2">
+                            Fecha de expiración: <span id="expirationDate"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Botón para ir al Sistema -->
+                <div id="accessButton" class="mt-6 hidden">
+                    <button 
+                        onclick="redirectToSystem()"
+                        class="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 font-semibold"
+                    >
+                        <i class="fas fa-arrow-right mr-2"></i>
+                        Ir al Sistema
+                    </button>
+                </div>
+
+                <!-- Enlaces adicionales -->
+                <div class="mt-8 text-center space-y-2">
+                    <p class="text-sm text-gray-600">
+                        ¿No tienes un código? 
+                        <a href="https://filxlylanding.netlify.app/" class="text-purple-600 hover:underline">
+                            Regístrate aquí
+                        </a>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        ¿Ya eres cliente? 
+                        <a href="#" onclick="showPaidLogin()" class="text-purple-600 hover:underline">
+                            Ingresar con credenciales
+                        </a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="mt-6 text-center">
+                <p class="text-blue-200 text-sm">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Conexión segura SSL • Datos protegidos
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Clientes Pagos -->
+    <div id="paidLoginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Acceso Clientes</h3>
+                <p class="text-gray-600">Ingresa con tus credenciales</p>
+            </div>
+            
+            <form id="paidLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input 
+                        type="email" 
+                        id="paidEmail"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input 
+                        type="password" 
+                        id="paidPassword"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                        required
+                    >
+                </div>
+                <div class="flex gap-2">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+                    >
+                        Ingresar
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="hidePaidLogin()"
+                        class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Gestión de códigos de activación
+        class TrialManager {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                // Generar algunos códigos de ejemplo para testing
+                this.generateSampleCodes();
+                this.setupEventListeners();
+                this.checkExistingTrial();
+            }
+
+            generateSampleCodes() {
+                const sampleCodes = [
+                    'FXT-2024-A1B2',
+                    'FXT-2024-C3D4',
+                    'FXT-2024-E5F6',
+                    'FXT-2024-G7H8',
+                    'FXT-2024-I9J0'
+                ];
+
+                // Guardar códigos de ejemplo si no existen
+                if (!localStorage.getItem('fixlyCodes')) {
+                    const codes = {};
+                    sampleCodes.forEach(code => {
+                        codes[code] = {
+                            status: 'available',
+                            createdAt: null,
+                            expiresAt: null,
+                            email: null
+                        };
+                    });
+                    localStorage.setItem('fixlyCodes', JSON.stringify(codes));
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.validateCode();
+                });
+
+                document.getElementById('activationCode').addEventListener('input', (e) => {
+                    this.formatCodeInput(e.target);
+                });
+
+                document.getElementById('paidLoginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.validatePaidLogin();
+                });
+            }
+
+            formatCodeInput(input) {
+                let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                
+                // Agregar guiones automáticamente
+                if (value.length > 3) {
+                    value = value.slice(0, 3) + '-' + value.slice(3);
+                }
+                if (value.length > 8) {
+                    value = value.slice(0, 8) + '-' + value.slice(8, 12);
+                }
+                
+                input.value = value;
+            }
+
+            validateCode() {
+                const code = document.getElementById('activationCode').value;
+                const codes = JSON.parse(localStorage.getItem('fixlyCodes') || '{}');
+
+                // Limpiar mensajes anteriores
+                this.hideStatus();
+
+                // Validar formato
+                if (!/^FXT-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+                    this.showStatus('Formato de código inválido. Debe ser FXT-XXXX-XXXX', 'error');
+                    return;
+                }
+
+                // Verificar si el código existe
+                if (!codes[code]) {
+                    this.showStatus('Código de activación no válido. Verifica el código en tu email.', 'error');
+                    return;
+                }
+
+                const codeData = codes[code];
+
+                // Si el código ya fue usado, verificar si aún está vigente
+                if (codeData.status === 'used') {
+                    const now = new Date();
+                    const expiresAt = new Date(codeData.expiresAt);
+                    
+                    if (now > expiresAt) {
+                        this.showStatus('Tu período de prueba ha expirado. ¡Suscríbete al plan Pro para continuar!', 'error');
+                        setTimeout(() => {
+                            window.open('https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=fa47110f64504852abf794f722f96a85', '_blank');
+                        }, 2000);
+                        return;
+                    } else {
+                        // Código válido y aún vigente
+                        this.showTrialInfo(expiresAt);
+                        this.showAccessButton();
+                        return;
+                    }
+                }
+
+                // Activar código por primera vez
+                if (codeData.status === 'available') {
+                    this.activateCode(code, codes);
+                }
+            }
+
+            activateCode(code, codes) {
+                const now = new Date();
+                const expiresAt = new Date(now.getTime() + (15 * 24 * 60 * 60 * 1000)); // 15 días
+
+                // Actualizar código
+                codes[code] = {
+                    status: 'used',
+                    createdAt: now.toISOString(),
+                    expiresAt: expiresAt.toISOString(),
+                    email: 'demo@fixlytaller.com'
+                };
+
+                localStorage.setItem('fixlyCodes', JSON.stringify(codes));
+                localStorage.setItem('fixlyActiveTrial', JSON.stringify({
+                    code: code,
+                    expiresAt: expiresAt.toISOString(),
+                    activated: true
+                }));
+
+                this.showStatus('¡Código activado exitosamente! Bienvenido a Fixly Taller', 'success');
+                
+                setTimeout(() => {
+                    this.showTrialInfo(expiresAt);
+                    this.showAccessButton();
+                }, 1500);
+            }
+
+            showTrialInfo(expiresAt) {
+                const now = new Date();
+                const daysRemaining = Math.max(0, Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24)));
+                const progress = Math.max(0, (daysRemaining / 15) * 100);
+
+                document.getElementById('remainingDays').textContent = daysRemaining;
+                document.getElementById('expirationDate').textContent = expiresAt.toLocaleDateString('es-ES');
+                document.getElementById('progressBar').style.width = progress + '%';
+                
+                document.getElementById('trialInfo').classList.remove('hidden');
+            }
+
+            showAccessButton() {
+                document.getElementById('accessButton').classList.remove('hidden');
+            }
+
+            checkExistingTrial() {
+                const activeTrial = JSON.parse(localStorage.getItem('fixlyActiveTrial') || 'null');
+                
+                if (activeTrial) {
+                    const now = new Date();
+                    const expiresAt = new Date(activeTrial.expiresAt);
+                    
+                    if (now < expiresAt) {
+                        // Prellenar código y mostrar info
+                        document.getElementById('activationCode').value = activeTrial.code;
+                        this.showTrialInfo(expiresAt);
+                        this.showAccessButton();
+                        this.showStatus('Sesión activa encontrada', 'success');
+                    } else {
+                        // Limpiar trial expirado
+                        localStorage.removeItem('fixlyActiveTrial');
+                    }
+                }
+            }
+
+            validatePaidLogin() {
+                const email = document.getElementById('paidEmail').value;
+                const password = document.getElementById('paidPassword').value;
+
+                // Demo - cualquier email y password funciona
+                if (email && password) {
+                    this.hidePaidLogin();
+                    this.showStatus('Acceso autorizado - Cliente Premium', 'success');
+                    setTimeout(() => {
+                        this.redirectToSystem();
+                    }, 1500);
+                } else {
+                    alert('Por favor completa todos los campos');
+                }
+            }
+
+            showStatus(message, type) {
+                const statusDiv = document.getElementById('statusMessage');
+                const statusText = document.getElementById('statusText');
+                
+                statusText.textContent = message;
+                statusDiv.classList.remove('hidden');
+                
+                // Aplicar estilos según tipo
+                statusDiv.querySelector('div').className = type === 'success' 
+                    ? 'p-4 rounded-lg bg-green-50 border border-green-200'
+                    : 'p-4 rounded-lg bg-red-50 border border-red-200';
+                    
+                statusText.className = type === 'success'
+                    ? 'text-sm text-green-800'
+                    : 'text-sm text-red-800';
+            }
+
+            hideStatus() {
+                document.getElementById('statusMessage').classList.add('hidden');
+            }
+
+            redirectToSystem() {
+                // Redireccionar al sistema principal
+                window.location.href = 'https://test.fixlytaller.com/';
+            }
+        }
+
+        // Funciones globales
+        function redirectToSystem() {
+            trialManager.redirectToSystem();
+        }
+
+        function showPaidLogin() {
+            document.getElementById('paidLoginModal').classList.remove('hidden');
+        }
+
+        function hidePaidLogin() {
+            document.getElementById('paidLoginModal').classList.add('hidden');
+        }
+
+        // Inicializar cuando la página carga
+        let trialManager;
+        document.addEventListener('DOMContentLoaded', function() {
+            trialManager = new TrialManager();
+            
+            // Mostrar códigos de ejemplo en consola para testing
+            console.log('Códigos de ejemplo para probar:');
+            console.log('FXT-2024-A1B2');
+            console.log('FXT-2024-C3D4'); 
+            console.log('FXT-2024-E5F6');
+        });
+    </script>
+
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDvFrrxchmplS%2B3oKofINRr7wh5Q%2FLMC4oysbx02wRpGxxGNUh6lYTdIz2Gf1ZDftgFnLqoWf27ZIy6vKSir79nnqT1HvVWRzCcm2JHY%2FknZ9mxhlPU7ry9PXy875BxH%2FFAfOtarwurE8TZ7Uitb79l70Oy940D3fnwScHUMXIPtBuF5PhwwBNmG%2BSxFyu433JXmtGoSq%2BGUhIa1s8uAEnfywLgBV8nCJqgFl%2FJCuYibOoIRip9XHghu7Km5LnBu84PCSKLglpuiaBUB%2FxSnFH0ie87zv6Tkz0erClh2ZErZDVXIwa3WcjW1zPcDndP%2BcaF1zzB2h%2FCSdu6ESV%2BkMzLf9VsyRdpmHMghqFK5r9Q5lFiB%2BrD3D%2FNsAXBFq90Vw%2FJdWnSwUXiUlpXnLO62%2BqyA%2B%2BItGTQAUDxsjk2kO2o%2FslYOlrF9pzdFjzn0FRZ%2BY4THdQ8DnEVYbf2aMv%2BZDXbbCZYm1ol%2BsDjNaXJMP62QmPLGiBb94nYVMQ%2FBKMm8WnQ%3D%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDvFrrxchmplS+3oKofINRr7wh5Q/LMC4oysbx02wRpGxxGNUh6lYTdIz2Gf1ZDftgFnLqoWf27ZIy6vKSir79nnqT1HvVWRzCcm2JHY/knZ9mxhlPU7ry9PXy875BxH/FAfOtarwurE8TZ7Uitb79l70Oy940D3fnwScHUMXIPtBuF5PhwwBNmG+SxFyu433JXmtGoSq+GUhIa1s8uAEnfywLgBV8nCJqgFl/JCuYibOoIRip9XHghu7Km5LnBu84PCSKLglpuiaBUB/xSnFH0ie87zv6Tkz0erClh2ZErZDVXIwa3WcjW1zPcDndP+caF1zzB2h/CSdu6ESV+kMzLf9VsyRdpmHMghqFK5r9Q5lFiB+rD3D/NsAXBFq90Vw/JdWnSwUXiUlpXnLO62+qyA++ItGTQAUDxsjk2kO2o/slYOlrF9pzdFjzn0FRZ+Y4THdQ8DnEVYbf2aMv+ZDXbbCZYm1ol+sDjNaXJMP62QmPLGiBb94nYVMQ/BKMm8WnQ==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    

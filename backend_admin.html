@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Backend - Gestión de Códigos y Emails</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .chart-container {
+            height: 300px;
+        }
+        .sidebar-active {
+            background-color: #4F46E5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-tools text-2xl"></i>
+                    <span class="text-xl font-bold">Fixly Backend Admin</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm">Sistema de Gestión</span>
+                    <i class="fas fa-user-circle text-2xl"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg">
+            <nav class="mt-5">
+                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 sidebar-active" onclick="showSection('dashboard')">
+                    <i class="fas fa-chart-pie mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('codes')">
+                    <i class="fas fa-key mr-3"></i>
+                    Códigos de Activación
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('users')">
+                    <i class="fas fa-users mr-3"></i>
+                    Usuarios
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('emails')">
+                    <i class="fas fa-envelope mr-3"></i>
+                    Emails Automáticos
+                </a>
+                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('mercadopago')">
+                    <i class="fas fa-credit-card mr-3"></i>
+                    MercadoPago Webhooks
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section p-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Principal</h1>
+                
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Códigos Activos</p>
+                                <p class="text-2xl font-bold text-blue-600" id="active-codes">15</p>
+                            </div>
+                            <i class="fas fa-key text-3xl text-blue-600"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Usuarios Prueba</p>
+                                <p class="text-2xl font-bold text-yellow-600" id="trial-users">8</p>
+                            </div>
+                            <i class="fas fa-user-clock text-3xl text-yellow-600"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Usuarios Pagos</p>
+                                <p class="text-2xl font-bold text-green-600" id="paid-users">12</p>
+                            </div>
+                            <i class="fas fa-user-check text-3xl text-green-600"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600">Ingresos Mes</p>
+                                <p class="text-2xl font-bold text-purple-600" id="monthly-revenue">$238.800</p>
+                            </div>
+                            <i class="fas fa-dollar-sign text-3xl text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Conversión de Pruebas</h3>
+                        <div class="chart-container">
+                            <canvas id="conversionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Ingresos Mensuales</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Codes Section -->
+            <div id="codes" class="section p-8 hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Códigos de Activación</h1>
+                
+                <div class="bg-white rounded-lg shadow p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">Generar Nuevo Código</h3>
+                    <div class="flex items-end space-x-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Código</label>
+                            <select class="border rounded-lg px-3 py-2" id="codeType">
+                                <option value="trial">Prueba 15 días</option>
+                                <option value="paid">Usuario Pago</option>
+                            </select>
+                        </div>
+                        <button onclick="generateCode()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-plus mr-2"></i>Generar Código
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold">Códigos Generados</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Creación</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="codesTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Códigos se cargan dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users" class="section p-8 hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Usuarios</h1>
+                
+                <div class="bg-white rounded-lg shadow">
+                    <div class="px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold">Usuarios Registrados</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Usuarios se cargan dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emails Section -->
+            <div id="emails" class="section p-8 hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">Sistema de Emails Automáticos</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Plantillas de Email -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Plantillas de Email</h3>
+                        
+                        <div class="space-y-4">
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-green-600">Email Código de Activación</h4>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    🎉 ¡Bienvenido a Fixly Taller!<br>
+                                    Tu código de activación: [CODIGO]<br>
+                                    ⏰ 15 días de prueba gratuita
+                                </p>
+                                <button onclick="sendEmail('activation')" class="mt-3 bg-green-600 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-paper-plane mr-1"></i>Probar Envío
+                                </button>
+                            </div>
+                            
+                            <div class="border rounded-lg p-4">
+                                <h4 class="font-medium text-blue-600">Email Cliente Pago</h4>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    ✅ ¡Pago confirmado!<br>
+                                    Usuario: [EMAIL]<br>
+                                    Contraseña: [PASSWORD]<br>
+                                    Acceso ilimitado activado
+                                </p>
+                                <button onclick="sendEmail('payment')" class="mt-3 bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-paper-plane mr-1"></i>Probar Envío
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Historial de Emails -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Historial de Emails</h3>
+                        <div class="space-y-3" id="emailHistory">
+                            <!-- Historial se carga dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MercadoPago Section -->
+            <div id="mercadopago" class="section p-8 hidden">
+                <h1 class="text-3xl font-bold text-gray-800 mb-8">MercadoPago Webhooks</h1>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Configuración de Webhooks -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Configuración</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">URL del Webhook</label>
+                                <input type="text" value="https://test.fixlytaller.com/webhook/mercadopago" class="w-full border rounded-lg px-3 py-2" readonly>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Precio Suscripción</label>
+                                <input type="text" value="$19.900 ARS" class="w-full border rounded-lg px-3 py-2" readonly>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Link de Suscripción</label>
+                                <div class="flex">
+                                    <input type="text" id="subscriptionLink" value="https://mpago.la/2Xj8kL9" class="flex-1 border rounded-l-lg px-3 py-2">
+                                    <button onclick="copyLink()" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="simulatePayment()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">
+                            <i class="fas fa-play mr-2"></i>Simular Pago Exitoso
+                        </button>
+                    </div>
+                    
+                    <!-- Historial de Pagos -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4">Pagos Recientes</h3>
+                        <div class="space-y-3" id="paymentsHistory">
+                            <!-- Pagos se cargan dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de gestión completo
+        class FixlyBackend {
+            constructor() {
+                this.codes = JSON.parse(localStorage.getItem('fixly_codes') || '[]');
+                this.users = JSON.parse(localStorage.getItem('fixly_users') || '[]');
+                this.emails = JSON.parse(localStorage.getItem('fixly_emails') || '[]');
+                this.payments = JSON.parse(localStorage.getItem('fixly_payments') || '[]');
+                
+                this.initializeData();
+                this.initializeCharts();
+                this.loadTables();
+            }
+            
+            initializeData() {
+                // Datos de ejemplo si no existen
+                if (this.codes.length === 0) {
+                    this.codes = [
+                        { id: 1, code: 'FXT-2024-A7B9', type: 'trial', status: 'active', created: new Date().toISOString() },
+                        { id: 2, code: 'FXT-2024-B2C5', type: 'trial', status: 'used', created: new Date().toISOString() },
+                        { id: 3, code: 'FXT-2024-D8F3', type: 'paid', status: 'active', created: new Date().toISOString() }
+                    ];
+                }
+                
+                if (this.users.length === 0) {
+                    this.users = [
+                        { id: 1, taller: 'Electrónica Rivadavia', email: 'info@electronicarivadavia.com', type: 'trial', status: 'active', daysLeft: 12 },
+                        { id: 2, taller: 'Taller El Progreso', email: 'contacto@tallerprogreso.com', type: 'paid', status: 'active', daysLeft: null },
+                        { id: 3, taller: 'AudioFix', email: 'admin@audiofix.com', type: 'trial', status: 'active', daysLeft: 5 }
+                    ];
+                }
+            }
+            
+            generateCode() {
+                const type = document.getElementById('codeType').value;
+                const code = `FXT-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+                
+                const newCode = {
+                    id: Date.now(),
+                    code: code,
+                    type: type,
+                    status: 'active',
+                    created: new Date().toISOString()
+                };
+                
+                this.codes.push(newCode);
+                this.saveData();
+                this.loadCodesTable();
+                
+                // Mostrar notificación
+                this.showNotification(`Código ${code} generado exitosamente`, 'success');
+            }
+            
+            sendEmail(type) {
+                const email = {
+                    id: Date.now(),
+                    type: type,
+                    to: type === 'activation' ? 'cliente@ejemplo.com' : 'pago@ejemplo.com',
+                    subject: type === 'activation' ? '🎉 Código de Activación - Fixly Taller' : '✅ Pago Confirmado - Fixly Taller',
+                    sent: new Date().toISOString(),
+                    status: 'sent'
+                };
+                
+                this.emails.push(email);
+                this.saveData();
+                this.loadEmailHistory();
+                
+                this.showNotification(`Email ${type} enviado exitosamente`, 'success');
+            }
+            
+            simulatePayment() {
+                const payment = {
+                    id: Date.now(),
+                    amount: 19900,
+                    currency: 'ARS',
+                    email: 'nuevo.cliente@ejemplo.com',
+                    status: 'approved',
+                    created: new Date().toISOString()
+                };
+                
+                this.payments.push(payment);
+                
+                // Crear usuario automáticamente
+                const newUser = {
+                    id: Date.now(),
+                    taller: 'Nuevo Taller',
+                    email: payment.email,
+                    type: 'paid',
+                    status: 'active',
+                    daysLeft: null
+                };
+                
+                this.users.push(newUser);
+                
+                // Enviar email automáticamente
+                this.sendEmail('payment');
+                
+                this.saveData();
+                this.loadTables();
+                this.loadPaymentsHistory();
+                
+                this.showNotification('Pago procesado exitosamente. Usuario creado y email enviado.', 'success');
+            }
+            
+            loadCodesTable() {
+                const tbody = document.getElementById('codesTable');
+                tbody.innerHTML = '';
+                
+                this.codes.forEach(code => {
+                    const row = `
+                        <tr>
+                            <td class="px-6 py-4 font-mono text-sm">${code.code}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs ${code.type === 'trial' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                    ${code.type === 'trial' ? 'Prueba' : 'Pago'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs ${code.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                    ${code.status === 'active' ? 'Activo' : 'Usado'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">${new Date(code.created).toLocaleDateString()}</td>
+                            <td class="px-6 py-4">
+                                <button onclick="backend.deactivateCode(${code.id})" class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-ban"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+            
+            loadUsersTable() {
+                const tbody = document.getElementById('usersTable');
+                tbody.innerHTML = '';
+                
+                this.users.forEach(user => {
+                    const row = `
+                        <tr>
+                            <td class="px-6 py-4 font-medium">${user.taller}</td>
+                            <td class="px-6 py-4 text-sm">${user.email}</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs ${user.type === 'trial' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                    ${user.type === 'trial' ? 'Prueba' : 'Pago'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                    ${user.status === 'active' ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm">${user.daysLeft !== null ? user.daysLeft + ' días' : 'Ilimitado'}</td>
+                            <td class="px-6 py-4">
+                                <button onclick="backend.editUser(${user.id})" class="text-blue-600 hover:text-blue-800 mr-2">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button onclick="backend.deleteUser(${user.id})" class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            }
+            
+            loadEmailHistory() {
+                const container = document.getElementById('emailHistory');
+                container.innerHTML = '';
+                
+                this.emails.slice(-10).reverse().forEach(email => {
+                    const item = `
+                        <div class="border rounded p-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-sm">${email.subject}</p>
+                                    <p class="text-xs text-gray-600">${email.to}</p>
+                                </div>
+                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Enviado</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">${new Date(email.sent).toLocaleString()}</p>
+                        </div>
+                    `;
+                    container.innerHTML += item;
+                });
+            }
+            
+            loadPaymentsHistory() {
+                const container = document.getElementById('paymentsHistory');
+                container.innerHTML = '';
+                
+                this.payments.slice(-10).reverse().forEach(payment => {
+                    const item = `
+                        <div class="border rounded p-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-sm">$${payment.amount.toLocaleString()} ${payment.currency}</p>
+                                    <p class="text-xs text-gray-600">${payment.email}</p>
+                                </div>
+                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Aprobado</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">${new Date(payment.created).toLocaleString()}</p>
+                        </div>
+                    `;
+                    container.innerHTML += item;
+                });
+            }
+            
+            loadTables() {
+                this.loadCodesTable();
+                this.loadUsersTable();
+                this.loadEmailHistory();
+                this.loadPaymentsHistory();
+            }
+            
+            saveData() {
+                localStorage.setItem('fixly_codes', JSON.stringify(this.codes));
+                localStorage.setItem('fixly_users', JSON.stringify(this.users));
+                localStorage.setItem('fixly_emails', JSON.stringify(this.emails));
+                localStorage.setItem('fixly_payments', JSON.stringify(this.payments));
+            }
+            
+            showNotification(message, type) {
+                // Crear notificación temporal
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
+            
+            initializeCharts() {
+                // Gráfico de conversión
+                const conversionCtx = document.getElementById('conversionChart').getContext('2d');
+                new Chart(conversionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Convertidos', 'En Prueba', 'Expirados'],
+                        datasets: [{
+                            data: [12, 8, 3],
+                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                // Gráfico de ingresos
+                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Ingresos',
+                            data: [59800, 119600, 179400, 199300, 218800, 238800],
+                            borderColor: '#7C3AED',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Funciones globales
+        function showSection(sectionName) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Mostrar sección seleccionada
+            document.getElementById(sectionName).classList.remove('hidden');
+            
+            // Actualizar sidebar
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('sidebar-active');
+            });
+            event.target.classList.add('sidebar-active');
+        }
+        
+        function generateCode() {
+            backend.generateCode();
+        }
+        
+        function sendEmail(type) {
+            backend.sendEmail(type);
+        }
+        
+        function simulatePayment() {
+            backend.simulatePayment();
+        }
+        
+        function copyLink() {
+            const link = document.getElementById('subscriptionLink');
+            link.select();
+            document.execCommand('copy');
+            backend.showNotification('Link copiado al portapapeles', 'success');
+        }
+        
+        // Inicializar sistema
+        let backend;
+        document.addEventListener('DOMContentLoaded', function() {
+            backend = new FixlyBackend();
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDk3EM3zw4Rq%2FTbpOTYnjs3pZOAEPOw9KFluAcXVmMIE0mGTmQubTBxSYR%2BUX22DHAuxdho059l4xOwSySDA7BYKgU30jCoBpTyACilj91zUfrtH31isDV3U95rYAyzR69MxfAVf1dws3GPqQPX2pR%2F9ZxFCFWJh4JDwDsj3EmKpzWAAeU4P4eTc2TLNWN8q2ZQau1mor93pa%2Bicz1R12QTlI0%2BOw%2FCdf67oBTfIYGqUrkmTxav2kXqgieQGy35D3w%2F4RgMBjZevX9hTVg3XWXx7jaDKW52poL0BsLvoN2KGxjVzpMnGcte5i6Wm%2FU78QbHv19RPV7ibusD5fstzAzdBE118TzRT%2BKZxr90pLWfnmQ8sLG42KBFqjY5xnumUDVx8y4s%2BckdUFh681bIyfSABB4MCc4%2FJCV3PUow1hhkNf8lV6va5zh9NuLArqYhDeXJJyTS4UUxe3zpX22SET8fZqrIkoKKZ4zIfpZvF%2FGQXKm9mSeZlyNFIwb4D%2FK1jUWg%3D%3D";
+        window.__genspark_locale = "es-ES";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDk3EM3zw4Rq/TbpOTYnjs3pZOAEPOw9KFluAcXVmMIE0mGTmQubTBxSYR+UX22DHAuxdho059l4xOwSySDA7BYKgU30jCoBpTyACilj91zUfrtH31isDV3U95rYAyzR69MxfAVf1dws3GPqQPX2pR/9ZxFCFWJh4JDwDsj3EmKpzWAAeU4P4eTc2TLNWN8q2ZQau1mor93pa+icz1R12QTlI0+Ow/Cdf67oBTfIYGqUrkmTxav2kXqgieQGy35D3w/4RgMBjZevX9hTVg3XWXx7jaDKW52poL0BsLvoN2KGxjVzpMnGcte5i6Wm/U78QbHv19RPV7ibusD5fstzAzdBE118TzRT+KZxr90pLWfnmQ8sLG42KBFqjY5xnumUDVx8y4s+ckdUFh681bIyfSABB4MCc4/JCV3PUow1hhkNf8lV6va5zh9NuLArqYhDeXJJyTS4UUxe3zpX22SET8fZqrIkoKKZ4zIfpZvF/GQXKm9mSeZlyNFIwb4D/K1jUWg==";
+    </script>
+    
+    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
+    
