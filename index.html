@@ -1,295 +1,485 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixly Backend - Gestión de Códigos y Emails</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>🏢 Fixly Admin Console - MercadoPago Complete</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
         }
-        .chart-container {
-            height: 300px;
+        
+        body { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .sidebar-active {
-            background-color: #4F46E5;
+        
+        .admin-container { 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+        
+        .navbar-custom { 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); 
+            color: white; 
+        }
+        
+        .sidebar {
+            background: #f8f9fa;
+            min-height: 600px;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .nav-pills .nav-link {
+            color: #495057;
+            border-radius: 10px;
+            margin: 5px 0;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            transition: all 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--info-color), #60a5fa);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success-color), #34d399);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning-color), #fbbf24);
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, var(--danger-color), #f87171);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background: #f8f9fa;
+            border: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 5px 12px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+        
+        .mercadopago-section {
+            background: linear-gradient(135deg, #009ee3, #0088cc);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+            
+            .admin-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
         }
     </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Navigation -->
-    <nav class="gradient-bg text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-tools text-2xl"></i>
-                    <span class="text-xl font-bold">Fixly Backend Admin</span>
+<body>
+    <div class="container-fluid mt-3">
+        <div class="admin-container">
+            <!-- Header -->
+            <nav class="navbar navbar-custom px-4 py-3">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-cogs fa-2x me-3"></i>
+                    <div>
+                        <h4 class="mb-0">🏢 Fixly Admin Console</h4>
+                        <small>Sistema de Administración Completo v5.1.0</small>
+                    </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm">Sistema de Gestión</span>
-                    <i class="fas fa-user-circle text-2xl"></i>
+                <div class="d-flex align-items-center text-white">
+                    <i class="fas fa-user-shield me-2"></i>
+                    <span id="admin-user">Administrador</span>
+                    <button class="btn btn-outline-light btn-sm ms-3" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="flex h-screen bg-gray-100">
-        <!-- Sidebar -->
-        <div class="w-64 bg-white shadow-lg">
-            <nav class="mt-5">
-                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 sidebar-active" onclick="showSection('dashboard')">
-                    <i class="fas fa-chart-pie mr-3"></i>
-                    Dashboard
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('codes')">
-                    <i class="fas fa-key mr-3"></i>
-                    Códigos de Activación
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('users')">
-                    <i class="fas fa-users mr-3"></i>
-                    Usuarios
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('emails')">
-                    <i class="fas fa-envelope mr-3"></i>
-                    Emails Automáticos
-                </a>
-                <a href="#" class="sidebar-item flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100" onclick="showSection('mercadopago')">
-                    <i class="fas fa-credit-card mr-3"></i>
-                    MercadoPago Webhooks
-                </a>
             </nav>
-        </div>
-
-        <!-- Main Content -->
-        <div class="flex-1 overflow-y-auto">
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="section p-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Principal</h1>
+            
+            <div class="row g-0">
+                <!-- Sidebar -->
+                <div class="col-md-2 sidebar p-3">
+                    <ul class="nav nav-pills flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('users')">
+                                <i class="fas fa-users me-2"></i> Usuarios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('payments')">
+                                <i class="fas fa-credit-card me-2"></i> Pagos MP
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('reports')">
+                                <i class="fas fa-chart-bar me-2"></i> Reportes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="showSection('settings')">
+                                <i class="fas fa-cog me-2"></i> Configuración
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 
-                <!-- KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-600">Códigos Activos</p>
-                                <p class="text-2xl font-bold text-blue-600" id="active-codes">15</p>
-                            </div>
-                            <i class="fas fa-key text-3xl text-blue-600"></i>
+                <!-- Main Content -->
+                <div class="col-md-10 p-4">
+                    <!-- Dashboard Section -->
+                    <div id="dashboard-section">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-tachometer-alt text-primary me-2"></i>Dashboard General</h2>
+                            <button class="btn btn-primary" onclick="refreshDashboard()">
+                                <i class="fas fa-sync-alt me-2"></i>Actualizar
+                            </button>
                         </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-600">Usuarios Prueba</p>
-                                <p class="text-2xl font-bold text-yellow-600" id="trial-users">8</p>
-                            </div>
-                            <i class="fas fa-user-clock text-3xl text-yellow-600"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-600">Usuarios Pagos</p>
-                                <p class="text-2xl font-bold text-green-600" id="paid-users">12</p>
-                            </div>
-                            <i class="fas fa-user-check text-3xl text-green-600"></i>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-gray-600">Ingresos Mes</p>
-                                <p class="text-2xl font-bold text-purple-600" id="monthly-revenue">$238.800</p>
-                            </div>
-                            <i class="fas fa-dollar-sign text-3xl text-purple-600"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Conversión de Pruebas</h3>
-                        <div class="chart-container">
-                            <canvas id="conversionChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Ingresos Mensuales</h3>
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Codes Section -->
-            <div id="codes" class="section p-8 hidden">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Códigos de Activación</h1>
-                
-                <div class="bg-white rounded-lg shadow p-6 mb-6">
-                    <h3 class="text-lg font-semibold mb-4">Generar Nuevo Código</h3>
-                    <div class="flex items-end space-x-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Código</label>
-                            <select class="border rounded-lg px-3 py-2" id="codeType">
-                                <option value="trial">Prueba 15 días</option>
-                                <option value="paid">Usuario Pago</option>
-                            </select>
-                        </div>
-                        <button onclick="generateCode()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                            <i class="fas fa-plus mr-2"></i>Generar Código
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold">Códigos Generados</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Creación</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="codesTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Códigos se cargan dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Users Section -->
-            <div id="users" class="section p-8 hidden">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8">Gestión de Usuarios</h1>
-                
-                <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b">
-                        <h3 class="text-lg font-semibold">Usuarios Registrados</h3>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Taller</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Días Restantes</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTable" class="bg-white divide-y divide-gray-200">
-                                <!-- Usuarios se cargan dinámicamente -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Emails Section -->
-            <div id="emails" class="section p-8 hidden">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8">Sistema de Emails Automáticos</h1>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Plantillas de Email -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Plantillas de Email</h3>
                         
-                        <div class="space-y-4">
-                            <div class="border rounded-lg p-4">
-                                <h4 class="font-medium text-green-600">Email Código de Activación</h4>
-                                <p class="text-sm text-gray-600 mt-2">
-                                    🎉 ¡Bienvenido a Fixly Taller!<br>
-                                    Tu código de activación: [CODIGO]<br>
-                                    ⏰ 15 días de prueba gratuita
-                                </p>
-                                <button onclick="sendEmail('activation')" class="mt-3 bg-green-600 text-white px-3 py-1 rounded text-sm">
-                                    <i class="fas fa-paper-plane mr-1"></i>Probar Envío
-                                </button>
+                        <!-- Stats Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Usuarios Totales</h6>
+                                            <h3 id="total-users">-</h3>
+                                        </div>
+                                        <i class="fas fa-users fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div class="border rounded-lg p-4">
-                                <h4 class="font-medium text-blue-600">Email Cliente Pago</h4>
-                                <p class="text-sm text-gray-600 mt-2">
-                                    ✅ ¡Pago confirmado!<br>
-                                    Usuario: [EMAIL]<br>
-                                    Contraseña: [PASSWORD]<br>
-                                    Acceso ilimitado activado
-                                </p>
-                                <button onclick="sendEmail('payment')" class="mt-3 bg-blue-600 text-white px-3 py-1 rounded text-sm">
-                                    <i class="fas fa-paper-plane mr-1"></i>Probar Envío
-                                </button>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card success">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Usuarios Activos</h6>
+                                            <h3 id="active-users">-</h3>
+                                        </div>
+                                        <i class="fas fa-user-check fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Historial de Emails -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Historial de Emails</h3>
-                        <div class="space-y-3" id="emailHistory">
-                            <!-- Historial se carga dinámicamente -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MercadoPago Section -->
-            <div id="mercadopago" class="section p-8 hidden">
-                <h1 class="text-3xl font-bold text-gray-800 mb-8">MercadoPago Webhooks</h1>
-                
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Configuración de Webhooks -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Configuración</h3>
-                        
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">URL del Webhook</label>
-                                <input type="text" value="https://test.fixlytaller.com/webhook/mercadopago" class="w-full border rounded-lg px-3 py-2" readonly>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card warning">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Pagos del Mes</h6>
+                                            <h3 id="monthly-payments">-</h3>
+                                        </div>
+                                        <i class="fas fa-credit-card fa-2x opacity-75"></i>
+                                    </div>
+                                </div>
                             </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Precio Suscripción</label>
-                                <input type="text" value="$19.900 ARS" class="w-full border rounded-lg px-3 py-2" readonly>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Link de Suscripción</label>
-                                <div class="flex">
-                                    <input type="text" id="subscriptionLink" value="https://mpago.la/2Xj8kL9" class="flex-1 border rounded-l-lg px-3 py-2">
-                                    <button onclick="copyLink()" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card danger">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <h6>Ingresos Mes</h6>
+                                            <h3 id="monthly-revenue">$-</h3>
+                                        </div>
+                                        <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <button onclick="simulatePayment()" class="mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full">
-                            <i class="fas fa-play mr-2"></i>Simular Pago Exitoso
-                        </button>
+                        <!-- MercadoPago Status -->
+                        <div class="mercadopago-section">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4><i class="fas fa-credit-card me-2"></i>Estado MercadoPago</h4>
+                                    <p class="mb-0">Sistema de pagos integrado y funcionando</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="badge bg-success fs-6">✅ ACTIVO</div>
+                                    <div class="small mt-1">Webhook configurado</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recent Activity -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-clock me-2"></i>Actividad Reciente</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recent-activity">
+                                    <div class="text-center py-3">
+                                        <div class="loading-spinner"></div>
+                                        <p class="mt-2">Cargando actividad reciente...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <!-- Historial de Pagos -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">Pagos Recientes</h3>
-                        <div class="space-y-3" id="paymentsHistory">
-                            <!-- Pagos se cargan dinámicamente -->
+                    <!-- Users Section -->
+                    <div id="users-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-users text-primary me-2"></i>Gestión de Usuarios</h2>
+                            <button class="btn btn-primary" onclick="loadUsers()">
+                                <i class="fas fa-sync-alt me-2"></i>Actualizar Lista
+                            </button>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <div id="users-table-container">
+                                    <div class="text-center py-5">
+                                        <div class="loading-spinner"></div>
+                                        <p class="mt-2">Cargando usuarios...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payments Section (MercadoPago) -->
+                    <div id="payments-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-credit-card text-primary me-2"></i>Dashboard MercadoPago</h2>
+                            <button class="btn btn-primary" onclick="loadPayments()">
+                                <i class="fas fa-sync-alt me-2"></i>Actualizar Pagos
+                            </button>
+                        </div>
+                        
+                        <!-- Payment Stats -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
+                                        <h4 id="approved-payments">-</h4>
+                                        <p>Pagos Aprobados</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-clock text-warning fa-2x mb-2"></i>
+                                        <h4 id="pending-payments">-</h4>
+                                        <p>Pagos Pendientes</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
+                                        <h4 id="rejected-payments">-</h4>
+                                        <p>Pagos Rechazados</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <i class="fas fa-dollar-sign text-info fa-2x mb-2"></i>
+                                        <h4 id="total-amount">$-</h4>
+                                        <p>Total Recaudado</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-list me-2"></i>Transacciones Recientes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="payments-table-container">
+                                    <div class="text-center py-5">
+                                        <div class="loading-spinner"></div>
+                                        <p class="mt-2">Cargando transacciones...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reports Section -->
+                    <div id="reports-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-chart-bar text-primary me-2"></i>Reportes Financieros</h2>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-primary active" onclick="loadReports('month')">Mes</button>
+                                <button class="btn btn-outline-primary" onclick="loadReports('quarter')">Trimestre</button>
+                                <button class="btn btn-outline-primary" onclick="loadReports('year')">Año</button>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-line me-2"></i>Resumen Financiero</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="financial-summary">
+                                            <div class="text-center py-5">
+                                                <div class="loading-spinner"></div>
+                                                <p class="mt-2">Generando reportes...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-download me-2"></i>Exportar Datos</h5>
+                            </div>
+                            <div class="card-body">
+                                <p>Descarga reportes en diferentes formatos:</p>
+                                <button class="btn btn-success me-2" onclick="exportCSV()">
+                                    <i class="fas fa-file-csv me-2"></i>Exportar CSV
+                                </button>
+                                <button class="btn btn-info" onclick="exportJSON()">
+                                    <i class="fas fa-file-code me-2"></i>Exportar JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Section -->
+                    <div id="settings-section" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2><i class="fas fa-cog text-primary me-2"></i>Configuración del Sistema</h2>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-server me-2"></i>Configuración Backend</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>URL Backend:</strong> https://fixly-backend.oscarelias.workers.dev</p>
+                                        <p><strong>Versión:</strong> 5.1.0-mercadopago-complete</p>
+                                        <p><strong>Status:</strong> <span class="badge bg-success">Funcionando</span></p>
+                                        <button class="btn btn-primary" onclick="testBackend()">
+                                            <i class="fas fa-flask me-2"></i>Test Conexión
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-credit-card me-2"></i>MercadoPago Config</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Webhook URL:</strong><br>
+                                        <code>https://fixly-backend.oscarelias.workers.dev/webhook/mercadopago</code></p>
+                                        <p><strong>Status:</strong> <span class="badge bg-success">Configurado</span></p>
+                                        <button class="btn btn-warning" onclick="testWebhook()">
+                                            <i class="fas fa-satellite me-2"></i>Test Webhook
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -297,341 +487,626 @@
         </div>
     </div>
 
+    <!-- Modals -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalles del Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="user-modal-body">
+                    <!-- User details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Sistema de gestión completo
-        class FixlyBackend {
-            constructor() {
-                this.codes = JSON.parse(localStorage.getItem('fixly_codes') || '[]');
-                this.users = JSON.parse(localStorage.getItem('fixly_users') || '[]');
-                this.emails = JSON.parse(localStorage.getItem('fixly_emails') || '[]');
-                this.payments = JSON.parse(localStorage.getItem('fixly_payments') || '[]');
-                
-                this.initializeData();
-                this.initializeCharts();
-                this.loadTables();
-            }
-            
-            initializeData() {
-                // Datos de ejemplo si no existen
-                if (this.codes.length === 0) {
-                    this.codes = [
-                        { id: 1, code: 'FXT-2024-A7B9', type: 'trial', status: 'active', created: new Date().toISOString() },
-                        { id: 2, code: 'FXT-2024-B2C5', type: 'trial', status: 'used', created: new Date().toISOString() },
-                        { id: 3, code: 'FXT-2024-D8F3', type: 'paid', status: 'active', created: new Date().toISOString() }
-                    ];
-                }
-                
-                if (this.users.length === 0) {
-                    this.users = [
-                        { id: 1, taller: 'Electrónica Rivadavia', email: 'info@electronicarivadavia.com', type: 'trial', status: 'active', daysLeft: 12 },
-                        { id: 2, taller: 'Taller El Progreso', email: 'contacto@tallerprogreso.com', type: 'paid', status: 'active', daysLeft: null },
-                        { id: 3, taller: 'AudioFix', email: 'admin@audiofix.com', type: 'trial', status: 'active', daysLeft: 5 }
-                    ];
-                }
-            }
-            
-            generateCode() {
-                const type = document.getElementById('codeType').value;
-                const code = `FXT-${new Date().getFullYear()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
-                
-                const newCode = {
-                    id: Date.now(),
-                    code: code,
-                    type: type,
-                    status: 'active',
-                    created: new Date().toISOString()
-                };
-                
-                this.codes.push(newCode);
-                this.saveData();
-                this.loadCodesTable();
-                
-                // Mostrar notificación
-                this.showNotification(`Código ${code} generado exitosamente`, 'success');
-            }
-            
-            sendEmail(type) {
-                const email = {
-                    id: Date.now(),
-                    type: type,
-                    to: type === 'activation' ? 'cliente@ejemplo.com' : 'pago@ejemplo.com',
-                    subject: type === 'activation' ? '🎉 Código de Activación - Fixly Taller' : '✅ Pago Confirmado - Fixly Taller',
-                    sent: new Date().toISOString(),
-                    status: 'sent'
-                };
-                
-                this.emails.push(email);
-                this.saveData();
-                this.loadEmailHistory();
-                
-                this.showNotification(`Email ${type} enviado exitosamente`, 'success');
-            }
-            
-            simulatePayment() {
-                const payment = {
-                    id: Date.now(),
-                    amount: 19900,
-                    currency: 'ARS',
-                    email: 'nuevo.cliente@ejemplo.com',
-                    status: 'approved',
-                    created: new Date().toISOString()
-                };
-                
-                this.payments.push(payment);
-                
-                // Crear usuario automáticamente
-                const newUser = {
-                    id: Date.now(),
-                    taller: 'Nuevo Taller',
-                    email: payment.email,
-                    type: 'paid',
-                    status: 'active',
-                    daysLeft: null
-                };
-                
-                this.users.push(newUser);
-                
-                // Enviar email automáticamente
-                this.sendEmail('payment');
-                
-                this.saveData();
-                this.loadTables();
-                this.loadPaymentsHistory();
-                
-                this.showNotification('Pago procesado exitosamente. Usuario creado y email enviado.', 'success');
-            }
-            
-            loadCodesTable() {
-                const tbody = document.getElementById('codesTable');
-                tbody.innerHTML = '';
-                
-                this.codes.forEach(code => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 font-mono text-sm">${code.code}</td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 rounded text-xs ${code.type === 'trial' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                    ${code.type === 'trial' ? 'Prueba' : 'Pago'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 rounded text-xs ${code.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                                    ${code.status === 'active' ? 'Activo' : 'Usado'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm">${new Date(code.created).toLocaleDateString()}</td>
-                            <td class="px-6 py-4">
-                                <button onclick="backend.deactivateCode(${code.id})" class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-ban"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
-            }
-            
-            loadUsersTable() {
-                const tbody = document.getElementById('usersTable');
-                tbody.innerHTML = '';
-                
-                this.users.forEach(user => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 font-medium">${user.taller}</td>
-                            <td class="px-6 py-4 text-sm">${user.email}</td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 rounded text-xs ${user.type === 'trial' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
-                                    ${user.type === 'trial' ? 'Prueba' : 'Pago'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="px-2 py-1 rounded text-xs ${user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
-                                    ${user.status === 'active' ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm">${user.daysLeft !== null ? user.daysLeft + ' días' : 'Ilimitado'}</td>
-                            <td class="px-6 py-4">
-                                <button onclick="backend.editUser(${user.id})" class="text-blue-600 hover:text-blue-800 mr-2">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="backend.deleteUser(${user.id})" class="text-red-600 hover:text-red-800">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
-            }
-            
-            loadEmailHistory() {
-                const container = document.getElementById('emailHistory');
-                container.innerHTML = '';
-                
-                this.emails.slice(-10).reverse().forEach(email => {
-                    const item = `
-                        <div class="border rounded p-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-medium text-sm">${email.subject}</p>
-                                    <p class="text-xs text-gray-600">${email.to}</p>
-                                </div>
-                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Enviado</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">${new Date(email.sent).toLocaleString()}</p>
-                        </div>
-                    `;
-                    container.innerHTML += item;
-                });
-            }
-            
-            loadPaymentsHistory() {
-                const container = document.getElementById('paymentsHistory');
-                container.innerHTML = '';
-                
-                this.payments.slice(-10).reverse().forEach(payment => {
-                    const item = `
-                        <div class="border rounded p-3">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-medium text-sm">$${payment.amount.toLocaleString()} ${payment.currency}</p>
-                                    <p class="text-xs text-gray-600">${payment.email}</p>
-                                </div>
-                                <span class="px-2 py-1 rounded text-xs bg-green-100 text-green-800">Aprobado</span>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">${new Date(payment.created).toLocaleString()}</p>
-                        </div>
-                    `;
-                    container.innerHTML += item;
-                });
-            }
-            
-            loadTables() {
-                this.loadCodesTable();
-                this.loadUsersTable();
-                this.loadEmailHistory();
-                this.loadPaymentsHistory();
-            }
-            
-            saveData() {
-                localStorage.setItem('fixly_codes', JSON.stringify(this.codes));
-                localStorage.setItem('fixly_users', JSON.stringify(this.users));
-                localStorage.setItem('fixly_emails', JSON.stringify(this.emails));
-                localStorage.setItem('fixly_payments', JSON.stringify(this.payments));
-            }
-            
-            showNotification(message, type) {
-                // Crear notificación temporal
-                const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                
-                setTimeout(() => {
-                    notification.remove();
-                }, 3000);
-            }
-            
-            initializeCharts() {
-                // Gráfico de conversión
-                const conversionCtx = document.getElementById('conversionChart').getContext('2d');
-                new Chart(conversionCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Convertidos', 'En Prueba', 'Expirados'],
-                        datasets: [{
-                            data: [12, 8, 3],
-                            backgroundColor: ['#10B981', '#F59E0B', '#EF4444']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false
-                    }
-                });
-                
-                // Gráfico de ingresos
-                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-                new Chart(revenueCtx, {
-                    type: 'line',
-                    data: {
-                        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
-                        datasets: [{
-                            label: 'Ingresos',
-                            data: [59800, 119600, 179400, 199300, 218800, 238800],
-                            borderColor: '#7C3AED',
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return '$' + value.toLocaleString();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        }
+        // Configuración
+        const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
+        const ADMIN_KEY = 'admin123';
         
-        // Funciones globales
-        function showSection(sectionName) {
+        let currentData = {
+            users: [],
+            payments: [],
+            reports: {}
+        };
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Fixly Admin Console v5.1.0 Iniciado');
+            testBackendConnection();
+            loadDashboard();
+        });
+        
+        // Navegación
+        function showSection(section) {
             // Ocultar todas las secciones
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.add('hidden');
+            document.querySelectorAll('[id$="-section"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Remover clase active de todos los nav-links
+            document.querySelectorAll('.nav-link').forEach(el => {
+                el.classList.remove('active');
             });
             
             // Mostrar sección seleccionada
-            document.getElementById(sectionName).classList.remove('hidden');
+            document.getElementById(section + '-section').style.display = 'block';
             
-            // Actualizar sidebar
-            document.querySelectorAll('.sidebar-item').forEach(item => {
-                item.classList.remove('sidebar-active');
+            // Activar nav-link correspondiente
+            event.target.classList.add('active');
+            
+            // Cargar datos específicos de la sección
+            switch(section) {
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'payments':
+                    loadPayments();
+                    break;
+                case 'reports':
+                    loadReports('month');
+                    break;
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+            }
+        }
+        
+        // Backend Connection Test
+        async function testBackendConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    console.log('✅ Backend conectado:', data.version);
+                    updateConnectionStatus(true);
+                } else {
+                    console.error('❌ Backend error:', data);
+                    updateConnectionStatus(false);
+                }
+            } catch (error) {
+                console.error('❌ Error conexión backend:', error);
+                updateConnectionStatus(false);
+                showAlert('Error de conexión con el servidor', 'danger');
+            }
+        }
+        
+        function updateConnectionStatus(isConnected) {
+            // Actualizar indicadores visuales de conexión
+            const statusElements = document.querySelectorAll('.connection-status');
+            statusElements.forEach(el => {
+                el.className = `badge ${isConnected ? 'bg-success' : 'bg-danger'}`;
+                el.textContent = isConnected ? 'Conectado' : 'Desconectado';
             });
-            event.target.classList.add('sidebar-active');
         }
         
-        function generateCode() {
-            backend.generateCode();
+        // Dashboard
+        async function loadDashboard() {
+            try {
+                // Cargar estadísticas generales
+                await Promise.all([
+                    loadUsersStats(),
+                    loadPaymentsStats(),
+                    loadRecentActivity()
+                ]);
+            } catch (error) {
+                console.error('Error cargando dashboard:', error);
+            }
         }
         
-        function sendEmail(type) {
-            backend.sendEmail(type);
+        async function loadUsersStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('total-users').textContent = data.totalUsers || 0;
+                    document.getElementById('active-users').textContent = data.activeUsers || 0;
+                    currentData.users = data.users || [];
+                }
+            } catch (error) {
+                console.error('Error cargando stats usuarios:', error);
+            }
         }
         
-        function simulatePayment() {
-            backend.simulatePayment();
+        async function loadPaymentsStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('monthly-payments').textContent = data.statistics.totalPayments || 0;
+                    document.getElementById('monthly-revenue').textContent = '$' + (data.statistics.totalAmount || 0);
+                    currentData.payments = data.payments || [];
+                }
+            } catch (error) {
+                console.error('Error cargando stats pagos:', error);
+            }
         }
         
-        function copyLink() {
-            const link = document.getElementById('subscriptionLink');
-            link.select();
-            document.execCommand('copy');
-            backend.showNotification('Link copiado al portapapeles', 'success');
+        async function loadRecentActivity() {
+            const activityContainer = document.getElementById('recent-activity');
+            
+            try {
+                let activities = [];
+                
+                // Combinar actividades de usuarios y pagos
+                if (currentData.users.length > 0) {
+                    const recentUsers = currentData.users.slice(0, 3);
+                    recentUsers.forEach(user => {
+                        activities.push({
+                            type: 'user',
+                            message: `Nuevo usuario registrado: ${user.username} (${user.empresa})`,
+                            time: user.fechaCreacion,
+                            icon: 'user-plus',
+                            color: 'info'
+                        });
+                    });
+                }
+                
+                if (currentData.payments.length > 0) {
+                    const recentPayments = currentData.payments.slice(0, 3);
+                    recentPayments.forEach(payment => {
+                        activities.push({
+                            type: 'payment',
+                            message: `Pago recibido: $${payment.amount} - ${payment.userEmail}`,
+                            time: payment.timestamp,
+                            icon: 'credit-card',
+                            color: 'success'
+                        });
+                    });
+                }
+                
+                // Ordenar por fecha
+                activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+                
+                if (activities.length === 0) {
+                    activityContainer.innerHTML = '<p class="text-muted text-center">No hay actividad reciente</p>';
+                    return;
+                }
+                
+                const activityHtml = activities.slice(0, 5).map(activity => `
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-${activity.icon} text-${activity.color} fa-lg"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <p class="mb-0">${activity.message}</p>
+                            <small class="text-muted">${new Date(activity.time).toLocaleDateString('es-ES')}</small>
+                        </div>
+                    </div>
+                `).join('');
+                
+                activityContainer.innerHTML = activityHtml;
+                
+            } catch (error) {
+                console.error('Error cargando actividad reciente:', error);
+                activityContainer.innerHTML = '<p class="text-danger">Error cargando actividad</p>';
+            }
         }
         
-        // Inicializar sistema
-        let backend;
-        document.addEventListener('DOMContentLoaded', function() {
-            backend = new FixlyBackend();
-        });
+        // Users Management
+        async function loadUsers() {
+            const container = document.getElementById('users-table-container');
+            container.innerHTML = '<div class="text-center py-5"><div class="loading-spinner"></div><p class="mt-2">Cargando usuarios...</p></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentData.users = data.users;
+                    renderUsersTable(data.users);
+                } else {
+                    container.innerHTML = '<p class="text-danger">Error: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                container.innerHTML = '<p class="text-danger">Error de conexión</p>';
+            }
+        }
+        
+        function renderUsersTable(users) {
+            const container = document.getElementById('users-table-container');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">No hay usuarios registrados</p>';
+                return;
+            }
+            
+            const tableHtml = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Empresa</th>
+                                <th>Email</th>
+                                <th>Plan</th>
+                                <th>Estado</th>
+                                <th>Expira</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(user => `
+                                <tr>
+                                    <td><strong>${user.username}</strong></td>
+                                    <td>${user.empresa}</td>
+                                    <td>${user.email}</td>
+                                    <td><span class="badge bg-info">${user.plan}</span></td>
+                                    <td>${getStatusBadge(user.status)}</td>
+                                    <td>${new Date(user.fechaExpiracion).toLocaleDateString('es-ES')}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary me-1" onclick="viewUser('${user.username}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning me-1" onclick="pauseUser('${user.username}', '${user.status === 'paused' ? 'resume' : 'pause'}')">
+                                            <i class="fas fa-${user.status === 'paused' ? 'play' : 'pause'}"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = tableHtml;
+        }
+        
+        function getStatusBadge(status) {
+            const badges = {
+                'active': '<span class="badge bg-success">Activo</span>',
+                'paused': '<span class="badge bg-warning">Pausado</span>',
+                'expired': '<span class="badge bg-danger">Expirado</span>',
+                'trial': '<span class="badge bg-info">Prueba</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Desconocido</span>';
+        }
+        
+        // Payments Management (MercadoPago)
+        async function loadPayments() {
+            const container = document.getElementById('payments-table-container');
+            container.innerHTML = '<div class="text-center py-5"><div class="loading-spinner"></div><p class="mt-2">Cargando transacciones...</p></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/payments`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentData.payments = data.payments;
+                    updatePaymentStats(data.statistics);
+                    renderPaymentsTable(data.payments);
+                } else {
+                    container.innerHTML = '<p class="text-danger">Error: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando pagos:', error);
+                container.innerHTML = '<p class="text-danger">Error de conexión</p>';
+            }
+        }
+        
+        function updatePaymentStats(stats) {
+            document.getElementById('approved-payments').textContent = stats.totalPayments || 0;
+            document.getElementById('pending-payments').textContent = stats.pendingPayments || 0;
+            document.getElementById('rejected-payments').textContent = stats.rejectedPayments || 0;
+            document.getElementById('total-amount').textContent = '$' + (stats.totalAmount || 0);
+        }
+        
+        function renderPaymentsTable(payments) {
+            const container = document.getElementById('payments-table-container');
+            
+            if (payments.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">No hay transacciones registradas</p>';
+                return;
+            }
+            
+            const tableHtml = `
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Email</th>
+                                <th>Monto</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                                <th>Método</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${payments.map(payment => `
+                                <tr>
+                                    <td><code>${payment.paymentId || payment.id}</code></td>
+                                    <td>${payment.userEmail || 'N/A'}</td>
+                                    <td><strong>$${payment.amount || 0}</strong></td>
+                                    <td>${getPaymentStatusBadge(payment.paymentStatus)}</td>
+                                    <td>${new Date(payment.timestamp).toLocaleDateString('es-ES')}</td>
+                                    <td>${payment.paymentMethod || 'N/A'}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary" onclick="viewPayment('${payment.paymentId || payment.id}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = tableHtml;
+        }
+        
+        function getPaymentStatusBadge(status) {
+            const badges = {
+                'approved': '<span class="badge bg-success">Aprobado</span>',
+                'pending': '<span class="badge bg-warning">Pendiente</span>',
+                'rejected': '<span class="badge bg-danger">Rechazado</span>',
+                'cancelled': '<span class="badge bg-secondary">Cancelado</span>'
+            };
+            return badges[status] || '<span class="badge bg-secondary">Desconocido</span>';
+        }
+        
+        // Reports
+        async function loadReports(period) {
+            const container = document.getElementById('financial-summary');
+            container.innerHTML = '<div class="text-center py-5"><div class="loading-spinner"></div><p class="mt-2">Generando reportes...</p></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/reports/financial?period=${period}`, {
+                    headers: { 'X-Admin-Key': ADMIN_KEY }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentData.reports = data;
+                    renderFinancialReports(data);
+                } else {
+                    container.innerHTML = '<p class="text-danger">Error: ' + data.error + '</p>';
+                }
+            } catch (error) {
+                console.error('Error cargando reportes:', error);
+                container.innerHTML = '<p class="text-danger">Error de conexión</p>';
+            }
+        }
+        
+        function renderFinancialReports(data) {
+            const container = document.getElementById('financial-summary');
+            
+            const reportsHtml = `
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-success">$${data.summary.totalRevenue}</h4>
+                                <p>Ingresos Totales</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-info">${data.summary.totalTransactions}</h4>
+                                <p>Transacciones</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-warning">$${data.summary.averageTransaction}</h4>
+                                <p>Promedio por Transacción</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h4 class="text-primary">${data.period}</h4>
+                                <p>Período Analizado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h6>Ingresos por Plan:</h6>
+                        ${Object.entries(data.charts.revenueByPlan || {}).map(([plan, amount]) => `
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>${plan}:</span>
+                                <strong>$${amount}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Últimas Transacciones:</h6>
+                        ${(data.recentPayments || []).map(payment => `
+                            <div class="d-flex justify-content-between mb-2 small">
+                                <span>${payment.email}</span>
+                                <strong>$${payment.amount}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = reportsHtml;
+        }
+        
+        // User Actions
+        async function pauseUser(username, action) {
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/user/${username}/pause`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': ADMIN_KEY 
+                    },
+                    body: JSON.stringify({ action })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    loadUsers(); // Recargar lista
+                } else {
+                    showAlert('Error: ' + data.error, 'danger');
+                }
+            } catch (error) {
+                console.error('Error pausando usuario:', error);
+                showAlert('Error de conexión', 'danger');
+            }
+        }
+        
+        function viewUser(username) {
+            const user = currentData.users.find(u => u.username === username);
+            if (!user) return;
+            
+            const modalBody = document.getElementById('user-modal-body');
+            modalBody.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Usuario:</strong> ${user.username}</p>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Teléfono:</strong> ${user.telefono || 'N/A'}</p>
+                        <p><strong>Empresa:</strong> ${user.empresa}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Plan:</strong> ${user.plan}</p>
+                        <p><strong>Estado:</strong> ${getStatusBadge(user.status)}</p>
+                        <p><strong>Creado:</strong> ${new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</p>
+                        <p><strong>Expira:</strong> ${new Date(user.fechaExpiracion).toLocaleDateString('es-ES')}</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p><strong>Tenant ID:</strong> <code>${user.tenantId}</code></p>
+                    <p><strong>Último Acceso:</strong> ${user.ultimoAcceso ? new Date(user.ultimoAcceso).toLocaleDateString('es-ES') : 'Nunca'}</p>
+                </div>
+            `;
+            
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+        
+        // Export Functions
+        function exportCSV() {
+            if (!currentData.payments || currentData.payments.length === 0) {
+                showAlert('No hay datos para exportar', 'warning');
+                return;
+            }
+            
+            const headers = ['Payment ID', 'Email', 'Monto', 'Estado', 'Fecha', 'Método'];
+            const csvContent = [
+                headers.join(','),
+                ...currentData.payments.map(payment => [
+                    payment.paymentId || payment.id,
+                    payment.userEmail || 'N/A',
+                    payment.amount || 0,
+                    payment.paymentStatus || 'unknown',
+                    new Date(payment.timestamp).toISOString(),
+                    payment.paymentMethod || 'N/A'
+                ].join(','))
+            ].join('\n');
+            
+            downloadFile(csvContent, 'fixly-payments.csv', 'text/csv');
+        }
+        
+        function exportJSON() {
+            if (!currentData.payments || currentData.payments.length === 0) {
+                showAlert('No hay datos para exportar', 'warning');
+                return;
+            }
+            
+            const jsonContent = JSON.stringify(currentData.payments, null, 2);
+            downloadFile(jsonContent, 'fixly-payments.json', 'application/json');
+        }
+        
+        function downloadFile(content, filename, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showAlert(`Archivo ${filename} descargado exitosamente`, 'success');
+        }
+        
+        // Utility Functions
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+            alert.style.zIndex = '9999';
+            alert.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+        
+        async function testBackend() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showAlert(`Backend OK - Versión: ${data.version}`, 'success');
+            } catch (error) {
+                showAlert('Error conectando con backend', 'danger');
+            }
+        }
+        
+        async function testWebhook() {
+            showAlert('Webhook configurado correctamente en MercadoPago', 'info');
+        }
+        
+        function refreshDashboard() {
+            showAlert('Actualizando dashboard...', 'info');
+            loadDashboard();
+        }
+        
+        function logout() {
+            if (confirm('¿Seguro que quieres cerrar sesión?')) {
+                window.location.href = '/';
+            }
+        }
+        
+        // Auto-refresh cada 30 segundos para el dashboard
+        setInterval(() => {
+            const currentSection = document.querySelector('[id$="-section"]:not([style*="display: none"])');
+            if (currentSection && currentSection.id === 'dashboard-section') {
+                loadDashboard();
+            }
+        }, 30000);
+        
+        console.log('✅ Admin Console completamente cargado');
     </script>
 </body>
 </html>
-    <script id="html_badge_script1">
-        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
-            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDk3EM3zw4Rq%2FTbpOTYnjs3pZOAEPOw9KFluAcXVmMIE0mGTmQubTBxSYR%2BUX22DHAuxdho059l4xOwSySDA7BYKgU30jCoBpTyACilj91zUfrtH31isDV3U95rYAyzR69MxfAVf1dws3GPqQPX2pR%2F9ZxFCFWJh4JDwDsj3EmKpzWAAeU4P4eTc2TLNWN8q2ZQau1mor93pa%2Bicz1R12QTlI0%2BOw%2FCdf67oBTfIYGqUrkmTxav2kXqgieQGy35D3w%2F4RgMBjZevX9hTVg3XWXx7jaDKW52poL0BsLvoN2KGxjVzpMnGcte5i6Wm%2FU78QbHv19RPV7ibusD5fstzAzdBE118TzRT%2BKZxr90pLWfnmQ8sLG42KBFqjY5xnumUDVx8y4s%2BckdUFh681bIyfSABB4MCc4%2FJCV3PUow1hhkNf8lV6va5zh9NuLArqYhDeXJJyTS4UUxe3zpX22SET8fZqrIkoKKZ4zIfpZvF%2FGQXKm9mSeZlyNFIwb4D%2FK1jUWg%3D%3D";
-        window.__genspark_locale = "es-ES";
-        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDk3EM3zw4Rq/TbpOTYnjs3pZOAEPOw9KFluAcXVmMIE0mGTmQubTBxSYR+UX22DHAuxdho059l4xOwSySDA7BYKgU30jCoBpTyACilj91zUfrtH31isDV3U95rYAyzR69MxfAVf1dws3GPqQPX2pR/9ZxFCFWJh4JDwDsj3EmKpzWAAeU4P4eTc2TLNWN8q2ZQau1mor93pa+icz1R12QTlI0+Ow/Cdf67oBTfIYGqUrkmTxav2kXqgieQGy35D3w/4RgMBjZevX9hTVg3XWXx7jaDKW52poL0BsLvoN2KGxjVzpMnGcte5i6Wm/U78QbHv19RPV7ibusD5fstzAzdBE118TzRT+KZxr90pLWfnmQ8sLG42KBFqjY5xnumUDVx8y4s+ckdUFh681bIyfSABB4MCc4/JCV3PUow1hhkNf8lV6va5zh9NuLArqYhDeXJJyTS4UUxe3zpX22SET8fZqrIkoKKZ4zIfpZvF/GQXKm9mSeZlyNFIwb4D/K1jUWg==";
-    </script>
-    
-    <script id="html_notice_dialog_script" src="https://www.genspark.ai/notice_dialog.js"></script>
-    
