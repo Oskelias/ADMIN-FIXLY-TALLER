@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -315,11 +316,16 @@
                     <!-- Users Section -->
                     <div id="users-section" style="display: none;">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h2><i class="fas fa-users text-primary me-2"></i>Gestión de Usuarios</h2>
-                            <button class="btn btn-primary" onclick="loadUsers()">
-                                <i class="fas fa-sync-alt me-2"></i>Actualizar Lista
-                            </button>
-                        </div>
+                                <h2><i class="fas fa-users text-primary me-2"></i>Gestión de Usuarios</h2>
+                                <div>
+                                    <button class="btn btn-success me-2" onclick="openCreateUserModal()">
+                                        <i class="fas fa-user-plus me-2"></i>Nuevo Usuario
+                                    </button>
+                                    <button class="btn btn-primary" onclick="loadUsers()">
+                                        <i class="fas fa-sync-alt me-2"></i>Actualizar Lista
+                                    </button>
+                                </div>
+                            </div>
                         
                         <div class="card">
                             <div class="card-body">
@@ -504,9 +510,58 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+        <!-- Modal para crear nuevo usuario -->
+        <div class="modal fade" id="createUserModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Crear Nuevo Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="createUserForm">
+                            <div class="mb-3">
+                                <label class="form-label">Usuario</label>
+                                <input type="text" class="form-control" id="newUsername" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="newPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Confirmar Contraseña</label>
+                                <input type="password" class="form-control" id="confirmNewPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Plan</label>
+                                <input type="text" class="form-control" id="newPlan" placeholder="Free">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <select class="form-select" id="newStatus">
+                                    <option value="active" selected>Activo</option>
+                                    <option value="paused">Pausado</option>
+                                    <option value="expired">Expirado</option>
+                                    <option value="trial">Prueba</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Expira (fecha)</label>
+                                <input type="date" class="form-control" id="newExpiration">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" onclick="createUser()">Crear Usuario</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         // Configuración
         const API_BASE = 'https://fixly-backend.oscarelias.workers.dev';
@@ -605,16 +660,16 @@
         
         async function loadUsersStats() {
             try {
-                const response = await fetch(`${API_BASE}/api/admin/users`, {
-                    headers: { 'X-Admin-Key': ADMIN_KEY }
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById('total-users').textContent = data.totalUsers || 0;
-                    document.getElementById('active-users').textContent = data.activeUsers || 0;
-                    currentData.users = data.users || [];
-                }
+                // Leer usuarios desde el almacenamiento local
+                const users = getUsersFromStorage();
+                const total = users.length;
+                const activeCount = users.filter(u => {
+                    // Considerar activos los estados 'active' o 'activo'
+                    return u.status === 'active' || u.status === 'activo';
+                }).length;
+                document.getElementById('total-users').textContent = total;
+                document.getElementById('active-users').textContent = activeCount;
+                currentData.users = users;
             } catch (error) {
                 console.error('Error cargando stats usuarios:', error);
             }
@@ -698,26 +753,36 @@
             }
         }
         
+        // Helper functions for user management in local storage
+        function getUsersFromStorage() {
+            try {
+                const stored = localStorage.getItem('adminConsoleUsers');
+                return stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                console.error('Error reading users from storage:', e);
+                return [];
+            }
+        }
+
+        function saveUsersToStorage(users) {
+            try {
+                localStorage.setItem('adminConsoleUsers', JSON.stringify(users));
+            } catch (e) {
+                console.error('Error saving users to storage:', e);
+            }
+        }
+
         // Users Management
-        async function loadUsers() {
+        function loadUsers() {
             const container = document.getElementById('users-table-container');
             container.innerHTML = '<div class="text-center py-5"><div class="loading-spinner"></div><p class="mt-2">Cargando usuarios...</p></div>';
-            
             try {
-                const response = await fetch(`${API_BASE}/api/admin/users`, {
-                    headers: { 'X-Admin-Key': ADMIN_KEY }
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    currentData.users = data.users;
-                    renderUsersTable(data.users);
-                } else {
-                    container.innerHTML = '<p class="text-danger">Error: ' + data.error + '</p>';
-                }
+                const users = getUsersFromStorage();
+                currentData.users = users;
+                renderUsersTable(users);
             } catch (error) {
                 console.error('Error cargando usuarios:', error);
-                container.innerHTML = '<p class="text-danger">Error de conexión</p>';
+                container.innerHTML = '<p class="text-danger">Error cargando usuarios</p>';
             }
         }
         
@@ -956,56 +1021,133 @@
         
         // User Actions
         async function pauseUser(username, action) {
+            // Cambiar el estado del usuario en almacenamiento local sin llamada a API
             try {
-                const response = await fetch(`${API_BASE}/api/admin/user/${username}/pause`, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-Admin-Key': ADMIN_KEY 
-                    },
-                    body: JSON.stringify({ action })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    showAlert(data.message, 'success');
-                    loadUsers(); // Recargar lista
-                } else {
-                    showAlert('Error: ' + data.error, 'danger');
+                const users = getUsersFromStorage();
+                const index = users.findIndex(u => u.username === username || u.usuario === username);
+                if (index === -1) {
+                    showAlert('Usuario no encontrado', 'danger');
+                    return;
                 }
+                // Actualizar estado según acción
+                if (action === 'pause') {
+                    users[index].status = 'paused';
+                } else if (action === 'resume') {
+                    users[index].status = 'active';
+                }
+                saveUsersToStorage(users);
+                showAlert(action === 'pause' ? 'Usuario pausado' : 'Usuario reanudado', 'success');
+                loadUsers();
             } catch (error) {
                 console.error('Error pausando usuario:', error);
                 showAlert('Error de conexión', 'danger');
             }
         }
+
+        /**
+         * Mostrar el modal de creación de usuarios
+         */
+        function openCreateUserModal() {
+            // Limpiar campos del formulario
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newConfirmPassword').value = '';
+            document.getElementById('newPlan').value = '';
+            document.getElementById('newStatus').value = 'active';
+            document.getElementById('newExpiration').value = '';
+            const modalEl = document.getElementById('createUserModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        /**
+         * Crear un nuevo usuario a partir del formulario del modal
+         */
+        function createUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('newConfirmPassword').value;
+            const plan = document.getElementById('newPlan').value.trim();
+            const status = document.getElementById('newStatus').value;
+            const expiration = document.getElementById('newExpiration').value;
+
+            if (!username || !password || !confirm) {
+                showAlert('Completa todos los campos obligatorios', 'warning');
+                return;
+            }
+            if (password !== confirm) {
+                showAlert('Las contraseñas no coinciden', 'danger');
+                return;
+            }
+            // Leer usuarios actuales y verificar duplicado
+            const users = getUsersFromStorage();
+            if (users.some(u => u.username === username || u.usuario === username)) {
+                showAlert('El usuario ya existe', 'danger');
+                return;
+            }
+            // Construir objeto usuario. Para mantener compatibilidad, guardar ambos campos 'username' y 'usuario'.
+            const now = new Date();
+            const userObj = {
+                username: username,
+                usuario: username,
+                contrasena: password,
+                password: password,
+                plan: plan || '',
+                status: status || 'active',
+                fechaCreacion: now.toISOString(),
+                fechaExpiracion: expiration || '',
+                email: '',
+                telefono: '',
+                empresa: ''
+            };
+            users.push(userObj);
+            saveUsersToStorage(users);
+            // Cerrar modal
+            const modalEl = document.getElementById('createUserModal');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.hide();
+            showAlert('Usuario creado exitosamente', 'success');
+            // Actualizar estadísticas y tabla
+            loadUsersStats();
+            loadUsers();
+        }
         
         function viewUser(username) {
-            const user = currentData.users.find(u => u.username === username);
+            // Permitir que el nombre sea buscado por 'username' o 'usuario'
+            const user = currentData.users.find(u => u.username === username || u.usuario === username);
             if (!user) return;
             
             const modalBody = document.getElementById('user-modal-body');
             modalBody.innerHTML = `
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Usuario:</strong> ${user.username}</p>
-                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Usuario:</strong> ${user.username || user.usuario}</p>
+                        <p><strong>Email:</strong> ${user.email || 'N/A'}</p>
                         <p><strong>Teléfono:</strong> ${user.telefono || 'N/A'}</p>
-                        <p><strong>Empresa:</strong> ${user.empresa}</p>
+                        <p><strong>Empresa:</strong> ${user.empresa || 'N/A'}</p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Plan:</strong> ${user.plan}</p>
+                        <p><strong>Plan:</strong> ${user.plan || 'N/A'}</p>
                         <p><strong>Estado:</strong> ${getStatusBadge(user.status)}</p>
-                        <p><strong>Creado:</strong> ${new Date(user.fechaCreacion).toLocaleDateString('es-ES')}</p>
-                        <p><strong>Expira:</strong> ${new Date(user.fechaExpiracion).toLocaleDateString('es-ES')}</p>
+                        <p><strong>Creado:</strong> ${user.fechaCreacion ? new Date(user.fechaCreacion).toLocaleDateString('es-ES') : 'N/A'}</p>
+                        <p><strong>Expira:</strong> ${user.fechaExpiracion ? new Date(user.fechaExpiracion).toLocaleDateString('es-ES') : 'N/A'}</p>
                     </div>
                 </div>
                 <div class="mt-3">
-                    <p><strong>Tenant ID:</strong> <code>${user.tenantId}</code></p>
+                    ${user.tenantId ? `<p><strong>Tenant ID:</strong> <code>${user.tenantId}</code></p>` : ''}
                     <p><strong>Último Acceso:</strong> ${user.ultimoAcceso ? new Date(user.ultimoAcceso).toLocaleDateString('es-ES') : 'Nunca'}</p>
                 </div>
             `;
             
             new bootstrap.Modal(document.getElementById('userModal')).show();
+        }
+
+        /**
+         * Guardar cambios de usuario (no implementado en versión local)
+         * Actualmente solo muestra un mensaje informativo.
+         */
+        function saveUserChanges() {
+            showAlert('Función de edición no disponible en esta versión', 'info');
         }
         
         // Export Functions
