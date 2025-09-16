@@ -7,11 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
   <style>
-    :root{
-      --primary:#6a5acd; /* slateblue */
-      --secondary:#764ba2;
-      --bg:#f5f7fb;
-    }
+    :root{ --primary:#6a5acd; --secondary:#764ba2; --bg:#f5f7fb; }
     body{background:linear-gradient(180deg,#6a5acd 0%, #764ba2 100%) fixed; min-height:100vh;}
     .admin-shell{max-width:1400px; margin:24px auto; background:var(--bg); border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.15); overflow:hidden;}
     .admin-header{background:linear-gradient(135deg,#6a5acd, #764ba2); color:#fff; padding:18px 22px;}
@@ -27,12 +23,21 @@
     .loading-spinner{width:28px;height:28px;border:3px solid #ddd;border-top-color:#6a5acd;border-radius:50%;animation:spin 1s linear infinite;margin:auto}
     @keyframes spin{to{transform:rotate(360deg)}}
     .btn-pill{border-radius:999px}
+    .card-ghost{border:1px solid #eaeef7;border-radius:12px}
+    .alert-fixed{position:sticky; top:0; z-index:1040; border-radius:0}
   </style>
 </head>
 <body>
+  <div id="global-error" class="alert alert-danger alert-fixed d-none">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div><i class="fa-solid fa-triangle-exclamation me-2"></i><strong>Error de conexión:</strong> <span id="global-error-text">No se pudo contactar el backend.</span></div>
+      <button class="btn btn-sm btn-light" onclick="dismissGlobalError()">Ocultar</button>
+    </div>
+  </div>
+
   <div class="admin-shell">
     <div class="admin-header d-flex justify-content-between align-items-center">
-      <h1><i class="fa-solid fa-screwdriver-wrench"></i> Fixly Admin Console <small class="ms-1 fw-normal opacity-75">· v5.1</small></h1>
+      <h1><i class="fa-solid fa-screwdriver-wrench"></i> Fixly Admin Console <small class="ms-1 fw-normal opacity-75">· v5.3</small></h1>
       <div class="d-flex align-items-center gap-2">
         <span class="badge bg-success d-none" id="conn-ok"><i class="fa-solid fa-signal"></i> Conectado</span>
         <span class="badge bg-danger d-none" id="conn-bad"><i class="fa-solid fa-triangle-exclamation"></i> Sin conexión</span>
@@ -47,6 +52,7 @@
         <div class="mb-3 small text-muted">Navegación</div>
         <a class="nav-link active" href="#" onclick="showSection('dashboard', this)"><i class="fa-solid fa-gauge"></i> Dashboard</a>
         <a class="nav-link" href="#" onclick="showSection('users', this)"><i class="fa-solid fa-users"></i> Usuarios</a>
+        <a class="nav-link" href="#" onclick="showSection('emails', this)"><i class="fa-solid fa-envelope-open-text"></i> Emails Automáticos</a>
         <a class="nav-link" href="#" onclick="showSection('payments', this)"><i class="fa-solid fa-credit-card"></i> Pagos MP</a>
         <a class="nav-link" href="#" onclick="showSection('reports', this)"><i class="fa-solid fa-chart-line"></i> Reportes</a>
         <a class="nav-link" href="#" onclick="showSection('settings', this)"><i class="fa-solid fa-gear"></i> Configuración</a>
@@ -58,59 +64,16 @@
         <section id="dashboard-section">
           <h2 class="mb-3"><i class="fa-regular fa-compass text-primary me-2"></i>Dashboard General</h2>
           <div class="row g-3 kpi">
-            <div class="col-md-3">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small text-muted">Usuarios Totales</div>
-                  <div class="display-6 fw-semibold" id="total-users">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small text-muted">Usuarios Activos</div>
-                  <div class="display-6 fw-semibold text-success" id="active-users">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small text-muted">Pagos del Mes</div>
-                  <div class="display-6 fw-semibold" id="monthly-payments">-</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3">
-              <div class="card">
-                <div class="card-body">
-                  <div class="small text-muted">Ingresos Mes</div>
-                  <div class="display-6 fw-semibold text-danger" id="monthly-revenue">$-</div>
-                </div>
-              </div>
-            </div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><div class="small text-muted">Usuarios Totales</div><div class="display-6 fw-semibold" id="total-users">-</div></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><div class="small text-muted">Usuarios Activos</div><div class="display-6 fw-semibold text-success" id="active-users">-</div></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><div class="small text-muted">Pagos del Mes</div><div class="display-6 fw-semibold" id="monthly-payments">-</div></div></div></div>
+            <div class="col-md-3"><div class="card"><div class="card-body"><div class="small text-muted">Ingresos Mes</div><div class="display-6 fw-semibold text-danger" id="monthly-revenue">$-</div></div></div></div>
           </div>
-
-          <div class="card mt-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="mb-1"><i class="fa-regular fa-credit-card me-2"></i>Estado MercadoPago</h5>
-                <div class="text-muted small">Sistema de pagos integrado</div>
-              </div>
-              <div>
-                <span class="badge bg-success me-3" id="mp-badge"><i class="fa-solid fa-check"></i> ACTIVO</span>
-                <button class="btn btn-outline-primary btn-sm btn-pill" onclick="testWebhook()">Webhook configurado</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card mt-3">
-            <div class="card-body">
-              <h5 class="mb-3"><i class="fa-regular fa-clock me-2"></i>Actividad Reciente</h5>
-              <div id="recent-activity" class="small text-muted">No hay actividad reciente</div>
-            </div>
-          </div>
+          <div class="card mt-4"><div class="card-body d-flex justify-content-between align-items-center">
+            <div><h5 class="mb-1"><i class="fa-regular fa-credit-card me-2"></i>Estado MercadoPago</h5><div class="text-muted small">Sistema de pagos integrado</div></div>
+            <div><span class="badge bg-success me-3" id="mp-badge"><i class="fa-solid fa-check"></i> ACTIVO</span><button class="btn btn-outline-primary btn-sm btn-pill" onclick="testWebhook()">Webhook configurado</button></div>
+          </div></div>
+          <div class="card mt-3"><div class="card-body"><h5 class="mb-3"><i class="fa-regular fa-clock me-2"></i>Actividad Reciente</h5><div id="recent-activity" class="small text-muted">No hay actividad reciente</div></div></div>
         </section>
 
         <!-- USERS -->
@@ -122,13 +85,23 @@
               <button class="btn btn-primary btn-pill" onclick="loadUsers()"><i class="fa-solid fa-arrows-rotate me-2"></i>Actualizar</button>
             </div>
           </div>
-          <div class="card">
-            <div class="card-body">
-              <div id="users-table-container">
-                <div class="py-4 text-center">
-                  <div class="loading-spinner"></div>
-                  <div class="mt-2">Cargando usuarios…</div>
-                </div>
+          <div class="card"><div class="card-body"><div id="users-table-container" class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Cargando usuarios…</div></div></div></div>
+        </section>
+
+        <!-- EMAILS -->
+        <section id="emails-section" style="display:none">
+          <h2 class="mb-3"><i class="fa-solid fa-envelope-open-text text-primary me-2"></i>Sistema de Emails Automáticos</h2>
+          <div class="row g-3">
+            <div class="col-lg-7">
+              <div class="card-ghost p-3">
+                <h5 class="mb-3">Plantillas de Email</h5>
+                <div id="email-templates" class="vstack gap-3"></div>
+              </div>
+            </div>
+            <div class="col-lg-5">
+              <div class="card-ghost p-3">
+                <h5 class="mb-3">Historial de Emails</h5>
+                <div id="email-history" class="vstack gap-2"></div>
               </div>
             </div>
           </div>
@@ -137,16 +110,7 @@
         <!-- PAYMENTS -->
         <section id="payments-section" style="display:none">
           <h2 class="mb-3"><i class="fa-solid fa-credit-card text-primary me-2"></i>Pagos MP</h2>
-          <div class="card">
-            <div class="card-body">
-              <div id="payments-table-container">
-                <div class="py-4 text-center">
-                  <div class="loading-spinner"></div>
-                  <div class="mt-2">Cargando pagos…</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="card"><div class="card-body"><div id="payments-table-container" class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Cargando pagos…</div></div></div></div>
         </section>
 
         <!-- REPORTS -->
@@ -159,20 +123,15 @@
               <button class="btn btn-outline-secondary btn-sm" onclick="loadReports('year')">Año</button>
             </div>
           </div>
-          <div class="card">
-            <div class="card-body" id="financial-summary">
-              <div class="py-4 text-center">
-                <div class="loading-spinner"></div>
-                <div class="mt-2">Generando reportes…</div>
-              </div>
-            </div>
-          </div>
+          <div class="card"><div class="card-body" id="financial-summary">
+            <div class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Generando reportes…</div></div>
+          </div></div>
         </section>
 
         <!-- SETTINGS -->
         <section id="settings-section" style="display:none">
           <h2 class="mb-3"><i class="fa-solid fa-gear text-primary me-2"></i>Configuración</h2>
-          <div class="alert alert-info">Acá podés ajustar opciones generales. (Placeholder, no se toca el diseño.)</div>
+          <div class="alert alert-info">Opciones generales. (Sin cambio de diseño.)</div>
         </section>
       </main>
     </div>
@@ -181,65 +140,40 @@
   <!-- MODAL: Detalle Usuario -->
   <div class="modal fade" id="userModal" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fa-regular fa-id-card me-2"></i>Detalles del Usuario</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header"><h5 class="modal-title"><i class="fa-regular fa-id-card me-2"></i>Detalles del Usuario</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body" id="user-modal-body">Cargando…</div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button class="btn btn-primary" onclick="saveUserChanges()">Guardar Cambios</button>
-      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button><button class="btn btn-primary" onclick="saveUserChanges()">Guardar Cambios</button></div>
     </div></div>
   </div>
 
   <!-- MODAL: Crear Usuario -->
   <div class="modal fade" id="createUserModal" tabindex="-1">
     <div class="modal-dialog"><div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Nuevo Usuario</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+      <div class="modal-header"><h5 class="modal-title"><i class="fa-solid fa-user-plus me-2"></i>Nuevo Usuario</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
-        <div class="mb-2">
-          <label class="form-label">Usuario</label>
-          <input id="newUsername" class="form-control" autocomplete="off" required>
-        </div>
-        <div class="mb-2">
-          <label class="form-label">Contraseña</label>
-          <input id="newPassword" class="form-control" type="password" required>
-        </div>
-        <div class="mb-2">
-          <label class="form-label">Email</label>
-          <input id="newEmail" class="form-control" type="email" placeholder="opcional">
-        </div>
+        <div class="mb-2"><label class="form-label">Usuario</label><input id="newUsername" class="form-control" autocomplete="off" required></div>
+        <div class="mb-2"><label class="form-label">Contraseña</label><input id="newPassword" class="form-control" type="password" required></div>
+        <div class="mb-2"><label class="form-label">Email</label><input id="newEmail" class="form-control" type="email" placeholder="opcional"></div>
         <div class="row g-2">
-          <div class="col">
-            <label class="form-label">Plan</label>
-            <select id="newPlan" class="form-select">
-              <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
-            </select>
-          </div>
-          <div class="col">
-            <label class="form-label">Estado</label>
-            <select id="newStatus" class="form-select">
-              <option value="trial">Trial</option>
-              <option value="active">Activo</option>
-              <option value="paused">Pausado</option>
-            </select>
-          </div>
+          <div class="col"><label class="form-label">Plan</label><select id="newPlan" class="form-select"><option value="basic">Basic</option><option value="pro">Pro</option><option value="enterprise">Enterprise</option></select></div>
+          <div class="col"><label class="form-label">Estado</label><select id="newStatus" class="form-select"><option value="trial">Trial</option><option value="active">Activo</option><option value="paused">Pausado</option></select></div>
         </div>
-        <div class="mt-2">
-          <label class="form-label">Días de prueba</label>
-          <input id="newTrialDays" class="form-control" type="number" min="0" value="7">
-        </div>
+        <div class="mt-2"><label class="form-label">Días de prueba</label><input id="newTrialDays" class="form-control" type="number" min="0" value="7"></div>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button class="btn btn-primary" onclick="createUser()"><i class="fa-solid fa-save me-2"></i>Crear</button>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="createUser()"><i class="fa-solid fa-save me-2"></i>Crear</button></div>
+    </div></div>
+  </div>
+
+  <!-- MODAL: Probar Envío Email -->
+  <div class="modal fade" id="sendEmailModal" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title"><i class="fa-regular fa-paper-plane me-2"></i>Probar envío</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <input type="hidden" id="sendTemplateKey">
+        <div class="mb-2"><label class="form-label">Destinatario</label><input id="sendTo" class="form-control" type="email" placeholder="cliente@ejemplo.com"></div>
+        <div class="mb-2"><label class="form-label">Variables (JSON)</label><textarea id="sendVars" class="form-control" rows="4" placeholder='{"CODIGO":"ABC123","EMAIL":"cliente@ejemplo.com","PASSWORD":"secreta"}'></textarea></div>
       </div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" onclick="confirmSendTestEmail()"><i class="fa-solid fa-paper-plane me-2"></i>Enviar</button></div>
     </div></div>
   </div>
 
@@ -248,29 +182,55 @@
   /* =======================
      CONFIG + HELPERS
   ======================== */
-  const USE_BACKEND = true; // true=usa tu backend compartido; false=modo LocalStorage
+  const USE_BACKEND = true; // true=backend compartido; false=LocalStorage
   const API_BASE = window.API_BASE || 'https://fixly-backend.oscarelias.workers.dev';
   let auth = { token: localStorage.getItem('jwt') || '', tenantId: localStorage.getItem('tenantId') || '' };
 
-  function api(path, options = {}) {
+  function showGlobalError(msg){
+    console.debug('[GLOBAL ERROR]', msg);
+    const bar = document.getElementById('global-error');
+    const txt = document.getElementById('global-error-text');
+    if (txt) txt.textContent = msg || 'Error de conexión.';
+    if (bar) bar.classList.remove('d-none');
+    updateConnectionStatus(false);
+  }
+  function dismissGlobalError(){
+    const bar = document.getElementById('global-error');
+    if (bar) bar.classList.add('d-none');
+  }
+
+  async function api(path, options = {}) {
     if (!USE_BACKEND) return Promise.reject(new Error('USE_BACKEND=false'));
     const headers = {
       'Content-Type':'application/json',
-      ...(auth.token ? {'Authorization':`Bearer ${auth.token}`} : {}),
-      ...(auth.tenantId ? {'X-Tenant-Id':auth.tenantId} : {}),
-      ...(options.headers || {})
+      ...(auth.token?{'Authorization':`Bearer ${auth.token}`} : {}),
+      ...(auth.tenantId?{'X-Tenant-Id':auth.tenantId} : {}),
+      ...(options.headers||{})
     };
-    return fetch(`${API_BASE}${path}`, { ...options, headers })
-      .then(r => { if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); });
+    const url = `${API_BASE}${path}`;
+    console.debug('[API] →', options.method||'GET', url, options.body||'');
+    try{
+      const res = await fetch(url, { ...options, headers });
+      console.debug('[API] ← status', res.status, url);
+      if (!res.ok){
+        const text = await res.text().catch(()=>'');
+        throw new Error(`HTTP ${res.status} ${text}`);
+      }
+      const json = await res.json().catch(()=>({}));
+      return json;
+    }catch(err){
+      showGlobalError(`No se pudo contactar el backend (${url}). ${err.message}`);
+      throw err;
+    }
   }
 
   const LS_USERS = 'fixly_users';
-  const LS_PAYMENTS = 'fixly_payments_demo'; // para tabla de demo en modo local
-
-  function getUsersFromStorage(){ try{return JSON.parse(localStorage.getItem(LS_USERS) || '[]');}catch(_){return[];} }
-  function saveUsersToStorage(users){ localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+  const LS_PAYMENTS = 'fixly_payments_demo';
+  const LS_EMAIL_TEMPLATES = 'fixly_email_templates';
+  const LS_EMAIL_HISTORY = 'fixly_email_history';
 
   function showAlert(message, type='info'){
+    console.debug('[ALERT]', type, message);
     const el = document.createElement('div');
     el.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
     el.style.zIndex = 9999;
@@ -278,436 +238,359 @@
     document.body.appendChild(el);
     setTimeout(()=>{ el?.remove(); }, 4200);
   }
-  function confirmAction(msg){ return window.confirm(msg); }
+  function confirmAction(msg){ console.debug('[CONFIRM]', msg); return window.confirm(msg); }
   function fmtISO(d){ if(!d) return '—'; try{ return new Date(d).toLocaleDateString('es-AR'); }catch(_){ return '—'; } }
 
   /* =======================
      NAV + ESTADO
   ======================== */
   function showSection(section, el){
+    console.debug('[NAV] showSection', section);
     document.querySelectorAll('[id$="-section"]').forEach(s=>s.style.display='none');
-    document.getElementById(`${section}-section`).style.display='block';
+    const sec = document.getElementById(`${section}-section`);
+    if (sec) sec.style.display='block';
     document.querySelectorAll('.sidebar .nav-link').forEach(a=>a.classList.remove('active'));
     if(el) el.classList.add('active');
 
     if (section==='dashboard') loadDashboard();
     if (section==='users')     loadUsers();
+    if (section==='emails')    loadEmailsModule();
     if (section==='payments')  loadPayments();
     if (section==='reports')   loadReports('month');
   }
-
   function updateConnectionStatus(ok){
+    console.debug('[STATE] connection', ok);
     document.getElementById('conn-ok').classList.toggle('d-none', !ok);
     document.getElementById('conn-bad').classList.toggle('d-none', ok);
+    if (ok) dismissGlobalError();
   }
-
   async function testBackend(){
     try{
+      console.debug('[PING] /health');
       const r = await fetch(`${API_BASE}/health`);
       const j = await r.json();
       updateConnectionStatus(j.status==='ok');
-      showAlert(`Backend OK - versión ${j.version||'?'}`, 'success');
-    }catch(_){
+      console.debug('[PING OK]', j);
+    }catch(err){
+      console.warn('[PING FAIL]', err);
       updateConnectionStatus(false);
-      showAlert('Error conectando con backend', 'danger');
+      showGlobalError('Backend inalcanzable. Verificá API_BASE o la red.');
     }
   }
-
   function testWebhook(){ showAlert('Webhook de MP OK (comprobación local)', 'info'); }
-  function refreshDashboard(){ showAlert('Actualizando…','info'); loadDashboard(); }
+  function refreshDashboard(){ console.debug('[ACTION] refreshDashboard'); loadDashboard(); }
   function logout(){ if(confirmAction('¿Cerrar sesión?')) location.href = '/'; }
 
   /* =======================
      DASHBOARD
   ======================== */
   async function loadDashboard(){
-    // Usuarios
+    console.debug('[LOAD] dashboard');
     try{
       let users = [];
-      if (USE_BACKEND){
-        const data = await api('/api/admin/users');
-        users = (data.users||[]);
-      } else {
-        users = getUsersFromStorage();
-      }
-      const total = users.length;
-      const activos = users.filter(u => (u.status||'active')==='active').length;
-      document.getElementById('total-users').textContent = total;
-      document.getElementById('active-users').textContent = activos;
-
-      // Actividad reciente (simple)
+      if (USE_BACKEND){ const data = await api('/api/admin/users'); users = (data.users||[]); }
+      else{ users = JSON.parse(localStorage.getItem(LS_USERS)||'[]'); }
+      document.getElementById('total-users').textContent  = users.length;
+      document.getElementById('active-users').textContent = users.filter(u => (u.status||'active')==='active').length;
       const act = document.getElementById('recent-activity');
-      if(total){
-        const sample = users.slice(-3).reverse().map(u=>`Usuario <b>${u.username||u.usuario}</b> (${u.plan||'basic'})`).join(' · ');
-        act.innerHTML = sample || '—';
-      } else {
-        act.textContent = 'No hay actividad reciente';
-      }
-    }catch(e){ console.error(e); }
-
-    // Pagos (demo/real)
+      act.innerHTML = users.slice(-3).reverse().map(u=>`Usuario <b>${u.username||u.usuario}</b> (${u.plan||'basic'})`).join(' · ') || 'No hay actividad reciente';
+    }catch(e){ console.error('[DASHBOARD users] ', e); }
     try{
       let stats = { totalPayments:0, totalAmount:0 };
-      if (USE_BACKEND){
-        const data = await api('/api/admin/payments');
-        stats = data.statistics || stats;
-      } else {
-        const p = JSON.parse(localStorage.getItem(LS_PAYMENTS) || '[]');
-        stats.totalPayments = p.length;
-        stats.totalAmount   = p.reduce((a,x)=>a+(x.amount||0),0);
-      }
+      if (USE_BACKEND){ const data = await api('/api/admin/payments'); stats = data.statistics || stats; }
+      else{ const p = JSON.parse(localStorage.getItem(LS_PAYMENTS) || '[]'); stats.totalPayments = p.length; stats.totalAmount = p.reduce((a,x)=>a+(x.amount||0),0); }
       document.getElementById('monthly-payments').textContent = stats.totalPayments ?? 0;
       document.getElementById('monthly-revenue').textContent  = '$' + (stats.totalAmount ?? 0);
-    }catch(e){ console.error(e); }
+    }catch(e){ console.error('[DASHBOARD payments] ', e); }
   }
 
   /* =======================
      USUARIOS
   ======================== */
   function normalizeUser(u){
-    return {
-      username: u.username || u.usuario,
-      email: u.email || '',
-      plan: u.plan || 'basic',
-      status: u.status || 'active',     // active|paused|trial|expired|canceled
-      trialEndsAt: u.trialEndsAt || u.expires_at || null,
-      createdAt: u.createdAt || u.created_at || null,
-      empresa: u.empresa || '',
-      telefono: u.telefono || ''
-    };
+    return { username:u.username||u.usuario, email:u.email||'', plan:u.plan||'basic', status:u.status||'active', trialEndsAt:u.trialEndsAt||u.expires_at||null, createdAt:u.createdAt||u.created_at||null, empresa:u.empresa||'', telefono:u.telefono||'' };
   }
+  function getStatusBadge(status){ const map={active:'success', paused:'warning', trial:'info', expired:'secondary', canceled:'danger'}; return `<span class="badge bg-${map[status]||'secondary'} text-uppercase">${status}</span>`; }
 
-  function getStatusBadge(status){
-    const map = { active:'success', paused:'warning', trial:'info', expired:'secondary', canceled:'danger' };
-    const cls = map[status] || 'secondary';
-    return `<span class="badge bg-${cls} text-uppercase">${status}</span>`;
-  }
+  function getUsersFromStorage(){ try{return JSON.parse(localStorage.getItem(LS_USERS)||'[]');}catch(_){return[];} }
+  function saveUsersToStorage(v){ localStorage.setItem(LS_USERS, JSON.stringify(v)); }
 
   async function loadUsers(){
+    console.debug('[LOAD] users');
     const box = document.getElementById('users-table-container');
     box.innerHTML = `<div class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Cargando usuarios…</div></div>`;
     try{
       let users = [];
-      if (USE_BACKEND){
-        const data = await api('/api/admin/users');
-        users = (data.users||[]).map(normalizeUser);
-      } else {
-        users = getUsersFromStorage().map(normalizeUser);
-      }
-      window.currentData = window.currentData || {};
-      window.currentData.users = users;
-      renderUsersTable(users);
-      updateUsersStats(users);
+      if (USE_BACKEND){ const data = await api('/api/admin/users'); users = (data.users||[]).map(normalizeUser); }
+      else{ users = getUsersFromStorage().map(normalizeUser); }
+      window.currentData = window.currentData || {}; window.currentData.users = users;
+      renderUsersTable(users); document.getElementById('total-users').textContent = users.length; document.getElementById('active-users').textContent = users.filter(u=>u.status==='active').length;
     }catch(e){
-      console.error(e);
+      console.error('[USERS] load error', e);
       box.innerHTML = `<div class="text-center text-danger py-4">Error al cargar usuarios</div>`;
     }
   }
 
-  function updateUsersStats(users){
-    const total = users.length;
-    const activos = users.filter(u=>u.status==='active').length;
-    document.getElementById('total-users').textContent = total;
-    document.getElementById('active-users').textContent = activos;
-  }
-
   function renderUsersTable(users){
+    console.debug('[RENDER] users table', users.length);
     const box = document.getElementById('users-table-container');
     if(!users.length){ box.innerHTML = `<div class="text-center text-muted py-4">No hay usuarios</div>`; return; }
-
     const rows = users.map(u=>`
       <tr>
-        <td class="fw-semibold">${u.username}</td>
-        <td>${u.email || '—'}</td>
-        <td>${u.plan}</td>
-        <td>${getStatusBadge(u.status)}</td>
-        <td>${fmtISO(u.trialEndsAt)}</td>
+        <td class="fw-semibold">${u.username}</td><td>${u.email||'—'}</td><td>${u.plan}</td><td>${getStatusBadge(u.status)}</td><td>${fmtISO(u.trialEndsAt)}</td>
         <td class="text-end">
           ${u.status==='paused'
             ? `<button class="btn btn-sm btn-success me-1" onclick="pauseUser('${u.username}','resume')"><i class="fa-solid fa-play"></i></button>`
-            : `<button class="btn btn-sm btn-warning me-1" onclick="pauseUser('${u.username}','pause')"><i class="fa-solid fa-pause"></i></button>`
-          }
+            : `<button class="btn btn-sm btn-warning me-1" onclick="pauseUser('${u.username}','pause')"><i class="fa-solid fa-pause"></i></button>`}
           <button class="btn btn-sm btn-outline-primary me-1" onclick="extendTrialPrompt('${u.username}')"><i class="fa-regular fa-clock"></i></button>
           <button class="btn btn-sm btn-outline-dark me-1" onclick="upgradePlanPrompt('${u.username}')"><i class="fa-solid fa-arrow-up"></i></button>
           <button class="btn btn-sm btn-primary me-1" onclick="viewUser('${u.username}')"><i class="fa-regular fa-eye"></i></button>
           <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.username}')"><i class="fa-solid fa-trash"></i></button>
         </td>
-      </tr>
-    `).join('');
-
-    box.innerHTML = `
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead><tr>
-            <th>Usuario</th><th>Email</th><th>Plan</th><th>Estado</th><th>Trial hasta</th><th class="text-end">Acciones</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>`;
+      </tr>`).join('');
+    box.innerHTML = `<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Usuario</th><th>Email</th><th>Plan</th><th>Estado</th><th>Trial hasta</th><th class="text-end">Acciones</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
-  function openCreateUserModal(){
-    const m = new bootstrap.Modal('#createUserModal');
-    document.getElementById('newUsername').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('newEmail').value = '';
-    document.getElementById('newPlan').value = 'basic';
-    document.getElementById('newStatus').value = 'trial';
-    document.getElementById('newTrialDays').value = 7;
-    m.show();
-  }
-
+  function openCreateUserModal(){ console.debug('[OPEN] create user modal'); const m=new bootstrap.Modal('#createUserModal'); ['newUsername','newPassword','newEmail'].forEach(id=>document.getElementById(id).value=''); document.getElementById('newPlan').value='basic'; document.getElementById('newStatus').value='trial'; document.getElementById('newTrialDays').value=7; m.show(); }
   async function createUser(){
-    const username = document.getElementById('newUsername').value.trim();
-    const password = document.getElementById('newPassword').value.trim();
-    const email    = document.getElementById('newEmail').value.trim();
-    const plan     = document.getElementById('newPlan').value;
-    const status   = document.getElementById('newStatus').value;
-    const trialDays= parseInt(document.getElementById('newTrialDays').value||'0',10);
-
-    if(!username || !password){ showAlert('Usuario y contraseña son obligatorios','warning'); return; }
-
-    const payload = {
-      username, password, email, plan, status,
-      trialEndsAt: trialDays>0 ? new Date(Date.now()+trialDays*86400000).toISOString() : null
-    };
-
+    const username=document.getElementById('newUsername').value.trim(); const password=document.getElementById('newPassword').value.trim();
+    const email=document.getElementById('newEmail').value.trim(); const plan=document.getElementById('newPlan').value; const status=document.getElementById('newStatus').value; const trialDays=parseInt(document.getElementById('newTrialDays').value||'0',10);
+    console.debug('[ACTION] createUser', {username, email, plan, status, trialDays});
+    if(!username||!password){ showAlert('Usuario y contraseña son obligatorios','warning'); return; }
+    const payload={ username,password,email,plan,status, trialEndsAt: trialDays>0 ? new Date(Date.now()+trialDays*86400000).toISOString() : null };
     try{
-      if (USE_BACKEND){
-        const res = await api('/api/admin/users', { method:'POST', body: JSON.stringify(payload) });
-        if(!res.success) throw new Error(res.error||'Error al crear');
-      } else {
-        const users = getUsersFromStorage();
-        if (users.some(u => (u.username||u.usuario)===username)) throw new Error('El usuario ya existe');
-        users.push(payload);
-        saveUsersToStorage(users);
-      }
-      showAlert('Usuario creado','success');
-      bootstrap.Modal.getInstance(document.getElementById('createUserModal'))?.hide();
-      loadUsers();
-    }catch(e){
-      console.error(e);
-      showAlert('No se pudo crear el usuario','danger');
-    }
+      if (USE_BACKEND){ const res=await api('/api/admin/users',{method:'POST',body:JSON.stringify(payload)}); if(!res.success) throw new Error(res.error||'Error al crear'); }
+      else{ const users=getUsersFromStorage(); if(users.some(u=>(u.username||u.usuario)===username)) throw new Error('El usuario ya existe'); users.push(payload); localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+      showAlert('Usuario creado','success'); bootstrap.Modal.getInstance(document.getElementById('createUserModal'))?.hide(); loadUsers();
+    }catch(e){ console.error('[CREATE USER] ', e); showAlert('No se pudo crear el usuario','danger'); }
   }
-
-  async function pauseUser(username, action){ // pause|resume
+  async function pauseUser(username, action){
+    console.debug('[ACTION] pauseUser', username, action);
     if(!confirmAction(action==='pause'?'¿Pausar usuario?':'¿Reanudar usuario?')) return;
     try{
-      if (USE_BACKEND){
-        const res = await api(`/api/admin/user/${encodeURIComponent(username)}/pause`, {
-          method:'PUT', body: JSON.stringify({ action })
-        });
-        if(!res.success) throw new Error(res.error||'Error al actualizar estado');
-      } else {
-        const users = getUsersFromStorage();
-        const u = users.find(x => (x.username||x.usuario)===username);
-        if (u) u.status = (action==='pause'?'paused':'active');
-        saveUsersToStorage(users);
-      }
-      showAlert('Estado actualizado','success');
-      loadUsers();
-    }catch(e){
-      console.error(e); showAlert('No se pudo actualizar el estado','danger');
-    }
+      if (USE_BACKEND){ const res=await api(`/api/admin/user/${encodeURIComponent(username)}/pause`,{method:'PUT',body:JSON.stringify({action})}); if(!res.success) throw new Error(res.error||'Error'); }
+      else{ const users=getUsersFromStorage(); const u=users.find(x=>(x.username||x.usuario)===username); if(u) u.status=(action==='pause'?'paused':'active'); localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+      showAlert('Estado actualizado','success'); loadUsers();
+    }catch(e){ console.error('[PAUSE USER] ', e); showAlert('No se pudo actualizar el estado','danger'); }
   }
-
   async function deleteUser(username){
+    console.debug('[ACTION] deleteUser', username);
     if(!confirmAction('¿Eliminar usuario de forma permanente?')) return;
     try{
-      if (USE_BACKEND){
-        const res = await api(`/api/admin/user/${encodeURIComponent(username)}`, { method:'DELETE' });
-        if(!res.success) throw new Error(res.error||'Error al eliminar');
-      } else {
-        const users = getUsersFromStorage().filter(u => (u.username||u.usuario)!==username);
-        saveUsersToStorage(users);
-      }
-      showAlert('Usuario eliminado','success');
-      loadUsers();
-    }catch(e){
-      console.error(e); showAlert('No se pudo eliminar','danger');
-    }
+      if (USE_BACKEND){ const res=await api(`/api/admin/user/${encodeURIComponent(username)}`,{method:'DELETE'}); if(!res.success) throw new Error(res.error||'Error'); }
+      else{ const users=getUsersFromStorage().filter(u=>(u.username||u.usuario)!==username); localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+      showAlert('Usuario eliminado','success'); loadUsers();
+    }catch(e){ console.error('[DELETE USER] ', e); showAlert('No se pudo eliminar','danger'); }
   }
-
-  function extendTrialPrompt(username){
-    const days = parseInt(prompt('¿Cuántos días extender?', '7')||'0',10);
-    if (!days || days<1) return;
-    extendTrial(username, days);
-  }
+  function extendTrialPrompt(username){ const d=parseInt(prompt('¿Cuántos días extender?','7')||'0',10); if(d<1) return; extendTrial(username,d); }
   async function extendTrial(username, days){
+    console.debug('[ACTION] extendTrial', username, days);
     try{
-      if (USE_BACKEND){
-        const res = await api(`/api/admin/user/${encodeURIComponent(username)}`, {
-          method:'PUT', body: JSON.stringify({ extend_trial_days: days })
-        });
-        if(!res.success) throw new Error(res.error||'Error al extender trial');
-      } else {
-        const users = getUsersFromStorage();
-        const u = users.find(x => (x.username||x.usuario)===username);
-        if(u){
-          const base = u.trialEndsAt ? new Date(u.trialEndsAt).getTime() : Date.now();
-          u.trialEndsAt = new Date(base + days*86400000).toISOString();
-          if (u.status==='expired') u.status='trial';
-        }
-        saveUsersToStorage(users);
-      }
-      showAlert('Trial extendido','success');
-      loadUsers();
-    }catch(e){
-      console.error(e); showAlert('No se pudo extender el trial','danger');
-    }
+      if (USE_BACKEND){ const res=await api(`/api/admin/user/${encodeURIComponent(username)}`,{method:'PUT',body:JSON.stringify({extend_trial_days:days})}); if(!res.success) throw new Error(res.error||'Error'); }
+      else{ const users=getUsersFromStorage(); const u=users.find(x=>(x.username||x.usuario)===username); if(u){ const base=u.trialEndsAt?new Date(u.trialEndsAt).getTime():Date.now(); u.trialEndsAt=new Date(base+days*86400000).toISOString(); if(u.status==='expired') u.status='trial'; } localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+      showAlert('Trial extendido','success'); loadUsers();
+    }catch(e){ console.error('[EXTEND TRIAL] ', e); showAlert('No se pudo extender el trial','danger'); }
   }
-
-  function upgradePlanPrompt(username){
-    const plan = prompt('Nuevo plan (basic|pro|enterprise)', 'pro');
-    if(!plan) return;
-    upgradePlan(username, plan);
-  }
+  function upgradePlanPrompt(username){ const plan=prompt('Nuevo plan (basic|pro|enterprise)','pro'); if(!plan) return; upgradePlan(username,plan); }
   async function upgradePlan(username, plan){
+    console.debug('[ACTION] upgradePlan', username, plan);
     try{
-      if (USE_BACKEND){
-        const res = await api(`/api/admin/user/${encodeURIComponent(username)}`, {
-          method:'PUT', body: JSON.stringify({ plan })
-        });
-        if(!res.success) throw new Error(res.error||'Error al actualizar plan');
-      } else {
-        const users = getUsersFromStorage();
-        const u = users.find(x => (x.username||x.usuario)===username);
-        if (u) u.plan = plan;
-        saveUsersToStorage(users);
-      }
-      showAlert('Plan actualizado','success');
-      loadUsers();
-    }catch(e){
-      console.error(e); showAlert('No se pudo actualizar el plan','danger');
-    }
+      if (USE_BACKEND){ const res=await api(`/api/admin/user/${encodeURIComponent(username)}`,{method:'PUT',body:JSON.stringify({plan})}); if(!res.success) throw new Error(res.error||'Error'); }
+      else{ const users=getUsersFromStorage(); const u=users.find(x=>(x.username||x.usuario)===username); if(u) u.plan=plan; localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+      showAlert('Plan actualizado','success'); loadUsers();
+    }catch(e){ console.error('[UPGRADE PLAN] ', e); showAlert('No se pudo actualizar el plan','danger'); }
   }
-
   function viewUser(username){
-    const users = (window.currentData?.users)||[];
-    const user = users.find(u => (u.username||u.usuario)===username);
-    if(!user) return;
-    const html = `
-      <div class="row">
-        <div class="col-md-6">
-          <p><strong>Usuario:</strong> ${user.username}</p>
-          <p><strong>Email:</strong> ${user.email || '—'}</p>
-          <p><strong>Teléfono:</strong> ${user.telefono || '—'}</p>
-          <p><strong>Empresa:</strong> ${user.empresa || '—'}</p>
-        </div>
-        <div class="col-md-6">
-          <p><strong>Plan:</strong> ${user.plan}</p>
-          <p><strong>Estado:</strong> ${getStatusBadge(user.status)}</p>
-          <p><strong>Creado:</strong> ${fmtISO(user.createdAt)}</p>
-          <p><strong>Trial hasta:</strong> ${fmtISO(user.trialEndsAt)}</p>
-        </div>
-      </div>`;
+    console.debug('[VIEW] user', username);
+    const users=(window.currentData?.users)||[];
+    const u=users.find(x=>(x.username||x.usuario)===username);
+    if(!u){ console.warn('[VIEW] user not found'); return; }
+    const html = [
+      '<div class="row">',
+        '<div class="col-md-6">',
+          '<p><strong>Usuario:</strong> ', (u.username||''), '</p>',
+          '<p><strong>Email:</strong> ', (u.email||'—'), '</p>',
+          '<p><strong>Teléfono:</strong> ', (u.telefono||'—'), '</p>',
+          '<p><strong>Empresa:</strong> ', (u.empresa||'—'), '</p>',
+        '</div>',
+        '<div class="col-md-6">',
+          '<p><strong>Plan:</strong> ', (u.plan||'—'), '</p>',
+          '<p><strong>Estado:</strong> ', getStatusBadge(u.status||'active'), '</p>',
+          '<p><strong>Creado:</strong> ', fmtISO(u.createdAt), '</p>',
+          '<p><strong>Trial hasta:</strong> ', fmtISO(u.trialEndsAt), '</p>',
+        '</div>',
+      '</div>'
+    ].join('');
     document.getElementById('user-modal-body').innerHTML = html;
     new bootstrap.Modal('#userModal').show();
   }
-  function saveUserChanges(){ showAlert('Edición desde modal: integrá campos si querés persistir cambios específicos','info'); }
+  function saveUserChanges(){ showAlert('Edición desde modal: conectá campos específicos si querés persistirlos','info'); }
 
   /* =======================
-     PAGOS & REPORTES (resumen)
+     EMAILS AUTOMÁTICOS
+  ======================== */
+  const DEFAULT_TEMPLATES = [
+    { key:'activation_code', title:'Email Código de Activación', emoji:'🪪', sampleVars:{CODIGO:'ABC123', DIAS:'15'}, summary:'¡Bienvenido a Fixly Taller! Código de activación + días de prueba' },
+    { key:'payment_confirmed', title:'Email Cliente Pago', emoji:'✅', sampleVars:{EMAIL:'cliente@ejemplo.com', PASSWORD:'secreta'}, summary:'Pago confirmado + credenciales de acceso' }
+  ];
+  function getLocalTemplates(){ try{return JSON.parse(localStorage.getItem(LS_EMAIL_TEMPLATES)||'[]');}catch(_){return[];} }
+  function saveLocalTemplates(v){ localStorage.setItem(LS_EMAIL_TEMPLATES, JSON.stringify(v)); }
+  function getLocalEmailHistory(){ try{return JSON.parse(localStorage.getItem(LS_EMAIL_HISTORY)||'[]');}catch(_){return[];} }
+  function pushLocalEmailHistory(item){ const h=getLocalEmailHistory(); h.unshift(item); localStorage.setItem(LS_EMAIL_HISTORY, JSON.stringify(h.slice(0,50))); }
+
+  async function loadEmailsModule(){
+    console.debug('[LOAD] emails module');
+    // Plantillas
+    let templates = [];
+    try{
+      if (USE_BACKEND){
+        const res = await api('/api/admin/emails/templates');
+        templates = res.templates?.length ? res.templates : DEFAULT_TEMPLATES;
+      } else {
+        const local = getLocalTemplates();
+        templates = local.length ? local : DEFAULT_TEMPLATES;
+        if (!local.length) saveLocalTemplates(DEFAULT_TEMPLATES);
+      }
+    }catch(e){ console.error('[EMAIL TEMPLATES] ', e); templates = DEFAULT_TEMPLATES; }
+    renderEmailTemplates(templates);
+
+    // Historial
+    try{
+      let history = [];
+      if (USE_BACKEND){
+        const res = await api('/api/admin/emails/history');
+        history = res.history || [];
+      } else {
+        history = getLocalEmailHistory();
+      }
+      renderEmailHistory(history);
+    }catch(e){ console.error('[EMAIL HISTORY] ', e); renderEmailHistory([]); }
+  }
+
+  function renderEmailTemplates(templates){
+    console.debug('[RENDER] email templates', templates.length);
+    const box = document.getElementById('email-templates');
+    if(!templates.length){ box.innerHTML = `<div class="text-muted">No hay plantillas</div>`; return; }
+    box.innerHTML = templates.map(t=>{
+      const vars = JSON.stringify(t.sampleVars||{}).replace(/"/g,'&quot;');
+      return `
+      <div class="p-3 border rounded">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="mb-1">${t.title}</h6>
+            <div class="small text-muted">${t.summary || ''}</div>
+            <div class="mt-2 small"><span class="opacity-75">Variables:</span> <code>${Object.keys(t.sampleVars||{}).join(', ') || '—'}</code></div>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="openSendTestModal('${t.key}', JSON.parse('${vars}'))"><i class="fa-solid fa-paper-plane me-1"></i>Probar Envío</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderEmailHistory(history){
+    console.debug('[RENDER] email history', history.length);
+    const box = document.getElementById('email-history');
+    if(!history.length){ box.innerHTML = `<div class="text-muted">Sin envíos recientes</div>`; return; }
+    box.innerHTML = history.slice(0,20).map(h=>`
+      <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+        <div>
+          <div class="fw-semibold">${h.subject||h.template||'Email'}</div>
+          <div class="small text-muted">${h.to} · ${new Date(h.ts).toLocaleString('es-AR')}</div>
+        </div>
+        <span class="badge bg-${h.status==='sent'?'success':'secondary'}">${h.status||'sent'}</span>
+      </div>`).join('');
+  }
+
+  function openSendTestModal(key, sampleVars){
+    console.debug('[OPEN] send test modal', key, sampleVars);
+    document.getElementById('sendTemplateKey').value = key;
+    document.getElementById('sendTo').value = '';
+    document.getElementById('sendVars').value = JSON.stringify(sampleVars||{}, null, 2);
+    new bootstrap.Modal('#sendEmailModal').show();
+  }
+
+  async function confirmSendTestEmail(){
+    const key = document.getElementById('sendTemplateKey').value;
+    const to  = document.getElementById('sendTo').value.trim();
+    let vars  = {};
+    try{ vars = JSON.parse(document.getElementById('sendVars').value || '{}'); }catch(_){ showAlert('Variables inválidas (JSON)', 'warning'); return; }
+    if(!to){ showAlert('Ingresá un destinatario', 'warning'); return; }
+    console.debug('[ACTION] send test email', key, to, vars);
+
+    try{
+      if (USE_BACKEND){
+        const res = await api('/api/admin/emails/send', { method:'POST', body: JSON.stringify({ to, template:key, vars }) });
+        if(!res.success) throw new Error(res.error||'Error de envío');
+      } else {
+        pushLocalEmailHistory({ to, template:key, subject:`${key} - Fixly`, status:'sent', ts: Date.now() });
+      }
+      showAlert('Email enviado','success');
+      bootstrap.Modal.getInstance(document.getElementById('sendEmailModal'))?.hide();
+      loadEmailsModule();
+    }catch(e){
+      console.error('[SEND EMAIL] ', e);
+      showAlert('No se pudo enviar el email','danger');
+    }
+  }
+
+  /* =======================
+     PAGOS & REPORTES
   ======================== */
   async function loadPayments(){
+    console.debug('[LOAD] payments');
     const box = document.getElementById('payments-table-container');
     box.innerHTML = `<div class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Cargando pagos…</div></div>`;
     try{
       let payments = [];
-      if (USE_BACKEND){
-        const data = await api('/api/admin/payments');
-        payments = data.payments || [];
-      } else {
-        payments = JSON.parse(localStorage.getItem(LS_PAYMENTS)||'[]');
-      }
+      if (USE_BACKEND){ const data = await api('/api/admin/payments'); payments = data.payments || []; }
+      else { payments = JSON.parse(localStorage.getItem(LS_PAYMENTS)||'[]'); }
       const rows = payments.map(p=>`
-        <tr>
-          <td>${p.paymentId||p.id}</td>
-          <td>${p.userEmail || '—'}</td>
-          <td>$${p.amount||0}</td>
-          <td><span class="badge bg-${p.paymentStatus==='approved'?'success':(p.paymentStatus==='pending'?'warning':'secondary')}">${p.paymentStatus||'unknown'}</span></td>
-          <td>${fmtISO(p.timestamp)}</td>
-          <td>${p.paymentMethod||'—'}</td>
-        </tr>
-      `).join('');
-      box.innerHTML = `
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead><tr><th>ID</th><th>Email</th><th>Monto</th><th>Estado</th><th>Fecha</th><th>Método</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>`;
-    }catch(e){
-      console.error(e);
-      box.innerHTML = `<div class="text-center text-danger py-4">Error al cargar pagos</div>`;
-    }
+        <tr><td>${p.paymentId||p.id}</td><td>${p.userEmail||'—'}</td><td>$${p.amount||0}</td>
+            <td><span class="badge bg-${p.paymentStatus==='approved'?'success':(p.paymentStatus==='pending'?'warning':'secondary')}">${p.paymentStatus||'unknown'}</span></td>
+            <td>${new Date(p.timestamp||Date.now()).toLocaleString('es-AR')}</td><td>${p.paymentMethod||'—'}</td></tr>`).join('');
+      box.innerHTML = `<div class="table-responsive"><table class="table align-middle"><thead><tr><th>ID</th><th>Email</th><th>Monto</th><th>Estado</th><th>Fecha</th><th>Método</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    }catch(e){ console.error('[PAYMENTS] load error', e); box.innerHTML = `<div class="text-center text-danger py-4">Error al cargar pagos</div>`; }
   }
 
   async function loadReports(period){
+    console.debug('[LOAD] reports', period);
     const box = document.getElementById('financial-summary');
     box.innerHTML = `<div class="py-4 text-center"><div class="loading-spinner"></div><div class="mt-2">Generando reportes…</div></div>`;
     try{
       let data;
-      if (USE_BACKEND){
-        data = await api(`/api/admin/reports/financial?period=${encodeURIComponent(period)}`);
-      } else {
-        // demo local
+      if (USE_BACKEND){ data = await api(`/api/admin/reports/financial?period=${encodeURIComponent(period)}`); }
+      else {
         const p = JSON.parse(localStorage.getItem(LS_PAYMENTS) || '[]');
         const total = p.reduce((a,x)=>a+(x.amount||0),0);
-        data = {
-          success:true,
-          summary:{ totalRevenue: total, totalTransactions:p.length, averageTransaction: p.length? Math.round(total/p.length):0 },
-          charts:{ revenueByPlan: { basic: Math.round(total*0.3), pro: Math.round(total*0.5), enterprise: Math.round(total*0.2) } },
-          recentPayments: p.slice(-5).reverse(),
-          period
-        };
+        data = { success:true, summary:{ totalRevenue: total, totalTransactions:p.length, averageTransaction: p.length? Math.round(total/p.length):0 }, charts:{ revenueByPlan:{basic:Math.round(total*0.3),pro:Math.round(total*0.5),enterprise:Math.round(total*0.2)}}, recentPayments:p.slice(-5).reverse(), period };
       }
       const html = `
         <div class="row g-3">
-          <div class="col-md-3"><div class="card"><div class="card-body text-center">
-            <h4 class="text-success">$${data.summary.totalRevenue}</h4><div>Ingresos Totales</div>
-          </div></div></div>
-          <div class="col-md-3"><div class="card"><div class="card-body text-center">
-            <h4 class="text-info">${data.summary.totalTransactions}</h4><div>Transacciones</div>
-          </div></div></div>
-          <div class="col-md-3"><div class="card"><div class="card-body text-center">
-            <h4 class="text-warning">$${data.summary.averageTransaction}</h4><div>Promedio</div>
-          </div></div></div>
-          <div class="col-md-3"><div class="card"><div class="card-body text-center">
-            <h4 class="text-primary text-uppercase">${data.period}</h4><div>Período</div>
-          </div></div></div>
+          <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4 class="text-success">$ ${data.summary.totalRevenue}</h4><div>Ingresos Totales</div></div></div></div>
+          <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4 class="text-info">${data.summary.totalTransactions}</h4><div>Transacciones</div></div></div></div>
+          <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4 class="text-warning">$ ${data.summary.averageTransaction}</h4><div>Promedio</div></div></div></div>
+          <div class="col-md-3"><div class="card"><div class="card-body text-center"><h4 class="text-primary text-uppercase">${data.period}</h4><div>Período</div></div></div></div>
         </div>
-
         <div class="row mt-4">
-          <div class="col-md-6">
-            <h6>Ingresos por plan</h6>
-            ${Object.entries(data.charts.revenueByPlan||{}).map(([plan,amount])=>`
-              <div class="d-flex justify-content-between small my-1"><span>${plan}</span><strong>$${amount}</strong></div>`).join('')}
+          <div class="col-md-6"><h6>Ingresos por plan</h6>${
+            Object.entries(data.charts.revenueByPlan||{}).map(([plan,amount])=>`<div class="d-flex justify-content-between small my-1"><span>${plan}</span><strong>$ ${amount}</strong></div>`).join('')}
           </div>
-          <div class="col-md-6">
-            <h6>Últimos pagos</h6>
-            ${(data.recentPayments||[]).map(p=>`
-              <div class="d-flex justify-content-between small my-1"><span>${p.email||'—'}</span><strong>$${p.amount||0}</strong></div>
-            `).join('')}
+          <div class="col-md-6"><h6>Últimos pagos</h6>${
+            (data.recentPayments||[]).map(p=>`<div class="d-flex justify-content-between small my-1"><span>${p.email||'—'}</span><strong>$ ${p.amount||0}</strong></div>`).join('')}
           </div>
         </div>`;
       box.innerHTML = html;
-    }catch(e){
-      console.error(e);
-      box.innerHTML = `<div class="text-center text-danger py-4">Error al generar reportes</div>`;
-    }
+    }catch(e){ console.error('[REPORTS] load error', e); box.innerHTML = `<div class="text-center text-danger py-4">Error al generar reportes</div>`; }
   }
 
   /* =======================
      ARRANQUE
   ======================== */
   document.addEventListener('DOMContentLoaded', ()=>{
-    showSection('dashboard'); // default
-    testBackend();            // ping de estado
-    // auto refresh KPIs del dashboard
+    console.debug('[BOOT] DOM ready');
+    showSection('dashboard'); testBackend();
     setInterval(()=>{
-      const sec = document.querySelector('[id$="-section"]:not([style*="display: none"])');
+      const sec=document.querySelector('[id$="-section"]:not([style*="display: none"])');
       if(sec && sec.id==='dashboard-section'){ loadDashboard(); }
     }, 30000);
   });
