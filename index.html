@@ -1,2052 +1,1321 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FixlyTaller - Consola Admin</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FixlyTaller - Consola Admin</title>
 
-    <!-- Bootstrap CSS 5.3.2 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Bootstrap CSS 5.3.2 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-        }
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --primary-color: #667eea;
+      --secondary-color: #764ba2;
+    }
 
-        body {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        .sidebar {
-            background: var(--primary-gradient);
-            min-height: 100vh;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
+    .sidebar {
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
 
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.8);
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin: 5px 15px;
-            transition: all 0.3s ease;
-        }
+    .sidebar .nav-link {
+      color: rgba(255,255,255,0.9);
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 5px 15px;
+      transition: all 0.3s ease;
+    }
 
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            transform: translateX(5px);
-        }
+    .sidebar .nav-link:hover,
+    .sidebar .nav-link.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      transform: translateX(5px);
+    }
 
-        .sidebar .nav-link i {
-            width: 20px;
-            margin-right: 10px;
-        }
+    .sidebar .nav-link i {
+      width: 20px;
+      margin-right: 10px;
+    }
 
-        .main-content {
-            padding: 30px;
-        }
+    .main-content { padding: 30px; }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease;
-        }
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease;
+    }
+    .card:hover { transform: translateY(-2px); }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+    .card-header {
+      background: var(--primary-gradient);
+      color: white;
+      border-radius: 15px 15px 0 0 !important;
+      font-weight: 600;
+    }
 
-        .card-header {
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            font-weight: 600;
-        }
+    .kpi-card { background: var(--primary-gradient); color: white; border-radius: 15px; }
 
-        .kpi-card {
-            background: var(--primary-gradient);
-            color: white;
-            border-radius: 15px;
-        }
+    .btn-primary {
+      background: var(--primary-gradient);
+      border: none;
+      border-radius: 25px;
+      padding: 10px 25px;
+      font-weight: 600;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
 
-        .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
-            font-weight: 600;
-        }
+    .table th {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+    .navbar { background: white !important; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .navbar-brand { font-weight: 700; color: var(--primary-color) !important; }
 
-        .table th {
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-        }
+    .content-section { display: none; }
+    .content-section.active { display: block; }
 
-        .navbar {
-            background: white !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary-gradient);
+      padding: 20px;
+    }
+    .login-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 420px;
+    }
 
-        .navbar-brand {
-            font-weight: 700;
-            color: var(--primary-color) !important;
-        }
+    .form-control { border-radius: 10px; border: 2px solid #e9ecef; padding: 12px 15px; }
+    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(102,126,234,0.25); }
 
-        .content-section {
-            display: none;
-        }
+    .status-approved { background: #28a745; }
+    .status-pending  { background: #ffc107; }
+    .status-rejected { background: #dc3545; }
 
-        .content-section.active {
-            display: block;
-        }
-
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary-gradient);
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .form-control {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            padding: 12px 15px;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-        .badge {
-            border-radius: 15px;
-        }
-
-        .status-approved { background: #28a745; }
-        .status-pending { background: #ffc107; }
-        .status-rejected { background: #dc3545; }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -100%;
-                transition: left 0.3s ease;
-                z-index: 1000;
-                width: 250px;
-            }
-
-            .sidebar.show {
-                left: 0;
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed; left: -100%; transition: left 0.3s ease; z-index: 1000; width: 250px;
+      }
+      .sidebar.show { left: 0; }
+      .main-content { margin-left: 0; }
+    }
+  </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-card">
-            <div class="text-center mb-4">
-                <h2><i class="fas fa-cogs text-primary"></i> FixlyTaller</h2>
-                <p class="text-muted">Consola Administrativa</p>
-            </div>
+  <!-- Login Screen -->
+  <div id="loginScreen" class="login-container">
+    <div class="login-card">
+      <div class="text-center mb-4">
+        <h2><i class="fas fa-cogs text-primary"></i> FixlyTaller</h2>
+        <p class="text-muted m-0">Consola Administrativa</p>
+      </div>
 
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label class="form-label">Usuario</label>
-                    <input type="text" class="form-control" id="username" value="admin" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">ContraseÃ±a</label>
-                    <input type="password" class="form-control" id="password" value="OskiTemp#1" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar SesiÃ³n
-                </button>
-            </form>
-
-            <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label" for="username">Usuario</label>
+          <input type="text" class="form-control" id="username" value="admin" required autocomplete="username">
         </div>
-    </div>
-
-    <!-- Main Application -->
-    <div id="mainApp" style="display: none;">
-        <!-- Top Navigation -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <div class="container-fluid">
-                <button class="btn btn-primary d-lg-none me-3" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <a class="navbar-brand" href="#">
-                    <i class="fas fa-cogs me-2"></i>FixlyTaller Admin
-                </a>
-                <div class="ms-auto">
-                    <div class="dropdown">
-                        <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                            <i class="fas fa-user me-2"></i><span id="currentUser">admin</span>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="logout()">
-                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar SesiÃ³n
-                            </a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
-
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Sidebar -->
-                <div class="col-lg-2 p-0">
-                    <div class="sidebar" id="sidebar">
-                        <div class="p-3">
-                            <h5 class="text-white text-center">Panel Admin</h5>
-                        </div>
-                        <nav class="nav flex-column">
-                            <a class="nav-link active" href="#" onclick="showSection('dashboard')">
-                                <i class="fas fa-chart-line"></i>Dashboard
-                            </a>
-                            <a class="nav-link" href="#" onclick="showSection('users')">
-                                <i class="fas fa-users"></i>Usuarios
-                            </a>
-                            <a class="nav-link" href="#" onclick="showSection('payments')">
-                                <i class="fas fa-credit-card"></i>Pagos MP
-                            </a>
-                            <a class="nav-link" href="#" onclick="showSection('reports')">
-                                <i class="fas fa-chart-bar"></i>Reportes
-                            </a>
-                            <a class="nav-link" href="#" onclick="showSection('settings')">
-                                <i class="fas fa-cog"></i>ConfiguraciÃ³n
-                            </a>
-                        </nav>
-                    </div>
-                </div>
-
-                <!-- Main Content -->
-                <div class="col-lg-10">
-                    <div class="main-content">
-                        <!-- Dashboard Section -->
-                        <div id="dashboard" class="content-section active">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2><i class="fas fa-chart-line text-primary me-3"></i>Dashboard</h2>
-                                <button class="btn btn-primary" onclick="refreshDashboard()">
-                                    <i class="fas fa-sync-alt me-2"></i>Actualizar
-                                </button>
-                            </div>
-
-                            <!-- KPIs Row -->
-                            <div class="row mb-4">
-                                <div class="col-md-3 mb-3">
-                                    <div class="card kpi-card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-users fa-2x mb-3"></i>
-                                            <h3 id="totalUsers">0</h3>
-                                            <p class="mb-0">Usuarios Totales</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card kpi-card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-dollar-sign fa-2x mb-3"></i>
-                                            <h3 id="totalRevenue">$0</h3>
-                                            <p class="mb-0">Ingresos Total</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card kpi-card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-credit-card fa-2x mb-3"></i>
-                                            <h3 id="totalPayments">0</h3>
-                                            <p class="mb-0">Pagos Procesados</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card kpi-card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-chart-up fa-2x mb-3"></i>
-                                            <h3 id="conversionRate">0%</h3>
-                                            <p class="mb-0">Tasa ConversiÃ³n</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Charts Row -->
-                            <div class="row">
-                                <div class="col-lg-8 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-area me-2"></i>Ingresos por Mes
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="revenueChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-pie me-2"></i>Estados de Pago
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="paymentStatusChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Activity Monitor -->
-                            <div class="row">
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-clock me-2"></i>Actividad Reciente
-                                        </div>
-                                        <div class="card-body">
-                                            <div id="recentActivity">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="bg-success rounded-circle me-3" style="width: 8px; height: 8px;"></div>
-                                                    <div>
-                                                        <small class="text-muted">Hace 2 min</small><br>
-                                                        Nuevo usuario registrado: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b6c3c5d3c4f6d3ced7dbc6dad398d5d9db">[email&#160;protected]</a>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="bg-primary rounded-circle me-3" style="width: 8px; height: 8px;"></div>
-                                                    <div>
-                                                        <small class="text-muted">Hace 5 min</small><br>
-                                                        Pago aprobado: $150.00
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="bg-warning rounded-circle me-3" style="width: 8px; height: 8px;"></div>
-                                                    <div>
-                                                        <small class="text-muted">Hace 10 min</small><br>
-                                                        Pago pendiente: $75.50
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-server me-2"></i>Monitor del Sistema
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Estado API</span>
-                                                    <span class="badge bg-success">Online</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Base de Datos</span>
-                                                    <span class="badge bg-success">Conectada</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>MercadoPago</span>
-                                                    <span class="badge bg-success">Activo</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Bot Telegram</span>
-                                                    <span class="badge bg-success">Funcionando</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Users Section -->
-                        <div id="users" class="content-section">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2><i class="fas fa-users text-primary me-3"></i>GestiÃ³n de Usuarios</h2>
-                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openUserModal()">
-                                    <i class="fas fa-plus me-2"></i>Nuevo Usuario
-                                </button>
-                            </div>
-
-                            <!-- Filters -->
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Buscar</label>
-                                            <input type="text" class="form-control" id="searchUser" placeholder="Email o nombre...">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Rol</label>
-                                            <select class="form-select" id="filterRole">
-                                                <option value="">Todos los roles</option>
-                                                <option value="admin">Administrador</option>
-                                                <option value="operator">Operador</option>
-                                                <option value="viewer">Visualizador</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Estado</label>
-                                            <select class="form-select" id="filterStatus">
-                                                <option value="">Todos</option>
-                                                <option value="active">Activo</option>
-                                                <option value="inactive">Inactivo</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">&nbsp;</label>
-                                            <button class="btn btn-outline-primary w-100" onclick="filterUsers()">
-                                                <i class="fas fa-search me-2"></i>Filtrar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Users Table -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-table me-2"></i>Lista de Usuarios
-                                    <span class="badge bg-light text-dark ms-2" id="userCount">0 usuarios</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Email</th>
-                                                    <th>Nombre</th>
-                                                    <th>Rol</th>
-                                                    <th>Estado</th>
-                                                    <th>Ãltimo Acceso</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="usersTableBody">
-                                                <!-- Users will be loaded here -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <!-- Pagination -->
-                                    <nav>
-                                        <ul class="pagination justify-content-center" id="usersPagination">
-                                            <!-- Pagination will be loaded here -->
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
-
-                            <!-- User Statistics -->
-                            <div class="row mt-4">
-                                <div class="col-md-4">
-                                    <div class="card text-center">
-                                        <div class="card-body">
-                                            <i class="fas fa-user-shield fa-2x text-primary mb-2"></i>
-                                            <h4 id="adminCount">0</h4>
-                                            <p class="text-muted">Administradores</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card text-center">
-                                        <div class="card-body">
-                                            <i class="fas fa-user-cog fa-2x text-success mb-2"></i>
-                                            <h4 id="operatorCount">0</h4>
-                                            <p class="text-muted">Operadores</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card text-center">
-                                        <div class="card-body">
-                                            <i class="fas fa-user fa-2x text-info mb-2"></i>
-                                            <h4 id="viewerCount">0</h4>
-                                            <p class="text-muted">Visualizadores</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- User Modal -->
-                        <div class="modal fade" id="userModal" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="userModalTitle">Nuevo Usuario</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="userForm">
-                                            <input type="hidden" id="userId">
-                                            <div class="mb-3">
-                                                <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="userEmail" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Nombre Completo</label>
-                                                <input type="text" class="form-control" id="userName" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">ContraseÃ±a</label>
-                                                <div class="input-group">
-                                                    <input type="password" class="form-control" id="userPassword">
-                                                    <button class="btn btn-outline-secondary" type="button" onclick="generatePassword()">
-                                                        <i class="fas fa-random"></i>
-                                                    </button>
-                                                </div>
-                                                <small class="text-muted">Dejar vacÃ­o para mantener actual (solo ediciÃ³n)</small>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Rol</label>
-                                                <select class="form-select" id="userRole" required>
-                                                    <option value="">Seleccionar rol</option>
-                                                    <option value="admin">Administrador</option>
-                                                    <option value="operator">Operador</option>
-                                                    <option value="viewer">Visualizador</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="userActive" checked>
-                                                    <label class="form-check-label" for="userActive">
-                                                        Usuario activo
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </form>
-
-                                        <!-- Generated Credentials -->
-                                        <div id="credentialsSection" style="display: none;">
-                                            <div class="alert alert-success">
-                                                <h6><i class="fas fa-key me-2"></i>Credenciales Generadas:</h6>
-                                                <p class="mb-2"><strong>Email:</strong> <span id="genEmail"></span></p>
-                                                <p class="mb-2"><strong>ContraseÃ±a:</strong> <span id="genPassword"></span></p>
-                                                <button class="btn btn-sm btn-outline-success" onclick="copyCredentials()">
-                                                    <i class="fas fa-copy me-1"></i>Copiar Credenciales
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="button" class="btn btn-primary" onclick="saveUser()">
-                                            <i class="fas fa-save me-2"></i>Guardar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Payments Section -->
-                        <div id="payments" class="content-section">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2><i class="fas fa-credit-card text-primary me-3"></i>Pagos MercadoPago</h2>
-                                <div>
-                                    <button class="btn btn-outline-primary me-2" onclick="exportPayments()">
-                                        <i class="fas fa-download me-2"></i>Exportar
-                                    </button>
-                                    <button class="btn btn-primary" onclick="refreshPayments()">
-                                        <i class="fas fa-sync-alt me-2"></i>Actualizar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Payment Stats -->
-                            <div class="row mb-4">
-                                <div class="col-md-3 mb-3">
-                                    <div class="card bg-success text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-check-circle fa-2x mb-3"></i>
-                                            <h3 id="approvedPayments">0</h3>
-                                            <p class="mb-0">Aprobados</p>
-                                            <small id="approvedAmount">$0.00</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card bg-warning text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-clock fa-2x mb-3"></i>
-                                            <h3 id="pendingPayments">0</h3>
-                                            <p class="mb-0">Pendientes</p>
-                                            <small id="pendingAmount">$0.00</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card bg-danger text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-times-circle fa-2x mb-3"></i>
-                                            <h3 id="rejectedPayments">0</h3>
-                                            <p class="mb-0">Rechazados</p>
-                                            <small id="rejectedAmount">$0.00</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <div class="card kpi-card">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-percentage fa-2x mb-3"></i>
-                                            <h3 id="successRate">0%</h3>
-                                            <p class="mb-0">Tasa de Ãxito</p>
-                                            <small id="totalProcessed">0 procesados</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Filters -->
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <label class="form-label">Estado</label>
-                                            <select class="form-select" id="filterPaymentStatus">
-                                                <option value="">Todos</option>
-                                                <option value="approved">Aprobado</option>
-                                                <option value="pending">Pendiente</option>
-                                                <option value="rejected">Rechazado</option>
-                                                <option value="cancelled">Cancelado</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Fecha Desde</label>
-                                            <input type="date" class="form-control" id="filterDateFrom">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Fecha Hasta</label>
-                                            <input type="date" class="form-control" id="filterDateTo">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">&nbsp;</label>
-                                            <button class="btn btn-outline-primary w-100" onclick="filterPayments()">
-                                                <i class="fas fa-search me-2"></i>Filtrar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Payments Table -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-table me-2"></i>Transacciones
-                                    <span class="badge bg-light text-dark ms-2" id="paymentCount">0 transacciones</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>ID Pago</th>
-                                                    <th>Usuario</th>
-                                                    <th>Monto</th>
-                                                    <th>Estado</th>
-                                                    <th>MÃ©todo</th>
-                                                    <th>Fecha</th>
-                                                    <th>Acciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="paymentsTableBody">
-                                                <!-- Payments will be loaded here -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <!-- Pagination -->
-                                    <nav>
-                                        <ul class="pagination justify-content-center" id="paymentsPagination">
-                                            <!-- Pagination will be loaded here -->
-                                        </ul>
-                                    </nav>
-                                </div>
-                            </div>
-
-                            <!-- Payment Details Modal -->
-                            <div class="modal fade" id="paymentDetailModal" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Detalles del Pago</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-info-circle me-2"></i>InformaciÃ³n General</h6>
-                                                    <table class="table table-sm">
-                                                        <tr><th>ID MercadoPago:</th><td id="detailMpId">-</td></tr>
-                                                        <tr><th>Estado:</th><td><span id="detailStatus" class="badge">-</span></td></tr>
-                                                        <tr><th>Monto:</th><td id="detailAmount">-</td></tr>
-                                                        <tr><th>Moneda:</th><td id="detailCurrency">-</td></tr>
-                                                        <tr><th>Fecha CreaciÃ³n:</th><td id="detailCreated">-</td></tr>
-                                                        <tr><th>Fecha AprobaciÃ³n:</th><td id="detailApproved">-</td></tr>
-                                                    </table>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-user me-2"></i>InformaciÃ³n del Pagador</h6>
-                                                    <table class="table table-sm">
-                                                        <tr><th>Email:</th><td id="detailPayerEmail">-</td></tr>
-                                                        <tr><th>Nombre:</th><td id="detailPayerName">-</td></tr>
-                                                        <tr><th>Documento:</th><td id="detailPayerDoc">-</td></tr>
-                                                        <tr><th>TelÃ©fono:</th><td id="detailPayerPhone">-</td></tr>
-                                                    </table>
-                                                </div>
-                                            </div>
-
-                                            <h6 class="mt-4"><i class="fas fa-credit-card me-2"></i>MÃ©todo de Pago</h6>
-                                            <table class="table table-sm">
-                                                <tr><th>Tipo:</th><td id="detailPaymentType">-</td></tr>
-                                                <tr><th>MÃ©todo:</th><td id="detailPaymentMethod">-</td></tr>
-                                                <tr><th>Cuotas:</th><td id="detailInstallments">-</td></tr>
-                                            </table>
-
-                                            <div id="detailRawData" class="mt-4">
-                                                <h6><i class="fas fa-code me-2"></i>Datos Raw (JSON)</h6>
-                                                <pre class="bg-light p-3 rounded" style="max-height: 200px; overflow-y: auto;"><code id="detailJson"></code></pre>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                                            <button type="button" class="btn btn-primary" onclick="refundPayment()">
-                                                <i class="fas fa-undo me-2"></i>Reembolsar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Reports Section -->
-                        <div id="reports" class="content-section">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2><i class="fas fa-chart-bar text-primary me-3"></i>Reportes y AnÃ¡lisis</h2>
-                                <div>
-                                    <button class="btn btn-outline-success me-2" onclick="exportReport('excel')">
-                                        <i class="fas fa-file-excel me-2"></i>Excel
-                                    </button>
-                                    <button class="btn btn-outline-danger me-2" onclick="exportReport('pdf')">
-                                        <i class="fas fa-file-pdf me-2"></i>PDF
-                                    </button>
-                                    <button class="btn btn-primary" onclick="generateReport()">
-                                        <i class="fas fa-chart-line me-2"></i>Generar
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Report Filters -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <i class="fas fa-filter me-2"></i>Filtros de Reporte
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <label class="form-label">PerÃ­odo</label>
-                                            <select class="form-select" id="reportPeriod" onchange="updateDateRange()">
-                                                <option value="custom">Personalizado</option>
-                                                <option value="today">Hoy</option>
-                                                <option value="yesterday">Ayer</option>
-                                                <option value="week">Esta Semana</option>
-                                                <option value="month" selected>Este Mes</option>
-                                                <option value="quarter">Este Trimestre</option>
-                                                <option value="year">Este AÃ±o</option>
-                                                <option value="last_month">Mes Anterior</option>
-                                                <option value="last_quarter">Trimestre Anterior</option>
-                                                <option value="last_year">AÃ±o Anterior</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Fecha Desde</label>
-                                            <input type="date" class="form-control" id="reportDateFrom">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Fecha Hasta</label>
-                                            <input type="date" class="form-control" id="reportDateTo">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label">Tipo Reporte</label>
-                                            <select class="form-select" id="reportType">
-                                                <option value="financial">Financiero</option>
-                                                <option value="users">Usuarios</option>
-                                                <option value="payments">Pagos</option>
-                                                <option value="activity">Actividad</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Financial Overview -->
-                            <div class="row mb-4">
-                                <div class="col-lg-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-area me-2"></i>EvoluciÃ³n de Ingresos
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="financialChart" height="100"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="card h-100">
-                                        <div class="card-header">
-                                            <i class="fas fa-calculator me-2"></i>Resumen Financiero
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Ingresos Totales:</span>
-                                                    <strong class="text-success" id="reportTotalRevenue">$0.00</strong>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Promedio Diario:</span>
-                                                    <span id="reportDailyAvg">$0.00</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Transacciones:</span>
-                                                    <span id="reportTotalTxn">0</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Ticket Promedio:</span>
-                                                    <span id="reportAvgTicket">$0.00</span>
-                                                </div>
-                                            </div>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between">
-                                                    <span>Tasa de ConversiÃ³n:</span>
-                                                    <span id="reportConversionRate">0%</span>
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <div class="d-flex justify-content-between">
-                                                <span>Crecimiento:</span>
-                                                <span class="text-success" id="reportGrowth">+0%</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Comparative Charts -->
-                            <div class="row mb-4">
-                                <div class="col-lg-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-pie me-2"></i>DistribuciÃ³n por MÃ©todo de Pago
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="paymentMethodChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-chart-doughnut me-2"></i>Estados de Transacciones
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="transactionStatusChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- User Analytics -->
-                            <div class="row mb-4">
-                                <div class="col-lg-8">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-users me-2"></i>Crecimiento de Usuarios
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="userGrowthChart" height="100"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-4">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fas fa-clock me-2"></i>Actividad por Hora
-                                        </div>
-                                        <div class="card-body">
-                                            <canvas id="hourlyActivityChart"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Detailed Reports Table -->
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-table me-2"></i>Datos Detallados
-                                    <div class="float-end">
-                                        <button class="btn btn-sm btn-outline-primary" onclick="refreshReportData()">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-striped table-hover">
-                                            <thead>
-                                                <tr id="reportTableHeader">
-                                                    <!-- Dynamic headers based on report type -->
-                                                </tr>
-                                            </thead>
-                                            <tbody id="reportTableBody">
-                                                <!-- Dynamic content based on report type -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Report Summary Cards -->
-                            <div class="row mt-4">
-                                <div class="col-md-3">
-                                    <div class="card bg-primary text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-trophy fa-2x mb-3"></i>
-                                            <h4 id="topMetric1">0</h4>
-                                            <p class="mb-0">Mejor DÃ­a</p>
-                                            <small id="topDay">-</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-success text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-arrow-trend-up fa-2x mb-3"></i>
-                                            <h4 id="topMetric2">0%</h4>
-                                            <p class="mb-0">Crecimiento</p>
-                                            <small id="growthPeriod">vs perÃ­odo anterior</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-info text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-star fa-2x mb-3"></i>
-                                            <h4 id="topMetric3">0</h4>
-                                            <p class="mb-0">Nuevos Usuarios</p>
-                                            <small id="newUsersDetails">en el perÃ­odo</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="card bg-warning text-white">
-                                        <div class="card-body text-center">
-                                            <i class="fas fa-chart-line fa-2x mb-3"></i>
-                                            <h4 id="topMetric4">0</h4>
-                                            <p class="mb-0">ProyecciÃ³n</p>
-                                            <small id="projectionDetails">prÃ³ximo mes</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Settings Section -->
-                        <div id="settings" class="content-section">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h2><i class="fas fa-cog text-primary me-3"></i>ConfiguraciÃ³n del Sistema</h2>
-                                <button class="btn btn-success" onclick="saveAllSettings()">
-                                    <i class="fas fa-save me-2"></i>Guardar Todo
-                                </button>
-                            </div>
-
-                            <!-- Settings Navigation -->
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <ul class="nav nav-pills" id="settingsTabs">
-                                        <li class="nav-item">
-                                            <a class="nav-link active" href="#mp-settings" data-bs-toggle="pill">
-                                                <i class="fab fa-cc-mastercard me-2"></i>MercadoPago
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#telegram-settings" data-bs-toggle="pill">
-                                                <i class="fab fa-telegram me-2"></i>Telegram Bot
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#system-settings" data-bs-toggle="pill">
-                                                <i class="fas fa-server me-2"></i>Sistema
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#backup-settings" data-bs-toggle="pill">
-                                                <i class="fas fa-database me-2"></i>Respaldos
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <!-- Settings Content -->
-                            <div class="tab-content">
-                                <!-- MercadoPago Settings -->
-                                <div class="tab-pane fade show active" id="mp-settings">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fab fa-cc-mastercard me-2"></i>ConfiguraciÃ³n MercadoPago
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Access Token (ProducciÃ³n)</label>
-                                                        <div class="input-group">
-                                                            <input type="password" class="form-control" id="mpAccessToken" placeholder="APP_USR-...">
-                                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('mpAccessToken')">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Public Key (ProducciÃ³n)</label>
-                                                        <input type="text" class="form-control" id="mpPublicKey" placeholder="APP_USR-...">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Webhook URL</label>
-                                                        <input type="url" class="form-control" id="mpWebhookUrl" placeholder="https://api.fixlytaller.com/webhook/mercadopago">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Modo Sandbox</label>
-                                                        <div class="form-check form-switch">
-                                                            <input class="form-check-input" type="checkbox" id="mpSandboxMode">
-                                                            <label class="form-check-label" for="mpSandboxMode">Activar modo de pruebas</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Moneda</label>
-                                                        <select class="form-select" id="mpCurrency">
-                                                            <option value="ARS">Peso Argentino (ARS)</option>
-                                                            <option value="USD">DÃ³lar Estadounidense (USD)</option>
-                                                            <option value="EUR">Euro (EUR)</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Estado ConexiÃ³n</label>
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge bg-success me-2" id="mpConnectionStatus">Conectado</span>
-                                                            <button class="btn btn-sm btn-outline-primary" onclick="testMpConnection()">
-                                                                <i class="fas fa-plug me-1"></i>Probar
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="alert alert-info">
-                                                <i class="fas fa-info-circle me-2"></i>
-                                                <strong>Importante:</strong> Los datos de MercadoPago se encriptan antes de almacenarse.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Telegram Settings -->
-                                <div class="tab-pane fade" id="telegram-settings">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <i class="fab fa-telegram me-2"></i>ConfiguraciÃ³n Bot Telegram
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Bot Token</label>
-                                                        <div class="input-group">
-                                                            <input type="password" class="form-control" id="telegramToken" placeholder="1234567890:ABCDEF...">
-                                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('telegramToken')">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Webhook URL</label>
-                                                        <input type="url" class="form-control" id="telegramWebhook" placeholder="https://api.fixlytaller.com/webhook/telegram">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Chat ID Admin</label>
-                                                        <input type="text" class="form-control" id="telegramAdminChat" placeholder="123456789">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Notificaciones</label>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="telegramNotifyPayments" checked>
-                                                            <label class="form-check-label">Notificar pagos</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="telegramNotifyUsers" checked>
-                                                            <label class="form-check-label">Notificar nuevos usuarios</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="telegramNotifyErrors">
-                                                            <label class="form-check-label">Notificar errores</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Estado Bot</label>
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge bg-success me-2" id="telegramBotStatus">Activo</span>
-                                                            <button class="btn btn-sm btn-outline-primary me-2" onclick="testTelegramBot()">
-                                                                <i class="fas fa-paper-plane me-1"></i>Probar
-                                                            </button>
-                                                            <button class="btn btn-sm btn-outline-warning" onclick="setWebhookTelegram()">
-                                                                <i class="fas fa-link me-1"></i>Set Webhook
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- System Settings -->
-                                <div class="tab-pane fade" id="system-settings">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <i class="fas fa-server me-2"></i>ConfiguraciÃ³n General
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Nombre del Sistema</label>
-                                                        <input type="text" class="form-control" id="systemName" value="FixlyTaller">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">URL Base API</label>
-                                                        <input type="url" class="form-control" id="apiBaseUrl" value="https://api.fixlytaller.com">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Timezone</label>
-                                                        <select class="form-select" id="systemTimezone">
-                                                            <option value="America/Argentina/Buenos_Aires" selected>Buenos Aires (UTC-3)</option>
-                                                            <option value="America/New_York">New York (UTC-5)</option>
-                                                            <option value="Europe/Madrid">Madrid (UTC+1)</option>
-                                                            <option value="UTC">UTC (UTC+0)</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Idioma</label>
-                                                        <select class="form-select" id="systemLanguage">
-                                                            <option value="es" selected>EspaÃ±ol</option>
-                                                            <option value="en">English</option>
-                                                            <option value="pt">PortuguÃªs</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <i class="fas fa-shield-alt me-2"></i>Seguridad
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">JWT Secret</label>
-                                                        <div class="input-group">
-                                                            <input type="password" class="form-control" id="jwtSecret" placeholder="jwt-secret-key">
-                                                            <button class="btn btn-outline-secondary" type="button" onclick="generateJwtSecret()">
-                                                                <i class="fas fa-random"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Tiempo SesiÃ³n (horas)</label>
-                                                        <input type="number" class="form-control" id="sessionTimeout" value="24" min="1" max="168">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Rate Limiting</label>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="enableRateLimit" checked>
-                                                            <label class="form-check-label">Activar lÃ­mite de requests</label>
-                                                        </div>
-                                                        <input type="number" class="form-control mt-2" id="rateLimitRequests" value="100" placeholder="Requests por minuto">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Backup Settings -->
-                                <div class="tab-pane fade" id="backup-settings">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <i class="fas fa-database me-2"></i>Respaldos AutomÃ¡ticos
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Frecuencia</label>
-                                                        <select class="form-select" id="backupFrequency">
-                                                            <option value="daily" selected>Diario</option>
-                                                            <option value="weekly">Semanal</option>
-                                                            <option value="monthly">Mensual</option>
-                                                            <option value="disabled">Desactivado</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Hora de Backup</label>
-                                                        <input type="time" class="form-control" id="backupTime" value="03:00">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">RetenciÃ³n (dÃ­as)</label>
-                                                        <input type="number" class="form-control" id="backupRetention" value="30" min="1" max="365">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="checkbox" id="backupNotification" checked>
-                                                            <label class="form-check-label">Notificar por Telegram</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <i class="fas fa-tools me-2"></i>Herramientas de Mantenimiento
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="d-grid gap-2">
-                                                        <button class="btn btn-primary" onclick="createBackupNow()">
-                                                            <i class="fas fa-download me-2"></i>Crear Backup Ahora
-                                                        </button>
-                                                        <button class="btn btn-warning" onclick="optimizeDatabase()">
-                                                            <i class="fas fa-wrench me-2"></i>Optimizar Base de Datos
-                                                        </button>
-                                                        <button class="btn btn-info" onclick="clearCache()">
-                                                            <i class="fas fa-broom me-2"></i>Limpiar Cache
-                                                        </button>
-                                                        <button class="btn btn-danger" onclick="clearLogs()">
-                                                            <i class="fas fa-trash me-2"></i>Limpiar Logs Antiguos
-                                                        </button>
-                                                    </div>
-                                                    <hr>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Ãltimo Backup</label>
-                                                        <p class="text-muted" id="lastBackupDate">2024-01-15 03:00:00</p>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Estado del Sistema</label>
-                                                        <div class="progress mb-2">
-                                                            <div class="progress-bar bg-success" style="width: 85%" id="systemHealth">85%</div>
-                                                        </div>
-                                                        <small class="text-success">Sistema funcionando correctamente</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="mb-3">
+          <label class="form-label" for="password">Contraseña</label>
+          <input type="password" class="form-control" id="password" value="OskiTemp#1" required autocomplete="current-password">
         </div>
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+        </button>
+      </form>
+
+      <div id="loginError" class="alert alert-danger mt-3" style="display:none"></div>
     </div>
+  </div>
 
-    <!-- Bootstrap JS -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Main Application -->
+  <div id="mainApp" style="display:none;">
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <button class="btn btn-primary d-lg-none me-3" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+        <a class="navbar-brand" href="#"><i class="fas fa-cogs me-2"></i>FixlyTaller Admin</a>
+        <div class="ms-auto">
+          <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="fas fa-user me-2"></i><span id="currentUser">admin</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
 
-    <script>
-        // Configuration
-        const API_BASE = 'https://api.fixlytaller.com';
-        let authToken = localStorage.getItem('authToken');
-        let currentUser = null;
-        let charts = {};
+    <div class="container-fluid">
+      <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-2 p-0">
+          <div class="sidebar" id="sidebar">
+            <div class="p-3"><h5 class="text-white text-center m-0">Panel Admin</h5></div>
+            <nav class="nav flex-column">
+              <a class="nav-link active" href="#" onclick="showSection('dashboard')"><i class="fas fa-chart-line"></i>Dashboard</a>
+              <a class="nav-link" href="#" onclick="showSection('users')"><i class="fas fa-users"></i>Usuarios</a>
+              <a class="nav-link" href="#" onclick="showSection('payments')"><i class="fas fa-credit-card"></i>Pagos MP</a>
+              <a class="nav-link" href="#" onclick="showSection('reports')"><i class="fas fa-chart-bar"></i>Reportes</a>
+              <a class="nav-link" href="#" onclick="showSection('settings')"><i class="fas fa-cog"></i>Configuración</a>
+            </nav>
+          </div>
+        </div>
 
-        // Initialize application
-        document.addEventListener('DOMContentLoaded', function() {
-            if (authToken) {
-                showMainApp();
-                loadDashboardData();
-            } else {
-                showLoginScreen();
-            }
+        <!-- Main Content -->
+        <div class="col-lg-10">
+          <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="m-0"><i class="fas fa-chart-line text-primary me-3"></i>Dashboard</h2>
+                <button class="btn btn-primary" onclick="refreshDashboard()"><i class="fas fa-sync-alt me-2"></i>Actualizar</button>
+              </div>
 
-            initializeEventListeners();
-        });
+              <!-- KPIs Row -->
+              <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                  <div class="card kpi-card">
+                    <div class="card-body text-center">
+                      <i class="fas fa-users fa-2x mb-3"></i>
+                      <h3 id="totalUsers">0</h3>
+                      <p class="mb-0">Usuarios Totales</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="card kpi-card">
+                    <div class="card-body text-center">
+                      <i class="fas fa-dollar-sign fa-2x mb-3"></i>
+                      <h3 id="totalRevenue">$0</h3>
+                      <p class="mb-0">Ingresos Totales</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="card kpi-card">
+                    <div class="card-body text-center">
+                      <i class="fas fa-credit-card fa-2x mb-3"></i>
+                      <h3 id="totalPayments">0</h3>
+                      <p class="mb-0">Pagos Procesados</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="card kpi-card">
+                    <div class="card-body text-center">
+                      <i class="fas fa-chart-line fa-2x mb-3"></i>
+                      <h3 id="conversionRate">0%</h3>
+                      <p class="mb-0">Tasa de Conversión</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-        // Event Listeners
-        function initializeEventListeners() {
-            // Login form
-            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+              <!-- Charts Row -->
+              <div class="row">
+                <div class="col-lg-8 mb-4">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-area me-2"></i>Ingresos por Mes</div>
+                    <div class="card-body"><canvas id="revenueChart" height="120"></canvas></div>
+                  </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Estados de Pago</div>
+                    <div class="card-body"><canvas id="paymentStatusChart" height="120"></canvas></div>
+                  </div>
+                </div>
+              </div>
 
-            // Sidebar toggle for mobile
-            document.getElementById('sidebarToggle').addEventListener('click', function() {
-                document.getElementById('sidebar').classList.toggle('show');
-            });
+              <!-- Activity & System Monitor -->
+              <div class="row">
+                <div class="col-lg-6 mb-4">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-clock me-2"></i>Actividad Reciente</div>
+                    <div class="card-body" id="recentActivity">
+                      <div class="d-flex align-items-center mb-3">
+                        <div class="bg-success rounded-circle me-3" style="width:8px;height:8px;"></div>
+                        <div><small class="text-muted">Hace 2 min</small><br>Nuevo usuario registrado: <a href="mailto:nuevo@cliente.com">nuevo@cliente.com</a></div>
+                      </div>
+                      <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary rounded-circle me-3" style="width:8px;height:8px;"></div>
+                        <div><small class="text-muted">Hace 5 min</small><br>Pago aprobado: $150.00</div>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-warning rounded-circle me-3" style="width:8px;height:8px;"></div>
+                        <div><small class="text-muted">Hace 10 min</small><br>Pago pendiente: $75.50</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-server me-2"></i>Monitor del Sistema</div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between mb-3"><span>Estado API</span><span class="badge bg-success">Online</span></div>
+                      <div class="d-flex justify-content-between mb-3"><span>Base de Datos</span><span class="badge bg-success">Conectada</span></div>
+                      <div class="d-flex justify-content-between mb-3"><span>MercadoPago</span><span class="badge bg-success">Activo</span></div>
+                      <div class="d-flex justify-content-between"><span>Bot Telegram</span><span class="badge bg-success">Funcionando</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users" class="content-section">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="m-0"><i class="fas fa-users text-primary me-3"></i>Gestión de Usuarios</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openUserModal()"><i class="fas fa-plus me-2"></i>Nuevo Usuario</button>
+              </div>
+
+              <!-- Filters -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <label class="form-label" for="searchUser">Buscar</label>
+                      <input type="text" class="form-control" id="searchUser" placeholder="Email o nombre...">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="filterRole">Rol</label>
+                      <select class="form-select" id="filterRole">
+                        <option value="">Todos los roles</option>
+                        <option value="admin">Administrador</option>
+                        <option value="operator">Operador</option>
+                        <option value="viewer">Visualizador</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="filterStatus">Estado</label>
+                      <select class="form-select" id="filterStatus">
+                        <option value="">Todos</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3 d-grid">
+                      <label class="form-label">&nbsp;</label>
+                      <button class="btn btn-outline-primary" onclick="filterUsers()"><i class="fas fa-search me-2"></i>Filtrar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Users Table -->
+              <div class="card">
+                <div class="card-header">
+                  <i class="fas fa-table me-2"></i>Lista de Usuarios
+                  <span class="badge bg-light text-dark ms-2" id="userCount">0 usuarios</span>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead>
+                        <tr>
+                          <th>ID</th><th>Email</th><th>Nombre</th><th>Rol</th><th>Estado</th><th>Último Acceso</th><th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="usersTableBody"></tbody>
+                    </table>
+                  </div>
+                  <nav><ul class="pagination justify-content-center" id="usersPagination"></ul></nav>
+                </div>
+              </div>
+
+              <!-- User Statistics -->
+              <div class="row mt-4 g-3">
+                <div class="col-md-4"><div class="card text-center"><div class="card-body"><i class="fas fa-user-shield fa-2x text-primary mb-2"></i><h4 id="adminCount">0</h4><p class="text-muted m-0">Administradores</p></div></div></div>
+                <div class="col-md-4"><div class="card text-center"><div class="card-body"><i class="fas fa-user-cog fa-2x text-success mb-2"></i><h4 id="operatorCount">0</h4><p class="text-muted m-0">Operadores</p></div></div></div>
+                <div class="col-md-4"><div class="card text-center"><div class="card-body"><i class="fas fa-user fa-2x text-info mb-2"></i><h4 id="viewerCount">0</h4><p class="text-muted m-0">Visualizadores</p></div></div></div>
+              </div>
+            </div>
+
+            <!-- User Modal -->
+            <div class="modal fade" id="userModal" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="userModalTitle">Nuevo Usuario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="userForm">
+                      <input type="hidden" id="userId">
+                      <div class="mb-3">
+                        <label class="form-label" for="userEmail">Email</label>
+                        <input type="email" class="form-control" id="userEmail" required>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="userName">Nombre Completo</label>
+                        <input type="text" class="form-control" id="userName" required>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="userPassword">Contraseña</label>
+                        <div class="input-group">
+                          <input type="password" class="form-control" id="userPassword">
+                          <button class="btn btn-outline-secondary" type="button" onclick="generatePassword()"><i class="fas fa-random"></i></button>
+                        </div>
+                        <small class="text-muted">Dejar vacío para mantener actual (solo edición)</small>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label" for="userRole">Rol</label>
+                        <select class="form-select" id="userRole" required>
+                          <option value="">Seleccionar rol</option>
+                          <option value="admin">Administrador</option>
+                          <option value="operator">Operador</option>
+                          <option value="viewer">Visualizador</option>
+                        </select>
+                      </div>
+                      <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="userActive" checked>
+                        <label class="form-check-label" for="userActive">Usuario activo</label>
+                      </div>
+                    </form>
+                    <div id="credentialsSection" style="display:none;">
+                      <div class="alert alert-success">
+                        <h6 class="m-0"><i class="fas fa-key me-2"></i>Credenciales Generadas:</h6>
+                        <p class="mb-1"><strong>Email:</strong> <span id="genEmail"></span></p>
+                        <p class="mb-2"><strong>Contraseña:</strong> <span id="genPassword"></span></p>
+                        <button class="btn btn-sm btn-outline-success" onclick="copyCredentials()"><i class="fas fa-copy me-1"></i>Copiar Credenciales</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()"><i class="fas fa-save me-2"></i>Guardar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payments Section -->
+            <div id="payments" class="content-section">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="m-0"><i class="fas fa-credit-card text-primary me-3"></i>Pagos MercadoPago</h2>
+                <div>
+                  <button class="btn btn-outline-primary me-2" onclick="exportPayments()"><i class="fas fa-download me-2"></i>Exportar</button>
+                  <button class="btn btn-primary" onclick="refreshPayments()"><i class="fas fa-sync-alt me-2"></i>Actualizar</button>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="row mb-4 g-3">
+                <div class="col-md-3">
+                  <div class="card bg-success text-white"><div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i><h3 id="approvedPayments" class="m-0">0</h3>
+                    <p class="mb-0">Aprobados</p><small id="approvedAmount">$0.00</small>
+                  </div></div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-warning text-white"><div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x mb-2"></i><h3 id="pendingPayments" class="m-0">0</h3>
+                    <p class="mb-0">Pendientes</p><small id="pendingAmount">$0.00</small>
+                  </div></div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card bg-danger text-white"><div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x mb-2"></i><h3 id="rejectedPayments" class="m-0">0</h3>
+                    <p class="mb-0">Rechazados</p><small id="rejectedAmount">$0.00</small>
+                  </div></div>
+                </div>
+                <div class="col-md-3">
+                  <div class="card kpi-card"><div class="card-body text-center text-white">
+                    <i class="fas fa-percentage fa-2x mb-2"></i><h3 id="successRate" class="m-0">0%</h3>
+                    <p class="mb-0">Tasa de Éxito</p><small id="totalProcessed">0 procesados</small>
+                  </div></div>
+                </div>
+              </div>
+
+              <!-- Filters -->
+              <div class="card mb-4">
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <label class="form-label" for="filterPaymentStatus">Estado</label>
+                      <select class="form-select" id="filterPaymentStatus">
+                        <option value="">Todos</option>
+                        <option value="approved">Aprobado</option>
+                        <option value="pending">Pendiente</option>
+                        <option value="rejected">Rechazado</option>
+                        <option value="cancelled">Cancelado</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="filterDateFrom">Fecha Desde</label>
+                      <input type="date" class="form-control" id="filterDateFrom">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="filterDateTo">Fecha Hasta</label>
+                      <input type="date" class="form-control" id="filterDateTo">
+                    </div>
+                    <div class="col-md-3 d-grid">
+                      <label class="form-label">&nbsp;</label>
+                      <button class="btn btn-outline-primary" onclick="filterPayments()"><i class="fas fa-search me-2"></i>Filtrar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payments Table -->
+              <div class="card">
+                <div class="card-header">
+                  <i class="fas fa-table me-2"></i>Transacciones
+                  <span class="badge bg-light text-dark ms-2" id="paymentCount">0 transacciones</span>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                      <thead>
+                        <tr>
+                          <th>ID Pago</th><th>Usuario</th><th>Monto</th><th>Estado</th><th>Método</th><th>Fecha</th><th>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="paymentsTableBody"></tbody>
+                    </table>
+                  </div>
+                  <nav><ul class="pagination justify-content-center" id="paymentsPagination"></ul></nav>
+                </div>
+              </div>
+
+              <!-- Payment Details Modal -->
+              <div class="modal fade" id="paymentDetailModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header"><h5 class="modal-title">Detalles del Pago</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-info-circle me-2"></i>Información General</h6>
+                          <table class="table table-sm">
+                            <tr><th>ID MercadoPago:</th><td id="detailMpId">-</td></tr>
+                            <tr><th>Estado:</th><td><span id="detailStatus" class="badge bg-secondary">-</span></td></tr>
+                            <tr><th>Monto:</th><td id="detailAmount">-</td></tr>
+                            <tr><th>Moneda:</th><td id="detailCurrency">-</td></tr>
+                            <tr><th>Fecha Creación:</th><td id="detailCreated">-</td></tr>
+                            <tr><th>Fecha Aprobación:</th><td id="detailApproved">-</td></tr>
+                          </table>
+                        </div>
+                        <div class="col-md-6">
+                          <h6><i class="fas fa-user me-2"></i>Información del Pagador</h6>
+                          <table class="table table-sm">
+                            <tr><th>Email:</th><td id="detailPayerEmail">-</td></tr>
+                            <tr><th>Nombre:</th><td id="detailPayerName">-</td></tr>
+                            <tr><th>Documento:</th><td id="detailPayerDoc">-</td></tr>
+                            <tr><th>Teléfono:</th><td id="detailPayerPhone">-</td></tr>
+                          </table>
+                        </div>
+                      </div>
+                      <h6 class="mt-3"><i class="fas fa-credit-card me-2"></i>Método de Pago</h6>
+                      <table class="table table-sm">
+                        <tr><th>Tipo:</th><td id="detailPaymentType">-</td></tr>
+                        <tr><th>Método:</th><td id="detailPaymentMethod">-</td></tr>
+                        <tr><th>Cuotas:</th><td id="detailInstallments">-</td></tr>
+                      </table>
+                      <div class="mt-3">
+                        <h6><i class="fas fa-code me-2"></i>Datos Raw (JSON)</h6>
+                        <pre class="bg-light p-3 rounded" style="max-height:200px;overflow:auto;"><code id="detailJson"></code></pre>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                      <button type="button" class="btn btn-primary" onclick="refundPayment()"><i class="fas fa-undo me-2"></i>Reembolsar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports" class="content-section">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="m-0"><i class="fas fa-chart-bar text-primary me-3"></i>Reportes y Análisis</h2>
+                <div>
+                  <button class="btn btn-outline-success me-2" onclick="exportReport('excel')"><i class="fas fa-file-excel me-2"></i>Excel</button>
+                  <button class="btn btn-outline-danger me-2" onclick="exportReport('pdf')"><i class="fas fa-file-pdf me-2"></i>PDF</button>
+                  <button class="btn btn-primary" onclick="generateReport()"><i class="fas fa-chart-line me-2"></i>Generar</button>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header"><i class="fas fa-filter me-2"></i>Filtros de Reporte</div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-3">
+                      <label class="form-label" for="reportPeriod">Período</label>
+                      <select class="form-select" id="reportPeriod" onchange="updateDateRange()">
+                        <option value="custom">Personalizado</option>
+                        <option value="today">Hoy</option>
+                        <option value="yesterday">Ayer</option>
+                        <option value="week">Esta Semana</option>
+                        <option value="month" selected>Este Mes</option>
+                        <option value="quarter">Este Trimestre</option>
+                        <option value="year">Este Año</option>
+                        <option value="last_month">Mes Anterior</option>
+                        <option value="last_quarter">Trimestre Anterior</option>
+                        <option value="last_year">Año Anterior</option>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="reportDateFrom">Fecha Desde</label>
+                      <input type="date" class="form-control" id="reportDateFrom">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="reportDateTo">Fecha Hasta</label>
+                      <input type="date" class="form-control" id="reportDateTo">
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="reportType">Tipo Reporte</label>
+                      <select class="form-select" id="reportType">
+                        <option value="financial">Financiero</option>
+                        <option value="users">Usuarios</option>
+                        <option value="payments">Pagos</option>
+                        <option value="activity">Actividad</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-lg-8">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-area me-2"></i>Evolución de Ingresos</div>
+                    <div class="card-body"><canvas id="financialChart" height="100"></canvas></div>
+                  </div>
+                </div>
+                <div class="col-lg-4">
+                  <div class="card h-100">
+                    <div class="card-header"><i class="fas fa-calculator me-2"></i>Resumen Financiero</div>
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between mb-2"><span>Ingresos Totales:</span><strong class="text-success" id="reportTotalRevenue">$0.00</strong></div>
+                      <div class="d-flex justify-content-between mb-2"><span>Promedio Diario:</span><span id="reportDailyAvg">$0.00</span></div>
+                      <div class="d-flex justify-content-between mb-2"><span>Transacciones:</span><span id="reportTotalTxn">0</span></div>
+                      <div class="d-flex justify-content-between mb-2"><span>Ticket Promedio:</span><span id="reportAvgTicket">$0.00</span></div>
+                      <div class="d-flex justify-content-between mb-2"><span>Tasa de Conversión:</span><span id="reportConversionRate">0%</span></div>
+                      <hr><div class="d-flex justify-content-between"><span>Crecimiento:</span><span class="text-success" id="reportGrowth">+0%</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-4">
+                <div class="col-lg-6">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-chart-pie me-2"></i>Distribución por Método de Pago</div>
+                    <div class="card-body"><canvas id="paymentMethodChart" height="120"></canvas></div>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="card">
+                    <div class="card-header"><i class="fas fa-circle-notch me-2"></i>Estados de Transacciones</div>
+                    <div class="card-body"><canvas id="transactionStatusChart" height="120"></canvas></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <i class="fas fa-table me-2"></i>Datos Detallados
+                  <div class="float-end"><button class="btn btn-sm btn-outline-primary" onclick="refreshReportData()"><i class="fas fa-sync-alt"></i></button></div>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                      <thead><tr id="reportTableHeader"></tr></thead>
+                      <tbody id="reportTableBody"></tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-4 g-3">
+                <div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body text-center"><i class="fas fa-trophy fa-2x mb-2"></i><h4 id="topMetric1" class="m-0">0</h4><p class="mb-0">Mejor Día</p><small id="topDay">-</small></div></div></div>
+                <div class="col-md-3"><div class="card bg-success text-white"><div class="card-body text-center"><i class="fas fa-arrow-trend-up fa-2x mb-2"></i><h4 id="topMetric2" class="m-0">0%</h4><p class="mb-0">Crecimiento</p><small id="growthPeriod">vs período anterior</small></div></div></div>
+                <div class="col-md-3"><div class="card bg-info text-white"><div class="card-body text-center"><i class="fas fa-star fa-2x mb-2"></i><h4 id="topMetric3" class="m-0">0</h4><p class="mb-0">Nuevos Usuarios</p><small id="newUsersDetails">en el período</small></div></div></div>
+                <div class="col-md-3"><div class="card bg-warning text-white"><div class="card-body text-center"><i class="fas fa-chart-line fa-2x mb-2"></i><h4 id="topMetric4" class="m-0">0</h4><p class="mb-0">Proyección</p><small id="projectionDetails">próximo mes</small></div></div></div>
+              </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="content-section">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="m-0"><i class="fas fa-cog text-primary me-3"></i>Configuración del Sistema</h2>
+                <button class="btn btn-success" onclick="saveAllSettings()"><i class="fas fa-save me-2"></i>Guardar Todo</button>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-body">
+                  <ul class="nav nav-pills" id="settingsTabs">
+                    <li class="nav-item"><a class="nav-link active" href="#mp-settings" data-bs-toggle="pill"><i class="fab fa-cc-mastercard me-2"></i>MercadoPago</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#telegram-settings" data-bs-toggle="pill"><i class="fab fa-telegram me-2"></i>Telegram Bot</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#system-settings" data-bs-toggle="pill"><i class="fas fa-server me-2"></i>Sistema</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#backup-settings" data-bs-toggle="pill"><i class="fas fa-database me-2"></i>Respaldos</a></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tab-content">
+                <!-- MercadoPago Settings -->
+                <div class="tab-pane fade show active" id="mp-settings">
+                  <div class="card">
+                    <div class="card-header"><i class="fab fa-cc-mastercard me-2"></i>Configuración MercadoPago</div>
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label" for="mpAccessToken">Access Token (Producción)</label>
+                            <div class="input-group">
+                              <input type="password" class="form-control" id="mpAccessToken" placeholder="APP_USR-..." autocomplete="off" spellcheck="false" inputmode="text">
+                              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('mpAccessToken')"><i class="fas fa-eye"></i></button>
+                            </div>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="mpPublicKey">Public Key (Producción)</label>
+                            <input type="text" class="form-control" id="mpPublicKey" placeholder="APP_USR-...">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="mpWebhookUrl">Webhook URL</label>
+                            <input type="url" class="form-control" id="mpWebhookUrl" placeholder="https://api.fixlytaller.com/webhook/mercadopago">
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label" for="mpSandboxMode">Modo Sandbox</label>
+                            <div class="form-check form-switch">
+                              <input class="form-check-input" type="checkbox" id="mpSandboxMode">
+                              <label class="form-check-label" for="mpSandboxMode">Activar modo de pruebas</label>
+                            </div>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="mpCurrency">Moneda</label>
+                            <select class="form-select" id="mpCurrency">
+                              <option value="ARS">Peso Argentino (ARS)</option>
+                              <option value="USD">Dólar Estadounidense (USD)</option>
+                              <option value="EUR">Euro (EUR)</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Estado Conexión</label>
+                            <div class="d-flex align-items-center">
+                              <span class="badge bg-success me-2" id="mpConnectionStatus">Conectado</span>
+                              <button class="btn btn-sm btn-outline-primary" onclick="testMpConnection()"><i class="fas fa-plug me-1"></i>Probar</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i><strong>Importante:</strong> Los datos de MercadoPago se encriptan antes de almacenarse.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Telegram Settings -->
+                <div class="tab-pane fade" id="telegram-settings">
+                  <div class="card">
+                    <div class="card-header"><i class="fab fa-telegram me-2"></i>Configuración Bot Telegram</div>
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label" for="telegramToken">Bot Token</label>
+                            <div class="input-group">
+                              <input type="password" class="form-control" id="telegramToken" placeholder="1234567890:ABCDEF..." autocomplete="off" spellcheck="false" inputmode="text">
+                              <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('telegramToken')"><i class="fas fa-eye"></i></button>
+                            </div>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="telegramWebhook">Webhook URL</label>
+                            <input type="url" class="form-control" id="telegramWebhook" placeholder="https://api.fixlytaller.com/webhook/telegram">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="telegramAdminChat">Chat ID Admin</label>
+                            <input type="text" class="form-control" id="telegramAdminChat" placeholder="123456789">
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="mb-3">
+                            <label class="form-label">Notificaciones</label>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="telegramNotifyPayments" checked><label class="form-check-label" for="telegramNotifyPayments">Notificar pagos</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="telegramNotifyUsers" checked><label class="form-check-label" for="telegramNotifyUsers">Notificar nuevos usuarios</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" id="telegramNotifyErrors"><label class="form-check-label" for="telegramNotifyErrors">Notificar errores</label></div>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Estado Bot</label>
+                            <div class="d-flex align-items-center">
+                              <span class="badge bg-success me-2" id="telegramBotStatus">Activo</span>
+                              <button class="btn btn-sm btn-outline-primary me-2" onclick="testTelegramBot()"><i class="fas fa-paper-plane me-1"></i>Probar</button>
+                              <button class="btn btn-sm btn-outline-warning" onclick="setWebhookTelegram()"><i class="fas fa-link me-1"></i>Set Webhook</button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- System Settings -->
+                <div class="tab-pane fade" id="system-settings">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header"><i class="fas fa-server me-2"></i>Configuración General</div>
+                        <div class="card-body">
+                          <div class="mb-3">
+                            <label class="form-label" for="systemName">Nombre del Sistema</label>
+                            <input type="text" class="form-control" id="systemName" value="FixlyTaller">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="apiBaseUrl">URL Base API</label>
+                            <input type="url" class="form-control" id="apiBaseUrl" value="https://api.fixlytaller.com">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="systemTimezone">Timezone</label>
+                            <select class="form-select" id="systemTimezone">
+                              <option value="America/Argentina/Buenos_Aires" selected>Buenos Aires (UTC-3)</option>
+                              <option value="America/New_York">New York (UTC-5)</option>
+                              <option value="Europe/Madrid">Madrid (UTC+1)</option>
+                              <option value="UTC">UTC (UTC+0)</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="systemLanguage">Idioma</label>
+                            <select class="form-select" id="systemLanguage">
+                              <option value="es" selected>Español</option>
+                              <option value="en">English</option>
+                              <option value="pt">Português</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header"><i class="fas fa-shield-alt me-2"></i>Seguridad</div>
+                        <div class="card-body">
+                          <div class="mb-3">
+                            <label class="form-label" for="jwtSecret">JWT Secret</label>
+                            <div class="input-group">
+                              <input type="password" class="form-control" id="jwtSecret" placeholder="jwt-secret-key">
+                              <button class="btn btn-outline-secondary" type="button" onclick="generateJwtSecret()"><i class="fas fa-random"></i></button>
+                            </div>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="sessionTimeout">Tiempo Sesión (horas)</label>
+                            <input type="number" class="form-control" id="sessionTimeout" value="24" min="1" max="168">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="enableRateLimit">Rate Limiting</label>
+                            <div class="form-check">
+                              <input class="form-check-input" type="checkbox" id="enableRateLimit" checked>
+                              <label class="form-check-label" for="enableRateLimit">Activar límite de requests</label>
+                            </div>
+                            <input type="number" class="form-control mt-2" id="rateLimitRequests" value="100" placeholder="Requests por minuto">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="tab-pane fade" id="backup-settings">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header"><i class="fas fa-database me-2"></i>Respaldos Automáticos</div>
+                        <div class="card-body">
+                          <div class="mb-3">
+                            <label class="form-label" for="backupFrequency">Frecuencia</label>
+                            <select class="form-select" id="backupFrequency">
+                              <option value="daily" selected>Diario</option>
+                              <option value="weekly">Semanal</option>
+                              <option value="monthly">Mensual</option>
+                              <option value="disabled">Desactivado</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="backupTime">Hora de Backup</label>
+                            <input type="time" class="form-control" id="backupTime" value="03:00">
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label" for="backupRetention">Retención (días)</label>
+                            <input type="number" class="form-control" id="backupRetention" value="30" min="1" max="365">
+                          </div>
+                          <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="backupNotification" checked>
+                            <label class="form-check-label" for="backupNotification">Notificar por Telegram</label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="card">
+                        <div class="card-header"><i class="fas fa-tools me-2"></i>Herramientas de Mantenimiento</div>
+                        <div class="card-body">
+                          <div class="d-grid gap-2">
+                            <button class="btn btn-primary" onclick="createBackupNow()"><i class="fas fa-download me-2"></i>Crear Backup Ahora</button>
+                            <button class="btn btn-warning" onclick="optimizeDatabase()"><i class="fas fa-wrench me-2"></i>Optimizar Base de Datos</button>
+                            <button class="btn btn-info" onclick="clearCache()"><i class="fas fa-broom me-2"></i>Limpiar Cache</button>
+                            <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash me-2"></i>Limpiar Logs Antiguos</button>
+                          </div>
+                          <hr>
+                          <div class="mb-3">
+                            <label class="form-label">Último Backup</label>
+                            <p class="text-muted" id="lastBackupDate">2024-01-15 03:00:00</p>
+                          </div>
+                          <div class="mb-3">
+                            <label class="form-label">Estado del Sistema</label>
+                            <div class="progress mb-2"><div class="progress-bar bg-success" style="width:85%" id="systemHealth">85%</div></div>
+                            <small class="text-success">Sistema funcionando correctamente</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ===== Config =====
+    // Si definís window.API_BASE antes de cargar este script, se respeta. Si no, usa el input de settings o el default.
+    let API_BASE = window.API_BASE || 'https://api.fixlytaller.com';
+    let authToken = localStorage.getItem('authToken');
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const charts = {};
+
+    // ===== Helpers UI =====
+    const $ = (q, c=document) => c.querySelector(q);
+
+    function showNotification(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+      toast.style.cssText = 'top:20px;right:20px;z-index:1055;min-width:300px;';
+      toast.innerHTML = `${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+    function showError(message){ showNotification(message, 'danger'); }
+
+    function showLoginError(msg){
+      const box = $('#loginError');
+      if(!box) return alert(msg);
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+    function setBtnLoading(btn, isLoading){
+      if(!btn) return;
+      if(isLoading){
+        btn.disabled = true;
+        btn.dataset._orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cargando...';
+      } else {
+        btn.disabled = false;
+        if(btn.dataset._orig){ btn.innerHTML = btn.dataset._orig; delete btn.dataset._orig; }
+      }
+    }
+
+    // ===== Auth / Login =====
+    async function handleLogin(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn  = form.querySelector('button[type="submit"]');
+      const username = $('#username').value.trim();
+      const password = $('#password').value;
+
+      $('#loginError').style.display = 'none';
+      setBtnLoading(btn, true);
+
+      const payload = { username, password };
+      const heads = { 'Content-Type': 'application/json' };
+
+      const parseJson = async (r) => { try { return await r.json(); } catch(_) { return {}; } };
+      const accept = (r, data) => {
+        const ok = r.ok && (data.success === true || data.ok === true || data.token || data.access_token || data.jwt);
+        const token = data.token || data.access_token || data.jwt || '';
+        const user  = data.user || data.profile || { username };
+        return { ok, token, user, data, status: r.status };
+      };
+
+      try {
+        // 1) Intento contra API_BASE
+        let r = await fetch(`${API_BASE}/auth/login`, { method:'POST', headers: heads, body: JSON.stringify(payload) });
+        let data = await parseJson(r);
+        let res = accept(r, data);
+
+        // 2) Fallback: mismo dominio
+        if(!res.ok){
+          try {
+            const r2 = await fetch(`/api/auth/login`, { method:'POST', headers: heads, body: JSON.stringify(payload) });
+            const d2 = await parseJson(r2);
+            const res2 = accept(r2, d2);
+            if(res2.ok){ res = res2; data = d2; }
+          } catch(_){}
         }
 
-        // Authentication Functions
-        async function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                showLoading(true);
-                const response = await fetch(`${API_BASE}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    authToken = data.token;
-                    currentUser = data.user;
-                    localStorage.setItem('authToken', authToken);
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-
-                    showMainApp();
-                    showNotification('Bienvenido al panel administrativo', 'success');
-                    loadDashboardData();
-                } else {
-                    showError(data.message || 'Error de autenticaciÃ³n');
-                }
-            } catch (error) {
-                showError('Error de conexiÃ³n. Verifique su conexiÃ³n a internet.');
-                console.error('Login error:', error);
-            } finally {
-                showLoading(false);
-            }
+        if(res.ok){
+          authToken = res.token;
+          currentUser = res.user;
+          localStorage.setItem('authToken', authToken);
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          showMainApp();
+          showNotification('Bienvenido al panel administrativo', 'success');
+          loadDashboardData();
+          return;
         }
 
-        function logout() {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('currentUser');
-            authToken = null;
-            currentUser = null;
-            showLoginScreen();
+        // 3) DEV mode (localhost o ?dev=1)
+        const DEV_MODE = location.hostname.includes('localhost') || location.search.includes('dev=1');
+        if(DEV_MODE && username === 'admin' && password === 'OskiTemp#1'){
+          authToken = 'dev.' + Math.random().toString(36).slice(2);
+          currentUser = { username: 'admin', role: 'owner' };
+          localStorage.setItem('authToken', authToken);
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+          showMainApp();
+          showNotification('Entraste en modo DEV (sin backend).', 'warning');
+          loadDashboardData();
+          return;
         }
 
-        function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
+        const msg = data.message || data.error || `Login rechazado (${res.status || 'sin detalle'})`;
+        showLoginError(msg);
+
+      } catch (err) {
+        showLoginError('No se pudo conectar con el servidor. Revisá API_BASE, CORS o red.');
+        console.error('Login error:', err);
+      } finally {
+        setBtnLoading(btn, false);
+      }
+    }
+
+    function logout(){
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('currentUser');
+      authToken = null;
+      currentUser = null;
+      showLoginScreen();
+    }
+
+    function showLoginScreen(){
+      $('#loginScreen').style.display = 'flex';
+      $('#mainApp').style.display = 'none';
+    }
+    function showMainApp(){
+      $('#loginScreen').style.display = 'none';
+      $('#mainApp').style.display = 'block';
+      $('#currentUser').textContent = (currentUser && (currentUser.username || currentUser.email)) || 'admin';
+      // Si el usuario cambió API_BASE en settings, actualizar variable viva
+      const apiInput = $('#apiBaseUrl');
+      if(apiInput && apiInput.value) API_BASE = apiInput.value;
+    }
+
+    // ===== Navigation =====
+    function showSection(id){
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+      const target = document.getElementById(id);
+      if(target) target.classList.add('active');
+      const activeLink = document.querySelector(`.sidebar .nav-link[onclick="showSection('${id}')"]`);
+      if(activeLink) activeLink.classList.add('active');
+      switch(id){
+        case 'dashboard': loadDashboardData(); break;
+        case 'users': loadUsers(); break;
+        case 'payments': loadPayments(); break;
+        case 'reports': loadReports(); break;
+        case 'settings': loadSettings(); break;
+      }
+    }
+
+    // ===== Dashboard =====
+    async function loadDashboardData(){
+      try {
+        const [statsResponse, activityResponse] = await Promise.all([ apiRequest('/admin/stats'), apiRequest('/admin/activity') ]);
+        if(statsResponse && (statsResponse.success || statsResponse.ok)){
+          const d = statsResponse.data || {};
+          $('#totalUsers').textContent    = d.totalUsers || 0;
+          $('#totalRevenue').textContent  = formatCurrency(d.totalRevenue || 0);
+          $('#totalPayments').textContent = d.totalPayments || 0;
+          $('#conversionRate').textContent= (d.conversionRate || 0) + '%';
+          initDashboardCharts(d);
         }
-
-        function showMainApp() {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-
-            if (currentUser) {
-                document.getElementById('currentUser').textContent = currentUser.username || 'admin';
-            }
+        if(activityResponse && (activityResponse.success || activityResponse.ok)){
+          // si querés, render actividad real acá
         }
+      } catch(e){ console.warn('dashboard error', e); }
+    }
 
-        // Navigation Functions
-        function showSection(sectionName) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
+    function initDashboardCharts(d){
+      // Revenue
+      const revCtx = $('#revenueChart').getContext('2d');
+      if(charts.revenue) charts.revenue.destroy();
+      charts.revenue = new Chart(revCtx, {
+        type: 'line',
+        data: {
+          labels: d.revenueLabels || [],
+          datasets: [{ label: 'Ingresos', data: d.revenueData || [], borderColor: 'rgb(102,126,234)', backgroundColor: 'rgba(102,126,234,.1)', tension:.4, fill:true }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } }
+      });
+      // Status
+      const stx = $('#paymentStatusChart').getContext('2d');
+      if(charts.paymentStatus) charts.paymentStatus.destroy();
+      charts.paymentStatus = new Chart(stx, {
+        type: 'doughnut',
+        data: { labels:['Aprobados','Pendientes','Rechazados'], datasets: [{ data:[d.approvedPayments||0, d.pendingPayments||0, d.rejectedPayments||0], backgroundColor:['#28a745','#ffc107','#dc3545'] }] },
+        options: { responsive:true, maintainAspectRatio:false }
+      });
+    }
+    function refreshDashboard(){ loadDashboardData(); }
 
-            // Remove active class from nav links
-            document.querySelectorAll('.sidebar .nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-
-            // Show selected section
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-
-            // Add active class to clicked nav link
-            const activeLink = document.querySelector(`[onclick="showSection('${sectionName}')"]`);
-            if (activeLink) {
-                activeLink.classList.add('active');
-            }
-
-            // Load section-specific data
-            switch(sectionName) {
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-                case 'users':
-                    loadUsers();
-                    break;
-                case 'payments':
-                    loadPayments();
-                    break;
-                case 'reports':
-                    loadReports();
-                    break;
-                case 'settings':
-                    loadSettings();
-                    break;
-            }
+    // ===== Users =====
+    async function loadUsers(page=1){
+      try {
+        const r = await apiRequest(`/admin/users?page=${page}`);
+        if(r && (r.success || r.ok)){
+          const data = r.data || { users:[] };
+          const users = data.users || [];
+          $('#usersTableBody').innerHTML = users.map(u => `
+            <tr>
+              <td>${u.id ?? '-'}</td>
+              <td>${u.email ?? '-'}</td>
+              <td>${u.name ?? '-'}</td>
+              <td><span class="badge bg-primary">${u.role ?? '-'}</span></td>
+              <td><span class="badge ${u.active ? 'bg-success' : 'bg-secondary'}">${u.active ? 'Activo' : 'Inactivo'}</span></td>
+              <td>${formatDate(u.lastAccess)}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser(${u.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `).join('');
+          $('#userCount').textContent = `${users.length} usuarios`;
+          $('#adminCount').textContent = data.adminCount || 0;
+          $('#operatorCount').textContent = data.operatorCount || 0;
+          $('#viewerCount').textContent = data.viewerCount || 0;
         }
+      } catch(e){ console.warn('users error', e); }
+    }
+    function openUserModal(userId=null){
+      $('#userForm').reset();
+      $('#userActive').checked = true;
+      $('#credentialsSection').style.display='none';
+      $('#userId').value = userId || '';
+      $('#userModalTitle').textContent = userId ? 'Editar Usuario' : 'Nuevo Usuario';
+    }
+    async function saveUser(){
+      const userId = $('#userId').value;
+      const payload = {
+        email: $('#userEmail').value.trim(),
+        name: $('#userName').value.trim(),
+        password: $('#userPassword').value,
+        role: $('#userRole').value,
+        active: $('#userActive').checked
+      };
+      const method = userId ? 'PUT' : 'POST';
+      const ep = userId ? `/admin/users/${userId}` : '/admin/users';
+      try {
+        const r = await apiRequest(ep, method, payload);
+        if(r && (r.success || r.ok)){
+          bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+          showNotification('Usuario guardado', 'success');
+          loadUsers();
+          if(!userId && payload.email && payload.password){
+            $('#genEmail').textContent = payload.email;
+            $('#genPassword').textContent = payload.password;
+            $('#credentialsSection').style.display='block';
+          }
+        } else { showError(r.message || 'Error guardando usuario'); }
+      } catch(e){ showError('Error de conexión'); }
+    }
+    function generatePassword(){
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let pass = ''; for(let i=0;i<12;i++){ pass += chars[Math.floor(Math.random()*chars.length)]; }
+      $('#userPassword').value = pass;
+    }
+    function copyCredentials(){
+      const text = `Email: ${$('#genEmail').textContent}\nContraseña: ${$('#genPassword').textContent}`;
+      navigator.clipboard.writeText(text).then(() => showNotification('Credenciales copiadas', 'success'));
+    }
 
-        // Dashboard Functions
-        async function loadDashboardData() {
-            try {
-                const [statsResponse, activityResponse] = await Promise.all([
-                    apiRequest('/admin/stats'),
-                    apiRequest('/admin/activity')
-                ]);
-
-                if (statsResponse.success) {
-                    updateDashboardKPIs(statsResponse.data);
-                    initializeDashboardCharts(statsResponse.data);
-                }
-
-                if (activityResponse.success) {
-                    updateRecentActivity(activityResponse.data);
-                }
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
-            }
+    // ===== Payments =====
+    async function loadPayments(page=1){
+      try {
+        const r = await apiRequest(`/admin/payments?page=${page}`);
+        if(r && (r.success || r.ok)){
+          const data = r.data || { payments: [] };
+          const ps = data.payments || [];
+          $('#paymentsTableBody').innerHTML = ps.map(p => `
+            <tr>
+              <td>${p.id}</td><td>${p.userEmail}</td><td>${formatCurrency(p.amount)}</td>
+              <td><span class="badge status-${p.status}">${getStatusText(p.status)}</span></td>
+              <td>${p.paymentMethod}</td><td>${formatDate(p.createdAt)}</td>
+              <td><button class="btn btn-sm btn-outline-primary" onclick="viewPaymentDetails('${p.id}')"><i class="fas fa-eye"></i></button></td>
+            </tr>
+          `).join('');
+          $('#paymentCount').textContent = `${ps.length} transacciones`;
+          $('#approvedPayments').textContent = data.approvedCount || 0;
+          $('#approvedAmount').textContent  = formatCurrency(data.approvedAmount || 0);
+          $('#pendingPayments').textContent = data.pendingCount || 0;
+          $('#pendingAmount').textContent   = formatCurrency(data.pendingAmount || 0);
+          $('#rejectedPayments').textContent= data.rejectedCount || 0;
+          $('#rejectedAmount').textContent  = formatCurrency(data.rejectedAmount || 0);
+          const total = (data.approvedCount || 0) + (data.rejectedCount || 0);
+          const rate = total > 0 ? Math.round((data.approvedCount || 0) / total * 100) : 0;
+          $('#successRate').textContent = rate + '%';
+          $('#totalProcessed').textContent = `${total} procesados`;
         }
+      } catch(e){ console.warn('payments error', e); }
+    }
+    function filterPayments(){
+      // TODO: enviar filtros reales al backend
+      loadPayments();
+    }
+    function refreshPayments(){ loadPayments(); }
+    function exportPayments(){ showNotification('Exportando pagos...', 'info'); }
+    function viewPaymentDetails(id){ showNotification('Cargando detalles del pago '+id+'...', 'info'); }
 
-        function updateDashboardKPIs(data) {
-            document.getElementById('totalUsers').textContent = data.totalUsers || 0;
-            document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue || 0);
-            document.getElementById('totalPayments').textContent = data.totalPayments || 0;
-            document.getElementById('conversionRate').textContent = `${data.conversionRate || 0}%`;
+    // ===== Reports =====
+    async function loadReports(){
+      try {
+        const r = await apiRequest('/admin/reports');
+        if(r && (r.success || r.ok)){
+          const d = r.data || {};
+          // Financial chart
+          const fctx = $('#financialChart').getContext('2d');
+          if(charts.financial) charts.financial.destroy();
+          charts.financial = new Chart(fctx, { type:'line',
+            data:{ labels:d.financialLabels||[], datasets:[{ label:'Ingresos', data:d.financialData||[], borderColor:'rgb(102,126,234)', backgroundColor:'rgba(102,126,234,.1)', tension:.4, fill:true }]},
+            options:{ responsive:true, maintainAspectRatio:false }
+          });
+          // Methods
+          const mctx = $('#paymentMethodChart').getContext('2d');
+          if(charts.paymentMethod) charts.paymentMethod.destroy();
+          charts.paymentMethod = new Chart(mctx, { type:'pie',
+            data:{ labels:d.paymentMethods?.labels||[], datasets:[{ data:d.paymentMethods?.data||[], backgroundColor:['#667eea','#764ba2','#f093fb','#f5576c','#4facfe'] }]},
+            options:{ responsive:true, maintainAspectRatio:false }
+          });
+          // Status
+          const ts = $('#transactionStatusChart').getContext('2d');
+          if(charts.txStatus) charts.txStatus.destroy();
+          charts.txStatus = new Chart(ts, { type:'doughnut',
+            data:{ labels:d.txStatus?.labels||[], datasets:[{ data:d.txStatus?.data||[], backgroundColor:['#28a745','#ffc107','#dc3545','#6c757d'] }]},
+            options:{ responsive:true, maintainAspectRatio:false }
+          });
         }
-
-        function initializeDashboardCharts(data) {
-            // Revenue Chart
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            if (charts.revenue) charts.revenue.destroy();
-            charts.revenue = new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: data.revenueLabels || [],
-                    datasets: [{
-                        label: 'Ingresos',
-                        data: data.revenueData || [],
-                        borderColor: 'rgb(102, 126, 234)',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-
-            // Payment Status Chart
-            const statusCtx = document.getElementById('paymentStatusChart').getContext('2d');
-            if (charts.paymentStatus) charts.paymentStatus.destroy();
-            charts.paymentStatus = new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Aprobados', 'Pendientes', 'Rechazados'],
-                    datasets: [{
-                        data: [
-                            data.approvedPayments || 0,
-                            data.pendingPayments || 0,
-                            data.rejectedPayments || 0
-                        ],
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function refreshDashboard() {
-            showLoading(true);
-            loadDashboardData().finally(() => showLoading(false));
-        }
-
-        // Users Functions
-        async function loadUsers(page = 1) {
-            try {
-                const response = await apiRequest(`/admin/users?page=${page}`);
-                if (response.success) {
-                    displayUsers(response.data);
-                    updateUserStats(response.data);
-                }
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
-
-        function displayUsers(data) {
-            const tbody = document.getElementById('usersTableBody');
-            const users = data.users || [];
-
-            tbody.innerHTML = users.map(user => `
-                <tr>
-                    <td>${user.id}</td>
-                    <td>${user.email}</td>
-                    <td>${user.name}</td>
-                    <td><span class="badge bg-primary">${user.role}</span></td>
-                    <td><span class="badge ${user.active ? 'bg-success' : 'bg-secondary'}">${user.active ? 'Activo' : 'Inactivo'}</span></td>
-                    <td>${formatDate(user.lastAccess)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser(${user.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${user.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-
-            document.getElementById('userCount').textContent = `${users.length} usuarios`;
-        }
-
-        function updateUserStats(data) {
-            document.getElementById('adminCount').textContent = data.adminCount || 0;
-            document.getElementById('operatorCount').textContent = data.operatorCount || 0;
-            document.getElementById('viewerCount').textContent = data.viewerCount || 0;
-        }
-
-        function openUserModal(userId = null) {
-            const modal = document.getElementById('userModal');
-            const title = document.getElementById('userModalTitle');
-            const form = document.getElementById('userForm');
-
-            if (userId) {
-                title.textContent = 'Editar Usuario';
-                // Load user data here
-            } else {
-                title.textContent = 'Nuevo Usuario';
-                form.reset();
-                document.getElementById('userActive').checked = true;
-            }
-
-            document.getElementById('credentialsSection').style.display = 'none';
-        }
-
-        async function saveUser() {
-            const form = document.getElementById('userForm');
-            const formData = new FormData(form);
-            const userData = Object.fromEntries(formData);
-
-            try {
-                showLoading(true);
-                const userId = document.getElementById('userId').value;
-                const method = userId ? 'PUT' : 'POST';
-                const endpoint = userId ? `/admin/users/${userId}` : '/admin/users';
-
-                const response = await apiRequest(endpoint, method, userData);
-
-                if (response.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
-                    showNotification('Usuario guardado exitosamente', 'success');
-                    loadUsers();
-
-                    if (!userId) {
-                        // Show credentials for new user
-                        showGeneratedCredentials(userData.email, userData.password);
-                    }
-                } else {
-                    showError(response.message || 'Error al guardar usuario');
-                }
-            } catch (error) {
-                showError('Error de conexiÃ³n');
-                console.error('Save user error:', error);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function generatePassword() {
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-            let password = '';
-            for (let i = 0; i < 12; i++) {
-                password += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('userPassword').value = password;
-        }
-
-        function copyCredentials() {
-            const email = document.getElementById('genEmail').textContent;
-            const password = document.getElementById('genPassword').textContent;
-            const text = `Email: ${email}\nContraseÃ±a: ${password}`;
-
-            navigator.clipboard.writeText(text).then(() => {
-                showNotification('Credenciales copiadas al portapapeles', 'success');
-            });
-        }
-
-        // Payments Functions
-        async function loadPayments(page = 1) {
-            try {
-                const response = await apiRequest(`/admin/payments?page=${page}`);
-                if (response.success) {
-                    displayPayments(response.data);
-                    updatePaymentStats(response.data);
-                }
-            } catch (error) {
-                console.error('Error loading payments:', error);
-            }
-        }
-
-        function displayPayments(data) {
-            const tbody = document.getElementById('paymentsTableBody');
-            const payments = data.payments || [];
-
-            tbody.innerHTML = payments.map(payment => `
-                <tr>
-                    <td>${payment.id}</td>
-                    <td>${payment.userEmail}</td>
-                    <td>${formatCurrency(payment.amount)}</td>
-                    <td><span class="badge status-${payment.status}">${getStatusText(payment.status)}</span></td>
-                    <td>${payment.paymentMethod}</td>
-                    <td>${formatDate(payment.createdAt)}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="viewPaymentDetails('${payment.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-
-            document.getElementById('paymentCount').textContent = `${payments.length} transacciones`;
-        }
-
-        function updatePaymentStats(data) {
-            document.getElementById('approvedPayments').textContent = data.approvedCount || 0;
-            document.getElementById('approvedAmount').textContent = formatCurrency(data.approvedAmount || 0);
-            document.getElementById('pendingPayments').textContent = data.pendingCount || 0;
-            document.getElementById('pendingAmount').textContent = formatCurrency(data.pendingAmount || 0);
-            document.getElementById('rejectedPayments').textContent = data.rejectedCount || 0;
-            document.getElementById('rejectedAmount').textContent = formatCurrency(data.rejectedAmount || 0);
-
-            const total = (data.approvedCount || 0) + (data.rejectedCount || 0);
-            const rate = total > 0 ? Math.round((data.approvedCount || 0) / total * 100) : 0;
-            document.getElementById('successRate').textContent = `${rate}%`;
-            document.getElementById('totalProcessed').textContent = `${total} procesados`;
-        }
-
-        // Reports Functions
-        async function loadReports() {
-            try {
-                const response = await apiRequest('/admin/reports');
-                if (response.success) {
-                    initializeReportCharts(response.data);
-                    updateReportSummary(response.data);
-                }
-            } catch (error) {
-                console.error('Error loading reports:', error);
-            }
-        }
-
-        function initializeReportCharts(data) {
-            // Financial Chart
-            const financialCtx = document.getElementById('financialChart').getContext('2d');
-            if (charts.financial) charts.financial.destroy();
-            charts.financial = new Chart(financialCtx, {
-                type: 'line',
-                data: {
-                    labels: data.financialLabels || [],
-                    datasets: [{
-                        label: 'Ingresos',
-                        data: data.financialData || [],
-                        borderColor: 'rgb(102, 126, 234)',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-
-            // Payment Method Chart
-            const methodCtx = document.getElementById('paymentMethodChart').getContext('2d');
-            if (charts.paymentMethod) charts.paymentMethod.destroy();
-            charts.paymentMethod = new Chart(methodCtx, {
-                type: 'pie',
-                data: {
-                    labels: data.paymentMethods?.labels || [],
-                    datasets: [{
-                        data: data.paymentMethods?.data || [],
-                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-
-            // User Growth Chart
-            const growthCtx = document.getElementById('userGrowthChart').getContext('2d');
-            if (charts.userGrowth) charts.userGrowth.destroy();
-            charts.userGrowth = new Chart(growthCtx, {
-                type: 'bar',
-                data: {
-                    labels: data.userGrowthLabels || [],
-                    datasets: [{
-                        label: 'Nuevos Usuarios',
-                        data: data.userGrowthData || [],
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
-
-        function generateReport() {
-            const period = document.getElementById('reportPeriod').value;
-            const dateFrom = document.getElementById('reportDateFrom').value;
-            const dateTo = document.getElementById('reportDateTo').value;
-            const type = document.getElementById('reportType').value;
-
-            showLoading(true);
-            loadReports().finally(() => showLoading(false));
-        }
-
-        function exportReport(format) {
-            // Implement export functionality
-            showNotification(`Exportando reporte en formato ${format.toUpperCase()}...`, 'info');
-        }
-
-        // Settings Functions
-        async function loadSettings() {
-            try {
-                const response = await apiRequest('/admin/settings');
-                if (response.success) {
-                    populateSettings(response.data);
-                }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-            }
-        }
-
-        function populateSettings(data) {
-            // Populate form fields with settings data
-            Object.keys(data).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    if (element.type === 'checkbox') {
-                        element.checked = data[key];
-                    } else {
-                        element.value = data[key];
-                    }
-                }
-            });
-        }
-
-        async function saveAllSettings() {
-            try {
-                showLoading(true);
-
-                // Collect all settings from forms
-                const settings = {};
-                document.querySelectorAll('#settings input, #settings select').forEach(element => {
-                    if (element.type === 'checkbox') {
-                        settings[element.id] = element.checked;
-                    } else {
-                        settings[element.id] = element.value;
-                    }
-                });
-
-                const response = await apiRequest('/admin/settings', 'POST', settings);
-
-                if (response.success) {
-                    showNotification('ConfiguraciÃ³n guardada exitosamente', 'success');
-                } else {
-                    showError(response.message || 'Error al guardar configuraciÃ³n');
-                }
-            } catch (error) {
-                showError('Error de conexiÃ³n');
-                console.error('Save settings error:', error);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function togglePassword(fieldId) {
-            const field = document.getElementById(fieldId);
-            const button = field.nextElementSibling;
-            const icon = button.querySelector('i');
-
-            if (field.type === 'password') {
-                field.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                field.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-
-        function generateJwtSecret() {
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let secret = '';
-            for (let i = 0; i < 32; i++) {
-                secret += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            document.getElementById('jwtSecret').value = secret;
-        }
-
-        // Utility Functions
-        async function apiRequest(endpoint, method = 'GET', data = null) {
-            const options = {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            };
-
-            if (authToken) {
-                options.headers['Authorization'] = `Bearer ${authToken}`;
-            }
-
-            if (data && method !== 'GET') {
-                options.body = JSON.stringify(data);
-            }
-
-            const response = await fetch(`${API_BASE}${endpoint}`, options);
-
-            if (response.status === 401) {
-                logout();
-                throw new Error('Unauthorized');
-            }
-
-            return await response.json();
-        }
-
-        function showLoading(show) {
-            // Implement loading indicator
-            const loadingElements = document.querySelectorAll('.btn');
-            loadingElements.forEach(btn => {
-                if (show) {
-                    btn.disabled = true;
-                    if (!btn.dataset.originalText) {
-                        btn.dataset.originalText = btn.innerHTML;
-                    }
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-                } else {
-                    btn.disabled = false;
-                    if (btn.dataset.originalText) {
-                        btn.innerHTML = btn.dataset.originalText;
-                    }
-                }
-            });
-        }
-
-        function showNotification(message, type = 'info') {
-            // Create toast notification
-            const toast = document.createElement('div');
-            toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            toast.style.cssText = 'top: 20px; right: 20px; z-index: 1055; min-width: 300px;';
-            toast.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 5000);
-        }
-
-        function showError(message) {
-            showNotification(message, 'danger');
-        }
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-AR', {
-                style: 'currency',
-                currency: 'ARS'
-            }).format(amount);
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return '-';
-            return new Date(dateString).toLocaleDateString('es-AR', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function getStatusText(status) {
-            const statusMap = {
-                'approved': 'Aprobado',
-                'pending': 'Pendiente',
-                'rejected': 'Rechazado',
-                'cancelled': 'Cancelado'
-            };
-            return statusMap[status] || status;
-        }
-
-        // Additional utility functions for completeness
-        function filterUsers() {
-            const search = document.getElementById('searchUser').value;
-            const role = document.getElementById('filterRole').value;
-            const status = document.getElementById('filterStatus').value;
-
-            // Implement filtering logic
-            loadUsers(1, { search, role, status });
-        }
-
-        function filterPayments() {
-            const status = document.getElementById('filterPaymentStatus').value;
-            const dateFrom = document.getElementById('filterDateFrom').value;
-            const dateTo = document.getElementById('filterDateTo').value;
-
-            // Implement filtering logic
-            loadPayments(1, { status, dateFrom, dateTo });
-        }
-
-        function refreshPayments() {
-            showLoading(true);
-            loadPayments().finally(() => showLoading(false));
-        }
-
-        function exportPayments() {
-            showNotification('Exportando pagos...', 'info');
-        }
-
-        function viewPaymentDetails(paymentId) {
-            // Load and show payment details in modal
-            showNotification('Cargando detalles del pago...', 'info');
-        }
-
-        // Test functions for settings
-        function testMpConnection() {
-            showNotification('Probando conexiÃ³n con MercadoPago...', 'info');
-        }
-
-        function testTelegramBot() {
-            showNotification('Enviando mensaje de prueba...', 'info');
-        }
-
-        function setWebhookTelegram() {
-            showNotification('Configurando webhook de Telegram...', 'info');
-        }
-
-        // Maintenance functions
-        function createBackupNow() {
-            showNotification('Creando backup...', 'info');
-        }
-
-        function optimizeDatabase() {
-            showNotification('Optimizando base de datos...', 'info');
-        }
-
-        function clearCache() {
-            showNotification('Limpiando cache...', 'info');
-        }
-
-        function clearLogs() {
-            showNotification('Limpiando logs antiguos...', 'info');
-        }
-
-        function updateDateRange() {
-            const period = document.getElementById('reportPeriod').value;
-            const dateFrom = document.getElementById('reportDateFrom');
-            const dateTo = document.getElementById('reportDateTo');
-
-            const now = new Date();
-            let startDate, endDate;
-
-            switch(period) {
-                case 'today':
-                    startDate = endDate = now;
-                    break;
-                case 'week':
-                    startDate = new Date(now.setDate(now.getDate() - 7));
-                    endDate = new Date();
-                    break;
-                case 'month':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    endDate = new Date();
-                    break;
-                default:
-                    return; // Custom or other periods
-            }
-
-            if (startDate) {
-                dateFrom.value = startDate.toISOString().split('T')[0];
-                dateTo.value = endDate.toISOString().split('T')[0];
-            }
-        }
-    </script>
+      } catch(e){ console.warn('reports error', e); }
+    }
+    function generateReport(){ showNotification('Generando reporte...', 'info'); loadReports(); }
+    function exportReport(fmt){ showNotification('Exportando reporte a '+fmt.toUpperCase()+'...', 'info'); }
+    function refreshReportData(){ loadReports(); }
+    function updateDateRange(){
+      const period = $('#reportPeriod').value;
+      const now = new Date();
+      let start = null, end = new Date();
+      if(period === 'today'){ start = new Date(); }
+      if(period === 'week'){ start = new Date(); start.setDate(end.getDate()-7); }
+      if(period === 'month'){ start = new Date(end.getFullYear(), end.getMonth(), 1); }
+      if(start){
+        $('#reportDateFrom').value = start.toISOString().slice(0,10);
+        $('#reportDateTo').value   = end.toISOString().slice(0,10);
+      }
+    }
+
+    // ===== Settings =====
+    async function loadSettings(){
+      try { const r = await apiRequest('/admin/settings'); if(r && (r.success || r.ok)) populateSettings(r.data || {}); }
+      catch(e){ console.warn('settings error', e); }
+    }
+    function populateSettings(data){
+      Object.keys(data).forEach(k => {
+        const el = document.getElementById(k);
+        if(!el) return;
+        if(el.type === 'checkbox') el.checked = !!data[k]; else el.value = data[k];
+      });
+      if($('#apiBaseUrl')?.value) API_BASE = $('#apiBaseUrl').value;
+    }
+    async function saveAllSettings(){
+      const settings = {};
+      document.querySelectorAll('#settings input, #settings select').forEach(el => {
+        settings[el.id] = (el.type === 'checkbox') ? el.checked : el.value;
+      });
+      try {
+        const r = await apiRequest('/admin/settings', 'POST', settings);
+        if(r && (r.success || r.ok)) showNotification('Configuración guardada', 'success'); else showError(r.message || 'No se pudo guardar');
+      } catch(e){ showError('Error de conexión'); }
+    }
+    function togglePassword(id){
+      const f = document.getElementById(id);
+      const btn = f?.nextElementSibling?.querySelector('i');
+      if(!f) return;
+      f.type = (f.type === 'password') ? 'text' : 'password';
+      if(btn){ btn.classList.toggle('fa-eye'); btn.classList.toggle('fa-eye-slash'); }
+    }
+    function generateJwtSecret(){
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let s = ''; for(let i=0;i<32;i++){ s += chars[Math.floor(Math.random()*chars.length)]; }
+      $('#jwtSecret').value = s;
+    }
+
+    // ===== Utils =====
+    async function apiRequest(endpoint, method='GET', data=null){
+      const headers = { 'Content-Type':'application/json' };
+      if(authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      const opt = { method, headers };
+      if(data && method !== 'GET') opt.body = JSON.stringify(data);
+      const url = `${API_BASE}${endpoint}`;
+      let r = await fetch(url, opt);
+      // Si 404/CORS, intentá mismo dominio
+      if(r.status === 404 || r.status === 0){
+        try { r = await fetch(`/api${endpoint}`, opt); } catch(_){}
+      }
+      if(r.status === 401){ logout(); throw new Error('Unauthorized'); }
+      try { return await r.json(); } catch(_){ return { ok:false }; }
+    }
+    function formatCurrency(a){ return new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS' }).format(a || 0); }
+    function formatDate(s){ if(!s) return '-'; const d = new Date(s); if(isNaN(d)) return '-'; return d.toLocaleString('es-AR'); }
+
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = $('#loginForm'); if(form) form.addEventListener('submit', handleLogin);
+      const toggle = $('#sidebarToggle'); if(toggle) toggle.addEventListener('click', () => $('#sidebar').classList.toggle('show'));
+      if(authToken){ showMainApp(); loadDashboardData(); } else { showLoginScreen(); }
+    });
+  </script>
 </body>
 </html>
