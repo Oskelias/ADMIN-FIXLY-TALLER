@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -261,7 +263,7 @@
                     <div class="card-body" id="recentActivity">
                       <div class="d-flex align-items-center mb-3">
                         <div class="bg-success rounded-circle me-3" style="width:8px;height:8px;"></div>
-                        <div><small class="text-muted">Hace 2 min</small><br>Nuevo usuario registrado: <a href="mailto:nuevo@cliente.com">nuevo@cliente.com</a></div>
+                        <div><small class="text-muted">Hace 2 min</small><br>Nuevo usuario registrado: <a href="/cdn-cgi/l/email-protection#3a544f5f4c557a5956535f544e5f14595557"><span class="__cf_email__" data-cfemail="9cf2e9f9eaf3dcfff0f5f9f2e8f9b2fff3f1">[email&#160;protected]</span></a></div>
                       </div>
                       <div class="d-flex align-items-center mb-3">
                         <div class="bg-primary rounded-circle me-3" style="width:8px;height:8px;"></div>
@@ -910,13 +912,17 @@
   </div>
 
   <!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Fijar API_BASE antes de cargar la lógica de la consola -->
-<script>
-  window.API_BASE = 'https://api.fixlytaller.com';
-</script>
+  <!-- Fijar API_BASE antes de cargar la lógica de la consola -->
+  <script>
+    // Establecer manualmente la URL base para las peticiones de la consola.
+    // Si no deseas fijar esta URL desde el código, elimina este script y
+    // configura window.API_BASE en la pestaña de configuración de la consola.
+    window.API_BASE = 'https://api.fixlytaller.com';
+  </script>
 
+  <script>
     // ===== Config =====
     // Si definís window.API_BASE antes de cargar este script, se respeta. Si no, usa el input de settings o el default.
     let API_BASE = window.API_BASE || 'https://api.fixlytaller.com';
