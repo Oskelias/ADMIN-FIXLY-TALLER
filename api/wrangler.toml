@@ -1,0 +1,35 @@
+# Fixly Admin API - Cloudflare Workers Configuration
+name = "fixly-admin-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Development settings
+[dev]
+port = 8787
+
+# Environment variables (non-sensitive)
+[vars]
+ENVIRONMENT = "development"
+ADMIN_URL = "http://localhost:5173"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "fixly-admin-db"
+database_id = "your-d1-database-id"
+
+# Production environment
+[env.production]
+name = "fixly-admin-api-prod"
+routes = [
+  { pattern = "api.fixlytaller.com/*", zone_name = "fixlytaller.com" }
+]
+
+[env.production.vars]
+ENVIRONMENT = "production"
+ADMIN_URL = "https://admin.fixlytaller.com"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "fixly-admin-db-prod"
+database_id = "your-prod-d1-database-id"
