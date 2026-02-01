@@ -4,7 +4,7 @@ import { CheckCircle, Clock, XCircle, AlertCircle, Pause, Ban } from 'lucide-rea
 type StatusType =
   | 'active' | 'inactive' | 'pending' | 'approved' | 'rejected'
   | 'completed' | 'cancelled' | 'suspended' | 'trial' | 'error'
-  | 'configured' | 'in_progress' | 'refunded' | 'past_due' | 'paused';
+  | 'configured' | 'in_progress' | 'refunded' | 'past_due'| 'delivered' |  'paused';
 
 interface StatusBadgeProps {
   status: StatusType;
@@ -23,6 +23,7 @@ const statusConfig: Record<StatusType, { label: string; variant: 'success' | 'wa
   trial: { label: 'Trial', variant: 'warning', icon: Clock },
   past_due: { label: 'Vencido', variant: 'warning', icon: AlertCircle },
   rejected: { label: 'Rechazado', variant: 'destructive', icon: XCircle },
+  delivered: { label: 'Entregado', variant: 'success', icon: CheckCircle },
   cancelled: { label: 'Cancelado', variant: 'destructive', icon: Ban },
   suspended: { label: 'Suspendido', variant: 'destructive', icon: Ban },
   error: { label: 'Error', variant: 'destructive', icon: XCircle },
