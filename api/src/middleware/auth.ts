@@ -94,3 +94,61 @@ export function requireSuperAdmin() {
     await next();
   };
 }
+
+/**
+ * Middleware to check tenant status
+ * Used by the app (not admin) to enforce suspension
+ * Returns 403 with code TENANT_SUSPENDED if tenant is suspended
+ */
+export function requireActiveTenant() {
+  return async (c: Context<{ Bindings: Env }>, next: Next) => {
+    const user = c.get('user');
+
+    // Superadmins bypass tenant check (they have no tenant)
+    if (!user || user.role === 'superadmin') {
+      await next();
+      return;
+    }
+
+    // If user has no tenant, allow (edge case)
+    if (!user.tenant_id) {
+      await next();
+      return;
+    }
+
+    // Check tenant status
+    const tenant = await c.env.DB.prepare(
+      'SELECT id, status, name FROM tenants WHERE id = ?'
+    )
+      .bind(user.tenant_id)
+      .first<{ id: string; status: string; name: string }>();
+
+    if (!tenant) {
+      return c.json({
+        error: 'Tenant not found',
+        code: 'TENANT_NOT_FOUND',
+      }, 404);
+    }
+
+    if (tenant.status === 'suspended') {
+      return c.json({
+        error: 'Account suspended',
+        code: 'TENANT_SUSPENDED',
+        message: 'Your account has been suspended due to non-payment. Please contact support.',
+        tenantId: tenant.id,
+        tenantName: tenant.name,
+      }, 403);
+    }
+
+    if (tenant.status === 'cancelled') {
+      return c.json({
+        error: 'Account cancelled',
+        code: 'TENANT_CANCELLED',
+        message: 'This account has been cancelled.',
+        tenantId: tenant.id,
+      }, 403);
+    }
+
+    await next();
+  };
+}

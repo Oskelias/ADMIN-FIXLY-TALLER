@@ -1,4 +1,5 @@
 export { LoginPage } from './Login';
+export { SignupPage } from './Signup';
 export { DashboardPage } from './Dashboard';
 export { TenantsPage } from './Tenants';
 export { UsersPage } from './Users';
