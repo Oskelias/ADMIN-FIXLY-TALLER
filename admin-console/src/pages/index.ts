@@ -1,0 +1,8 @@
+export { LoginPage } from './Login';
+export { DashboardPage } from './Dashboard';
+export { TenantsPage } from './Tenants';
+export { UsersPage } from './Users';
+export { PaymentsPage } from './Payments';
+export { OperationsPage } from './Operations';
+export { AuditPage } from './Audit';
+export { ConfigPage } from './Config';
