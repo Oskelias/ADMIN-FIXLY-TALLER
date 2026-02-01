@@ -9,6 +9,8 @@
     "deploy:production": "wrangler deploy --env production",
     "db:migrate": "wrangler d1 execute fixly-admin-db --file=./migrations/001_initial_schema.sql",
     "db:migrate:prod": "wrangler d1 execute fixly-admin-db-prod --file=./migrations/001_initial_schema.sql --env production",
+    "seed:superadmin": "node scripts/seed-superadmin.mjs",
+    "seed:demo": "node scripts/seed-demo.mjs",
     "types": "wrangler types"
   },
   "dependencies": {

@@ -43,6 +43,20 @@ class ApiClient {
         }
 
         if (error.response?.status === 403) {
+          const errorCode = error.response?.data?.code;
+
+          // Handle tenant suspended (for app usage)
+          if (errorCode === 'TENANT_SUSPENDED') {
+            // Store suspension info for UI to handle
+            window.dispatchEvent(new CustomEvent('tenant-suspended', {
+              detail: {
+                tenantId: error.response.data.tenantId,
+                tenantName: error.response.data.tenantName,
+                message: error.response.data.message,
+              }
+            }));
+          }
+
           // Forbidden - no permission
           console.error('Access denied:', error.response.data);
         }
@@ -91,19 +105,37 @@ export const api = new ApiClient();
 // ============ AUTH ENDPOINTS ============
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post<{ user: import('@/types').User; token: string }>('/admin/auth/login', { email, password }),
+    api.post<{ user: import('@/types').User; token: string }>('/auth/login', { email, password }),
 
-  logout: () => api.post('/admin/auth/logout'),
+  logout: () => api.post('/auth/logout'),
 
-  me: () => api.get<import('@/types').User>('/admin/auth/me'),
+  me: () => api.get<import('@/types').User>('/auth/me'),
 
-  refreshToken: () => api.post<{ token: string }>('/admin/auth/refresh'),
+  refreshToken: () => api.post<{ token: string }>('/auth/refresh'),
 
   resetPassword: (email: string) =>
-    api.post('/admin/auth/reset-password', { email }),
+    api.post('/auth/reset-password', { email }),
 
   changePassword: (currentPassword: string, newPassword: string) =>
-    api.post('/admin/auth/change-password', { currentPassword, newPassword }),
+    api.post('/auth/change-password', { currentPassword, newPassword }),
+
+  // Public signup - creates new tenant + user
+  signup: (data: { email: string; password: string; businessName: string; phone?: string }) =>
+    api.post<{
+      success: boolean;
+      token: string;
+      tenantId: string;
+      user: import('@/types').User;
+      tenant: {
+        id: string;
+        name: string;
+        slug: string;
+        status: string;
+        plan: string;
+        trialEndsAt: string;
+      };
+      message: string;
+    }>('/auth/public/signup', data),
 };
 
 // ============ DASHBOARD ENDPOINTS ============

@@ -4,6 +4,7 @@ import { Layout } from '@/components/layout';
 import { Toaster } from '@/components/ui/toaster';
 import {
   LoginPage,
+  SignupPage,
   DashboardPage,
   TenantsPage,
   UsersPage,
@@ -74,6 +75,12 @@ function App() {
             path="/login"
             element={
               isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignupPage />
             }
           />
 
