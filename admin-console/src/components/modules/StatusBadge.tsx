@@ -31,12 +31,9 @@ const statusConfig: Record<StatusType, { label: string; variant: 'success' | 'wa
   paused: { label: 'Pausado', variant: 'secondary', icon: Pause },
 };
 
-export function StatusBadge({ status, showIcon = true, size = 'md' }: StatusBadgeProps) {
-  const config = statusConfig[status] || {
-    label: status,
-    variant: 'secondary' as const,
-    icon: AlertCircle,
-  };
+export function StatusBadge({ status, showIcon = true, size = 'md' }: StatusBadgeProps)
+{
+  const config = statusConfig[status];
   const Icon = config.icon;
 
   return (
