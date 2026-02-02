@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Play } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,7 +13,7 @@ import { authApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  username: z.string().min(1, 'El usuario es requerido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
@@ -33,8 +33,8 @@ export function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      username: 'admin',
+      password: 'admin628',
     },
   });
 
@@ -43,7 +43,7 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const response = await authApi.login(data.email, data.password);
+      const response = await authApi.login(data.username, data.password);
       login(response.user, response.token);
       toast({
         title: 'Bienvenido',
@@ -61,54 +61,6 @@ export function LoginPage() {
       });
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // DEV mode login for testing
-  const handleDevLogin = () => {
-    const devUser = {
-      id: 'dev-user-1',
-      email: 'admin@fixly.com',
-      name: 'Admin Dev',
-      role: 'superadmin' as const,
-      tenantId: null,
-      active: true,
-      emailVerified: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    login(devUser, 'dev-token-12345');
-    navigate('/dashboard');
-  };
-
-  // Demo login - uses demo credentials
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
-  const handleDemoLogin = async () => {
-    setIsDemoLoading(true);
-    setError(null);
-
-    try {
-      // Demo credentials (from seed:demo)
-      const demoEmail = 'demo@fixly.com';
-      const demoPassword = 'demo123';
-
-      const response = await authApi.login(demoEmail, demoPassword);
-      login(response.user, response.token);
-      toast({
-        title: 'Modo Demo',
-        description: 'Bienvenido al entorno de demostración',
-        variant: 'default',
-      });
-      navigate('/dashboard');
-    } catch (err) {
-      setError('No se pudo acceder al modo demo. Verifica que el seed esté ejecutado.');
-      toast({
-        title: 'Error',
-        description: 'No se pudo acceder al modo demo',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsDemoLoading(false);
     }
   };
 
@@ -143,9 +95,7 @@ export function LoginPage() {
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle>Iniciar Sesión</CardTitle>
-            <CardDescription>
-              Ingresa tus credenciales para acceder al panel
-            </CardDescription>
+            <CardDescription>Ingresa tu usuario y contraseña</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -157,19 +107,19 @@ export function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Usuario</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@example.com"
+                    id="username"
+                    type="text"
+                    placeholder="admin"
                     className="pl-9"
-                    {...register('email')}
+                    {...register('username')}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-xs text-red-500">{errors.email.message}</p>
+                {errors.username && (
+                  <p className="text-xs text-red-500">{errors.username.message}</p>
                 )}
               </div>
 
@@ -201,19 +151,6 @@ export function LoginPage() {
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-fixly-purple-600 focus:ring-fixly-purple-500"
-                  />
-                  <span className="text-gray-600">Recordarme</span>
-                </label>
-                <a href="#" className="text-fixly-purple-600 hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </a>
-              </div>
-
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <span className="flex items-center gap-2">
@@ -224,49 +161,6 @@ export function LoginPage() {
                   'Iniciar Sesión'
                 )}
               </Button>
-
-              {/* Demo login button */}
-              <div className="pt-4 border-t space-y-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full border-fixly-purple-200 text-fixly-purple-600 hover:bg-fixly-purple-50"
-                  onClick={handleDemoLogin}
-                  disabled={isDemoLoading}
-                >
-                  {isDemoLoading ? (
-                    <span className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-fixly-purple-300 border-t-fixly-purple-600 rounded-full animate-spin" />
-                      Entrando...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Play className="h-4 w-4" />
-                      Entrar como Demo
-                    </span>
-                  )}
-                </Button>
-
-                {/* Dev mode button - only show in development */}
-                {import.meta.env.DEV && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full text-gray-500"
-                    onClick={handleDevLogin}
-                  >
-                    Modo Desarrollo (Sin API)
-                  </Button>
-                )}
-              </div>
-
-              {/* Signup link */}
-              <p className="text-center text-sm text-gray-500 pt-4">
-                ¿No tienes cuenta?{' '}
-                <Link to="/signup" className="text-fixly-purple-600 hover:underline font-medium">
-                  Crear mi taller
-                </Link>
-              </p>
             </form>
           </CardContent>
         </Card>
