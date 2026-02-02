@@ -24,6 +24,7 @@ import { tmpdir } from 'os';
 
 // Configuration
 const email = process.env.DEMO_USER_EMAIL || 'demo@fixly.com';
+const username = process.env.DEMO_USER_USERNAME || 'demo';
 const password = process.env.DEMO_USER_PASSWORD || 'demo123';
 const dbName = process.env.D1_DATABASE || 'fixly-admin-db';
 const isProduction = process.env.NODE_ENV === 'production';
@@ -190,12 +191,13 @@ INSERT OR IGNORE INTO locations (
 
 -- Demo User (admin of the tenant)
 INSERT OR IGNORE INTO users (
-  id, tenant_id, email, name, password_hash, role,
+  id, tenant_id, email, username, name, password_hash, role,
   active, email_verified, created_at, updated_at
 ) VALUES (
   '${DEMO_USER_ID}',
   '${DEMO_TENANT_ID}',
   '${email.toLowerCase()}',
+  '${username.toLowerCase()}',
   'Demo User',
   '${passwordHash}',
   'admin',
@@ -264,6 +266,7 @@ try {
   console.log('   - 10 Demo Audit Logs');
   console.log('');
   console.log(`📝 Demo credentials:`);
+  console.log(`   Username: ${username}`);
   console.log(`   Email: ${email}`);
   console.log(`   Password: ${password}`);
 

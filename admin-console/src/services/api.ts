@@ -104,8 +104,8 @@ export const api = new ApiClient();
 
 // ============ AUTH ENDPOINTS ============
 export const authApi = {
-  login: (email: string, password: string) =>
-    api.post<{ user: import('@/types').User; token: string }>('/auth/login', { email, password }),
+  login: (username: string, password: string) =>
+    api.post<{ user: import('@/types').User; token: string }>('/auth/login', { username, password }),
 
   logout: () => api.post('/auth/logout'),
 

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Play } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,8 +13,8 @@ import { authApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  username: z.string().min(1, 'El usuario es requerido'),
+  password: z.string().min(1, 'La contraseña es requerida'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -33,7 +33,7 @@ export function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: '',
+      username: '',
       password: '',
     },
   });
@@ -43,7 +43,7 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const response = await authApi.login(data.email, data.password);
+      const response = await authApi.login(data.username, data.password);
       login(response.user, response.token);
       toast({
         title: 'Bienvenido',
@@ -88,11 +88,11 @@ export function LoginPage() {
     setError(null);
 
     try {
-      // Demo credentials (from seed:demo)
-      const demoEmail = 'demo@fixly.com';
+      // Demo credentials (from seed:demo) - now using username
+      const demoUsername = 'demo';
       const demoPassword = 'demo123';
 
-      const response = await authApi.login(demoEmail, demoPassword);
+      const response = await authApi.login(demoUsername, demoPassword);
       login(response.user, response.token);
       toast({
         title: 'Modo Demo',
@@ -157,19 +157,19 @@ export function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Usuario</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@example.com"
+                    id="username"
+                    type="text"
+                    placeholder="admin"
                     className="pl-9"
-                    {...register('email')}
+                    {...register('username')}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-xs text-red-500">{errors.email.message}</p>
+                {errors.username && (
+                  <p className="text-xs text-red-500">{errors.username.message}</p>
                 )}
               </div>
 

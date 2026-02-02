@@ -14,17 +14,24 @@ import { execSync } from 'child_process';
 import crypto from 'crypto';
 
 // Read environment variables
-const email = process.env.SUPERADMIN_EMAIL;
-const password = process.env.SUPERADMIN_PASSWORD;
+const email = process.env.SUPERADMIN_EMAIL || 'admin@fixlytaller.com';
+const password = process.env.SUPERADMIN_PASSWORD || 'admin628';
+const username = process.env.SUPERADMIN_USERNAME || 'admin';
 const dbName = process.env.D1_DATABASE || 'fixly-admin-db';
 const isProduction = process.env.NODE_ENV === 'production';
 
-if (!email || !password) {
-  console.error('❌ Error: SUPERADMIN_EMAIL and SUPERADMIN_PASSWORD are required');
-  console.error('');
-  console.error('Usage:');
-  console.error('  SUPERADMIN_EMAIL=admin@fixly.com SUPERADMIN_PASSWORD=secret123 npm run seed:superadmin');
-  process.exit(1);
+// Show help if requested
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  console.log('Usage:');
+  console.log('  npm run seed:superadmin');
+  console.log('');
+  console.log('Environment variables (optional):');
+  console.log('  SUPERADMIN_EMAIL    - Admin email (default: admin@fixlytaller.com)');
+  console.log('  SUPERADMIN_PASSWORD - Admin password (default: admin628)');
+  console.log('  SUPERADMIN_USERNAME - Admin username (default: admin)');
+  console.log('  D1_DATABASE         - Database name (default: fixly-admin-db)');
+  console.log('  NODE_ENV            - Set to "production" for production database');
+  process.exit(0);
 }
 
 // Hash password using SHA-256 (same as backend)
@@ -40,11 +47,12 @@ const now = new Date().toISOString();
 const sql = `
 -- Check if superadmin exists, if not create
 INSERT OR IGNORE INTO users (
-  id, email, name, password_hash, role, tenant_id,
+  id, email, username, name, password_hash, role, tenant_id,
   active, email_verified, created_at, updated_at
 ) VALUES (
   '${userId}',
   '${email.toLowerCase()}',
+  '${username.toLowerCase()}',
   'Super Admin',
   '${passwordHash}',
   'superadmin',
