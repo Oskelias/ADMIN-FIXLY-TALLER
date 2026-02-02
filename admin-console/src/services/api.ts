@@ -1,6 +1,24 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/auth';
-import type { ApiError } from '@/types';
+import type {
+  ApiError,
+  AuditFilters,
+  AuditLog,
+  DashboardStats,
+  MercadoPagoConfig,
+  OperationFilters,
+  Order,
+  PaginatedResponse,
+  Payment,
+  PaymentFilters,
+  Session,
+  Tenant,
+  TenantFilters,
+  TenantSettings,
+  User,
+  UserFilters,
+  UserRole,
+} from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fixlytaller.com';
 
@@ -114,35 +132,36 @@ export const api = new ApiClient();
 ===================================================== */
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post<{ user: import('@/types').User; token: string }>('/auth/login', { email, password }),
+    api.post<{ user: User; token: string }>('/auth/login', { email, password }),
 
   logout: () => api.post('/auth/logout'),
 
-  me: () => api.get<import('@/types').User>('/auth/me'),
+  me: () => api.get<User>('/auth/me'),
 
   refreshToken: () => api.post<{ token: string }>('/auth/refresh'),
 
   signup: (data: { email: string; password: string; businessName: string; phone?: string }) =>
-    api.post('/auth/public/signup', data),
+    api.post<{ user: User; token: string }>('/auth/public/signup', data),
 };
 
 /* =====================================================
    DASHBOARD
 ===================================================== */
 export const dashboardApi = {
-  getStats: () => api.get('/admin/dashboard/stats'),
-  getRecentActivity: (limit = 10) => api.get('/admin/dashboard/activity', { limit }),
+  getStats: () => api.get<DashboardStats>('/admin/dashboard/stats'),
+  getRecentActivity: (limit = 10) =>
+    api.get<AuditLog[]>('/admin/dashboard/activity', { limit }),
 };
 
 /* =====================================================
    TENANTS
 ===================================================== */
 export const tenantsApi = {
-  list: (filters?: unknown) => api.get('/admin/tenants', filters),
-  get: (id: string) => api.get(`/admin/tenants/${id}`),
-  create: (data: unknown) => api.post('/admin/tenants', data),
-  update: (id: string, data: unknown) => api.put(`/admin/tenants/${id}`, data),
-  delete: (id: string) => api.delete(`/admin/tenants/${id}`),
+  list: (filters?: TenantFilters) => api.get<PaginatedResponse<Tenant>>('/admin/tenants', filters),
+  get: (id: string) => api.get<Tenant>(`/admin/tenants/${id}`),
+  create: (data: unknown) => api.post<Tenant>('/admin/tenants', data),
+  update: (id: string, data: unknown) => api.put<Tenant>(`/admin/tenants/${id}`, data),
+  delete: (id: string) => api.delete<void>(`/admin/tenants/${id}`),
   suspend: (id: string, reason: string) => api.post(`/admin/tenants/${id}/suspend`, { reason }),
   activate: (id: string) => api.post(`/admin/tenants/${id}/activate`),
 };
@@ -151,33 +170,65 @@ export const tenantsApi = {
    USERS
 ===================================================== */
 export const usersApi = {
-  list: (filters?: unknown) => api.get('/admin/users', filters),
-  get: (id: string) => api.get(`/admin/users/${id}`),
-  create: (data: unknown) => api.post('/admin/users', data),
-  update: (id: string, data: unknown) => api.put(`/admin/users/${id}`, data),
-  delete: (id: string) => api.delete(`/admin/users/${id}`),
+  list: (filters?: UserFilters) => api.get<PaginatedResponse<User>>('/admin/users', filters),
+  get: (id: string) => api.get<User>(`/admin/users/${id}`),
+  create: (data: unknown) => api.post<User>('/admin/users', data),
+  update: (id: string, data: unknown) => api.put<User>(`/admin/users/${id}`, data),
+  delete: (id: string) => api.delete<void>(`/admin/users/${id}`),
+  getSessions: (id: string) => api.get<Session[]>(`/admin/users/${id}/sessions`),
+  terminateSession: (userId: string, sessionId: string) =>
+    api.delete<void>(`/admin/users/${userId}/sessions/${sessionId}`),
+  resetPassword: (id: string) => api.post<void>(`/admin/users/${id}/reset-password`),
+  block: (id: string, reason: string) => api.post<void>(`/admin/users/${id}/block`, { reason }),
+  unblock: (id: string) => api.post<void>(`/admin/users/${id}/unblock`),
+  invite: (data: { email: string; role: UserRole }) => api.post<void>('/admin/users/invite', data),
 };
 
 /* =====================================================
    PAYMENTS
 ===================================================== */
 export const paymentsApi = {
-  list: (filters?: unknown) => api.get('/admin/payments', filters),
-  get: (id: string) => api.get(`/admin/payments/${id}`),
-  refund: (id: string, reason: string) => api.post(`/admin/payments/${id}/refund`, { reason }),
+  list: (filters?: PaymentFilters) => api.get<PaginatedResponse<Payment>>('/admin/payments', filters),
+  get: (id: string) => api.get<Payment>(`/admin/payments/${id}`),
+  refund: (id: string, reason: string) => api.post<void>(`/admin/payments/${id}/refund`, { reason }),
 };
 
 /* =====================================================
    OPERATIONS
 ===================================================== */
 export const operationsApi = {
-  listOrders: (filters?: unknown) => api.get('/admin/operations/orders', filters),
-  getOrder: (id: string) => api.get(`/admin/operations/orders/${id}`),
+  listOrders: (filters?: OperationFilters) =>
+    api.get<PaginatedResponse<Order>>('/admin/operations/orders', filters),
+  getOrder: (id: string) => api.get<Order>(`/admin/operations/orders/${id}`),
 };
 
 /* =====================================================
    AUDIT
 ===================================================== */
 export const auditApi = {
-  list: (filters?: unknown) => api.get('/admin/audit', filters),
+  list: (filters?: AuditFilters) => api.get<PaginatedResponse<AuditLog>>('/admin/audit', filters),
+};
+
+/* =====================================================
+   CONFIG
+===================================================== */
+export const configApi = {
+  getTenantSettings: (tenantId: string) =>
+    api.get<TenantSettings>(`/admin/config/${tenantId}/settings`),
+  updateTenantSettings: (tenantId: string, settings: TenantSettings) =>
+    api.put<TenantSettings>(`/admin/config/${tenantId}/settings`, settings),
+  getSystemHealth: () =>
+    api.get<{ status: string; services: Record<string, { status: string; latency: number }> }>(
+      '/admin/config/health'
+    ),
+};
+
+/* =====================================================
+   MERCADO PAGO
+===================================================== */
+export const mercadoPagoApi = {
+  getConfig: (tenantId: string) =>
+    api.get<MercadoPagoConfig>(`/admin/mercadopago/${tenantId}/config`),
+  testConnection: (tenantId: string) =>
+    api.post<{ success: boolean; message?: string }>(`/admin/mercadopago/${tenantId}/test-connection`),
 };
