@@ -70,12 +70,13 @@ class ApiClient {
         if (error.response?.status === 403) {
           const errorCode = error.response?.data?.code;
 
+          // Handle tenant suspended (for app usage)
           if (errorCode === 'TENANT_SUSPENDED') {
             window.dispatchEvent(
               new CustomEvent('tenant-suspended', {
                 detail: {
-                  tenantId: error.response?.data?.tenantId,
-                  tenantName: error.response?.data?.tenantName,
+                  tenantId: (error.response?.data as any)?.tenantId,
+                  tenantName: (error.response?.data as any)?.tenantName,
                   message: error.response?.data?.message,
                 },
               })
@@ -85,13 +86,19 @@ class ApiClient {
           console.error('Access denied:', error.response?.data);
         }
 
+        // Transform error for consistent handling
         const apiError: ApiError = {
           code: error.response?.data?.code || 'UNKNOWN_ERROR',
           message: error.response?.data?.message || error.message || 'An error occurred',
           details: error.response?.data?.details,
-          tenantId: error.response?.data?.tenantId,
-          tenantName: error.response?.data?.tenantName,
-        };
+          // estos 2 campos solo existen si tu ApiError los declara (si no, arreglamos types)
+          ...(typeof (error.response?.data as any)?.tenantId !== 'undefined'
+            ? { tenantId: (error.response?.data as any)?.tenantId }
+            : {}),
+          ...(typeof (error.response?.data as any)?.tenantName !== 'undefined'
+            ? { tenantName: (error.response?.data as any)?.tenantName }
+            : {}),
+        } as ApiError;
 
         return Promise.reject(apiError);
       }
@@ -134,12 +141,18 @@ export const authApi = {
   login: (username: string, password: string) =>
     api.post<{ user: User; token: string }>('/auth/login', { username, password }),
 
-  logout: () => api.post('/auth/logout'),
+  logout: () => api.post<void>('/auth/logout'),
 
   me: () => api.get<User>('/auth/me'),
 
   refreshToken: () => api.post<{ token: string }>('/auth/refresh'),
 
+  resetPassword: (email: string) => api.post<void>('/auth/reset-password', { email }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<void>('/auth/change-password', { currentPassword, newPassword }),
+
+  // Public signup - creates new tenant + user
   signup: (data: { email: string; password: string; businessName: string; phone?: string }) =>
     api.post<{ user: User; token: string }>('/auth/public/signup', data),
 };
