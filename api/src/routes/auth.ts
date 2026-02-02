@@ -12,19 +12,34 @@ import {
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Login
+// Login - accepts username or email
 app.post('/login', async (c) => {
-  const { email, password } = await c.req.json<{ email: string; password: string }>();
+  const body = await c.req.json<{ username?: string; email?: string; password: string }>();
+  const identifier = body.username || body.email;
+  const password = body.password;
 
-  if (!email || !password) {
-    return c.json({ error: 'Email and password are required' }, 400);
+  if (!identifier || !password) {
+    return c.json({ error: 'Username/email and password are required' }, 400);
   }
 
-  const user = await c.env.DB.prepare(
-    'SELECT * FROM users WHERE email = ? AND active = 1'
-  )
-    .bind(email.toLowerCase())
-    .first<User>();
+  // Check if identifier looks like email (contains @) or username
+  const isEmail = identifier.includes('@');
+
+  let user: User | null;
+  if (isEmail) {
+    user = await c.env.DB.prepare(
+      'SELECT * FROM users WHERE email = ? AND active = 1'
+    )
+      .bind(identifier.toLowerCase())
+      .first<User>();
+  } else {
+    // Search by username field or name field (as username fallback)
+    user = await c.env.DB.prepare(
+      'SELECT * FROM users WHERE (username = ? OR name = ?) AND active = 1'
+    )
+      .bind(identifier, identifier)
+      .first<User>();
+  }
 
   if (!user) {
     return c.json({ error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' }, 401);

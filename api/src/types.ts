@@ -14,6 +14,7 @@ export type UserRole = 'superadmin' | 'admin' | 'operator' | 'viewer';
 export interface User {
   id: string;
   email: string;
+  username?: string;
   name: string;
   password_hash: string;
   avatar?: string;

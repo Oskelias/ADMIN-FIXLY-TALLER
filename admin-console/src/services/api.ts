@@ -91,7 +91,6 @@ class ApiClient {
           code: error.response?.data?.code || 'UNKNOWN_ERROR',
           message: error.response?.data?.message || error.message || 'An error occurred',
           details: error.response?.data?.details,
-          // estos 2 campos solo existen si tu ApiError los declara (si no, arreglamos types)
           ...(typeof (error.response?.data as any)?.tenantId !== 'undefined'
             ? { tenantId: (error.response?.data as any)?.tenantId }
             : {}),

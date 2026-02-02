@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
   username: z.string().min(1, 'El usuario es requerido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  password: z.string().min(1, 'La contraseña es requerida'),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -61,6 +61,54 @@ export function LoginPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // DEV mode login for testing
+  const handleDevLogin = () => {
+    const devUser = {
+      id: 'dev-user-1',
+      email: 'admin@fixly.com',
+      name: 'Admin Dev',
+      role: 'superadmin' as const,
+      tenantId: null,
+      active: true,
+      emailVerified: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    login(devUser, 'dev-token-12345');
+    navigate('/dashboard');
+  };
+
+  // Demo login - uses demo credentials
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
+  const handleDemoLogin = async () => {
+    setIsDemoLoading(true);
+    setError(null);
+
+    try {
+      // Demo credentials (from seed:demo) - now using username
+      const demoUsername = 'demo';
+      const demoPassword = 'demo123';
+
+      const response = await authApi.login(demoUsername, demoPassword);
+      login(response.user, response.token);
+      toast({
+        title: 'Modo Demo',
+        description: 'Bienvenido al entorno de demostración',
+        variant: 'default',
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setError('No se pudo acceder al modo demo. Verifica que el seed esté ejecutado.');
+      toast({
+        title: 'Error',
+        description: 'No se pudo acceder al modo demo',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsDemoLoading(false);
     }
   };
 
@@ -161,6 +209,49 @@ export function LoginPage() {
                   'Iniciar Sesión'
                 )}
               </Button>
+
+              {/* Demo login button */}
+              <div className="pt-4 border-t space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full border-fixly-purple-200 text-fixly-purple-600 hover:bg-fixly-purple-50"
+                  onClick={handleDemoLogin}
+                  disabled={isDemoLoading}
+                >
+                  {isDemoLoading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-fixly-purple-300 border-t-fixly-purple-600 rounded-full animate-spin" />
+                      Entrando...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Play className="h-4 w-4" />
+                      Entrar como Demo
+                    </span>
+                  )}
+                </Button>
+
+                {/* Dev mode button - only show in development */}
+                {import.meta.env.DEV && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full text-gray-500"
+                    onClick={handleDevLogin}
+                  >
+                    Modo Desarrollo (Sin API)
+                  </Button>
+                )}
+              </div>
+
+              {/* Signup link */}
+              <p className="text-center text-sm text-gray-500 pt-4">
+                ¿No tienes cuenta?{' '}
+                <Link to="/signup" className="text-fixly-purple-600 hover:underline font-medium">
+                  Crear mi taller
+                </Link>
+              </p>
             </form>
           </CardContent>
         </Card>
