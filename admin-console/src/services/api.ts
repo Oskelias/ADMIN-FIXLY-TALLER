@@ -22,9 +22,9 @@ import type {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fixlytaller.com';
 
-/* =====================================================
-   Helper → convierte filtros tipados a params de axios
-===================================================== */
+// =====================================================
+// Helper → convierte filtros tipados a params de axios
+// =====================================================
 function toParams(filters?: unknown): Record<string, unknown> | undefined {
   if (!filters || typeof filters !== 'object') return undefined;
   return filters as Record<string, unknown>;
@@ -134,7 +134,9 @@ class ApiClient {
 
 export const api = new ApiClient();
 
-// ============ AUTH ENDPOINTS ============
+// =====================================================
+// AUTH
+// =====================================================
 export const authApi = {
   login: (email: string, password: string) =>
     api.post<{ user: User; token: string }>('/auth/login', { email, password }),
@@ -155,14 +157,18 @@ export const authApi = {
     api.post<{ user: User; token: string }>('/auth/public/signup', data),
 };
 
-// ============ DASHBOARD ENDPOINTS ============
+// =====================================================
+// DASHBOARD
+// =====================================================
 export const dashboardApi = {
   getStats: () => api.get<DashboardStats>('/admin/dashboard/stats'),
   getRecentActivity: (limit = 10) =>
     api.get<AuditLog[]>('/admin/dashboard/activity', { limit }),
 };
 
-// ============ TENANT ENDPOINTS ============
+// =====================================================
+// TENANTS
+// =====================================================
 export const tenantsApi = {
   list: (filters?: TenantFilters) => api.get<PaginatedResponse<Tenant>>('/admin/tenants', filters),
   get: (id: string) => api.get<Tenant>(`/admin/tenants/${id}`),
@@ -173,7 +179,9 @@ export const tenantsApi = {
   activate: (id: string) => api.post(`/admin/tenants/${id}/activate`),
 };
 
-// ============ USER ENDPOINTS ============
+// =====================================================
+// USERS
+// =====================================================
 export const usersApi = {
   list: (filters?: UserFilters) => api.get<PaginatedResponse<User>>('/admin/users', filters),
   get: (id: string) => api.get<User>(`/admin/users/${id}`),
@@ -189,78 +197,51 @@ export const usersApi = {
   invite: (data: { email: string; role: UserRole }) => api.post<void>('/admin/users/invite', data),
 };
 
-// ============ LOCATION ENDPOINTS ============
-export const locationsApi = {
-  list: (tenantId?: string) =>
-    api.get<PaginatedResponse<Location>>('/admin/locations', { tenantId }),
-
-  get: (id: string) => api.get<Location>(`/admin/locations/${id}`),
-
-  create: (data: Partial<Location>) =>
-    api.post<Location>('/admin/locations', data),
-
-  update: (id: string, data: Partial<Location>) =>
-    api.put<Location>(`/admin/locations/${id}`, data),
-
-  delete: (id: string) => api.delete<void>(`/admin/locations/${id}`),
-};
-
-// ============ PAYMENT ENDPOINTS ============
+// =====================================================
+// PAYMENTS
+// =====================================================
 export const paymentsApi = {
   list: (filters?: PaymentFilters) => api.get<PaginatedResponse<Payment>>('/admin/payments', filters),
   get: (id: string) => api.get<Payment>(`/admin/payments/${id}`),
   refund: (id: string, reason: string) => api.post<void>(`/admin/payments/${id}/refund`, { reason }),
 };
 
-// ============ SUBSCRIPTION ENDPOINTS ============
-export const subscriptionsApi = {
-  list: (tenantId?: string) =>
-    api.get<PaginatedResponse<Subscription>>('/admin/subscriptions', { tenantId }),
-
-  get: (id: string) => api.get<Subscription>(`/admin/subscriptions/${id}`),
-
-  cancel: (id: string, reason: string) =>
-    api.post<void>(`/admin/subscriptions/${id}/cancel`, { reason }),
-};
-
-// ============ MERCADOPAGO ENDPOINTS ============
-export const mercadoPagoApi = {
-  getConfig: (tenantId: string) =>
-    api.get<MercadoPagoConfig>(`/admin/mercadopago/${tenantId}/config`),
-
-  updateConfig: (tenantId: string, data: Partial<MercadoPagoConfig>) =>
-    api.put<void>(`/admin/mercadopago/${tenantId}/config`, data),
-
-  testConnection: (tenantId: string) =>
-    api.post<{ success: boolean; message: string }>(`/admin/mercadopago/${tenantId}/test`),
-
-  getTransactions: (tenantId: string, filters?: PaymentFilters) =>
-    api.get<PaginatedResponse<Payment>>(
-      `/admin/mercadopago/${tenantId}/transactions`,
-      filters
-    ),
-};
-
-// ============ OPERATIONS ENDPOINTS ============
+// =====================================================
+// OPERATIONS
+// =====================================================
 export const operationsApi = {
   listOrders: (filters?: OperationFilters) =>
     api.get<PaginatedResponse<Order>>('/admin/operations/orders', filters),
   getOrder: (id: string) => api.get<Order>(`/admin/operations/orders/${id}`),
 };
 
-// ============ AUDIT ENDPOINTS ============
+// =====================================================
+// AUDIT
+// =====================================================
 export const auditApi = {
   list: (filters?: AuditFilters) => api.get<PaginatedResponse<AuditLog>>('/admin/audit', filters),
 };
 
-/* =====================================================
-   CONFIG
+// =====================================================
+// CONFIG
+// =====================================================
+export const configApi = {
+  getTenantSettings: (tenantId: string) =>
+    api.get<TenantSettings>(`/admin/config/${tenantId}/settings`),
+  updateTenantSettings: (tenantId: string, settings: TenantSettings) =>
+    api.put<TenantSettings>(`/admin/config/${tenantId}/settings`, settings),
   getSystemHealth: () =>
     api.get<{ status: string; services: Record<string, { status: string; latency: number }> }>(
       '/admin/config/health'
     ),
 };
 
-/* =====================================================
-   MERCADO PAGO
+// =====================================================
+// MERCADO PAGO
+// =====================================================
+export const mercadoPagoApi = {
+  getConfig: (tenantId: string) =>
+    api.get<MercadoPagoConfig>(`/admin/mercadopago/${tenantId}/config`),
+  testConnection: (tenantId: string) =>
+    api.post<{ success: boolean; message?: string }>(`/admin/mercadopago/${tenantId}/test-connection`),
 };
