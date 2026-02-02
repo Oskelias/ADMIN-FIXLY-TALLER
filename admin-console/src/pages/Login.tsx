@@ -33,8 +33,8 @@ export function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
-      password: '',
+      username: 'admin',
+      password: 'admin628',
     },
   });
 
@@ -143,9 +143,7 @@ export function LoginPage() {
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle>Iniciar Sesión</CardTitle>
-            <CardDescription>
-              Ingresa tus credenciales para acceder al panel
-            </CardDescription>
+            <CardDescription>Ingresa tu usuario y contraseña</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -199,19 +197,6 @@ export function LoginPage() {
                 {errors.password && (
                   <p className="text-xs text-red-500">{errors.password.message}</p>
                 )}
-              </div>
-
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    className="rounded border-gray-300 text-fixly-purple-600 focus:ring-fixly-purple-500"
-                  />
-                  <span className="text-gray-600">Recordarme</span>
-                </label>
-                <a href="#" className="text-fixly-purple-600 hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </a>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>

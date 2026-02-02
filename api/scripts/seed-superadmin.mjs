@@ -3,9 +3,10 @@
  * Seed Superadmin Script
  *
  * Creates a superadmin user if it doesn't exist.
- * Reads from environment variables:
- *   - SUPERADMIN_EMAIL (required)
- *   - SUPERADMIN_PASSWORD (required)
+ * Environment variables (all optional with defaults):
+ *   - SUPERADMIN_EMAIL (default: admin@fixlytaller.com)
+ *   - SUPERADMIN_PASSWORD (default: admin628)
+ *   - SUPERADMIN_USERNAME (default: admin)
  *
  * Usage: npm run seed:superadmin
  */
@@ -13,7 +14,7 @@
 import { execSync } from 'child_process';
 import crypto from 'crypto';
 
-// Read environment variables
+// Read environment variables with defaults
 const email = process.env.SUPERADMIN_EMAIL || 'admin@fixlytaller.com';
 const password = process.env.SUPERADMIN_PASSWORD || 'admin628';
 const username = process.env.SUPERADMIN_USERNAME || 'admin';
@@ -73,6 +74,7 @@ const tempFile = join(tmpdir(), `seed-superadmin-${Date.now()}.sql`);
 writeFileSync(tempFile, sql);
 
 console.log('🔧 Seeding superadmin...');
+console.log(`   Username: ${username}`);
 console.log(`   Email: ${email}`);
 console.log(`   Database: ${dbName}`);
 console.log('');
@@ -117,4 +119,6 @@ try {
 }
 
 console.log('');
-console.log('📝 You can now login at admin.fixlytaller.com with these credentials');
+console.log('📝 You can now login at admin.fixlytaller.com with these credentials:');
+console.log(`   Username: ${username}`);
+console.log(`   Password: ${password}`);

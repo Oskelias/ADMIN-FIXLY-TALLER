@@ -11,6 +11,7 @@
  *
  * Environment variables:
  *   - DEMO_USER_EMAIL (default: demo@fixly.com)
+ *   - DEMO_USER_USERNAME (default: demo)
  *   - DEMO_USER_PASSWORD (default: demo123)
  *
  * Usage: npm run seed:demo
