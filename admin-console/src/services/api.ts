@@ -1,6 +1,26 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/store/auth';
-import type { ApiError } from '@/types';
+import type {
+  ApiError,
+  User,
+  DashboardStats,
+  AuditLog,
+  PaginatedResponse,
+  Tenant,
+  TenantFilters,
+  TenantStats,
+  UserFilters,
+  Location,
+  Payment,
+  PaymentFilters,
+  Subscription,
+  MercadoPagoConfig,
+  OperationFilters,
+  Order,
+  AuditFilters,
+  TenantSettings,
+  Session,
+} from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.fixlytaller.com';
 
@@ -52,12 +72,13 @@ class ApiClient {
         if (error.response?.status === 403) {
           const errorCode = error.response?.data?.code;
 
+          // Handle tenant suspended (for app usage)
           if (errorCode === 'TENANT_SUSPENDED') {
             window.dispatchEvent(
               new CustomEvent('tenant-suspended', {
                 detail: {
-                  tenantId: error.response?.data?.tenantId,
-                  tenantName: error.response?.data?.tenantName,
+                  tenantId: (error.response?.data as any)?.tenantId,
+                  tenantName: (error.response?.data as any)?.tenantName,
                   message: error.response?.data?.message,
                 },
               })
@@ -67,13 +88,19 @@ class ApiClient {
           console.error('Access denied:', error.response?.data);
         }
 
+        // Transform error for consistent handling
         const apiError: ApiError = {
           code: error.response?.data?.code || 'UNKNOWN_ERROR',
           message: error.response?.data?.message || error.message || 'An error occurred',
           details: error.response?.data?.details,
-          tenantId: error.response?.data?.tenantId,
-          tenantName: error.response?.data?.tenantName,
-        };
+          // estos 2 campos solo existen si tu ApiError los declara (si no, arreglamos types)
+          ...(typeof (error.response?.data as any)?.tenantId !== 'undefined'
+            ? { tenantId: (error.response?.data as any)?.tenantId }
+            : {}),
+          ...(typeof (error.response?.data as any)?.tenantName !== 'undefined'
+            ? { tenantName: (error.response?.data as any)?.tenantName }
+            : {}),
+        } as ApiError;
 
         return Promise.reject(apiError);
       }
@@ -109,75 +136,187 @@ class ApiClient {
 
 export const api = new ApiClient();
 
-/* =====================================================
-   AUTH
-===================================================== */
+// ============ AUTH ENDPOINTS ============
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post<{ user: import('@/types').User; token: string }>('/auth/login', { email, password }),
+    api.post<{ user: User; token: string }>('/auth/login', { email, password }),
 
-  logout: () => api.post('/auth/logout'),
+  logout: () => api.post<void>('/auth/logout'),
 
-  me: () => api.get<import('@/types').User>('/auth/me'),
+  me: () => api.get<User>('/auth/me'),
 
   refreshToken: () => api.post<{ token: string }>('/auth/refresh'),
 
+  resetPassword: (email: string) => api.post<void>('/auth/reset-password', { email }),
+
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<void>('/auth/change-password', { currentPassword, newPassword }),
+
+  // Public signup - creates new tenant + user
   signup: (data: { email: string; password: string; businessName: string; phone?: string }) =>
-    api.post('/auth/public/signup', data),
+    api.post<{
+      success: boolean;
+      token: string;
+      tenantId: string;
+      user: User;
+      tenant: {
+        id: string;
+        name: string;
+        slug: string;
+        status: string;
+        plan: string;
+        trialEndsAt: string;
+      };
+      message: string;
+    }>('/auth/public/signup', data),
 };
 
-/* =====================================================
-   DASHBOARD
-===================================================== */
+// ============ DASHBOARD ENDPOINTS ============
 export const dashboardApi = {
-  getStats: () => api.get('/admin/dashboard/stats'),
-  getRecentActivity: (limit = 10) => api.get('/admin/dashboard/activity', { limit }),
+  getStats: () => api.get<DashboardStats>('/admin/dashboard/stats'),
+
+  getRecentActivity: (limit = 10) => api.get<AuditLog[]>('/admin/dashboard/activity', { limit }),
 };
 
-/* =====================================================
-   TENANTS
-===================================================== */
+// ============ TENANT ENDPOINTS ============
 export const tenantsApi = {
-  list: (filters?: unknown) => api.get('/admin/tenants', filters),
-  get: (id: string) => api.get(`/admin/tenants/${id}`),
-  create: (data: unknown) => api.post('/admin/tenants', data),
-  update: (id: string, data: unknown) => api.put(`/admin/tenants/${id}`, data),
-  delete: (id: string) => api.delete(`/admin/tenants/${id}`),
-  suspend: (id: string, reason: string) => api.post(`/admin/tenants/${id}/suspend`, { reason }),
-  activate: (id: string) => api.post(`/admin/tenants/${id}/activate`),
+  list: (filters?: TenantFilters) =>
+    api.get<PaginatedResponse<Tenant>>('/admin/tenants', filters),
+
+  get: (id: string) => api.get<Tenant>(`/admin/tenants/${id}`),
+
+  create: (data: Partial<Tenant>) => api.post<Tenant>('/admin/tenants', data),
+
+  update: (id: string, data: Partial<Tenant>) => api.put<Tenant>(`/admin/tenants/${id}`, data),
+
+  delete: (id: string) => api.delete<void>(`/admin/tenants/${id}`),
+
+  getStats: (id: string) => api.get<TenantStats>(`/admin/tenants/${id}/stats`),
+
+  suspend: (id: string, reason: string) => api.post<void>(`/admin/tenants/${id}/suspend`, { reason }),
+
+  activate: (id: string) => api.post<void>(`/admin/tenants/${id}/activate`),
 };
 
-/* =====================================================
-   USERS
-===================================================== */
+// ============ USER ENDPOINTS ============
 export const usersApi = {
-  list: (filters?: unknown) => api.get('/admin/users', filters),
-  get: (id: string) => api.get(`/admin/users/${id}`),
-  create: (data: unknown) => api.post('/admin/users', data),
-  update: (id: string, data: unknown) => api.put(`/admin/users/${id}`, data),
-  delete: (id: string) => api.delete(`/admin/users/${id}`),
+  list: (filters?: UserFilters) =>
+    api.get<PaginatedResponse<User>>('/admin/users', filters),
+
+  get: (id: string) => api.get<User>(`/admin/users/${id}`),
+
+  create: (data: Partial<User> & { password?: string }) =>
+    api.post<User>('/admin/users', data),
+
+  update: (id: string, data: Partial<User>) =>
+    api.put<User>(`/admin/users/${id}`, data),
+
+  delete: (id: string) => api.delete<void>(`/admin/users/${id}`),
+
+  resetPassword: (id: string) => api.post<void>(`/admin/users/${id}/reset-password`),
+
+  block: (id: string, reason: string) => api.post<void>(`/admin/users/${id}/block`, { reason }),
+
+  unblock: (id: string) => api.post<void>(`/admin/users/${id}/unblock`),
+
+  getSessions: (id: string) => api.get<Session[]>(`/admin/users/${id}/sessions`),
+
+  terminateSession: (userId: string, sessionId: string) =>
+    api.delete<void>(`/admin/users/${userId}/sessions/${sessionId}`),
+
+  invite: (data: { email: string; role: string; tenantId?: string }) =>
+    api.post<void>('/admin/users/invite', data),
 };
 
-/* =====================================================
-   PAYMENTS
-===================================================== */
+// ============ LOCATION ENDPOINTS ============
+export const locationsApi = {
+  list: (tenantId?: string) =>
+    api.get<PaginatedResponse<Location>>('/admin/locations', { tenantId }),
+
+  get: (id: string) => api.get<Location>(`/admin/locations/${id}`),
+
+  create: (data: Partial<Location>) =>
+    api.post<Location>('/admin/locations', data),
+
+  update: (id: string, data: Partial<Location>) =>
+    api.put<Location>(`/admin/locations/${id}`, data),
+
+  delete: (id: string) => api.delete<void>(`/admin/locations/${id}`),
+};
+
+// ============ PAYMENT ENDPOINTS ============
 export const paymentsApi = {
-  list: (filters?: unknown) => api.get('/admin/payments', filters),
-  get: (id: string) => api.get(`/admin/payments/${id}`),
-  refund: (id: string, reason: string) => api.post(`/admin/payments/${id}/refund`, { reason }),
+  list: (filters?: PaymentFilters) =>
+    api.get<PaginatedResponse<Payment>>('/admin/payments', filters),
+
+  get: (id: string) => api.get<Payment>(`/admin/payments/${id}`),
+
+  refund: (id: string, reason: string) =>
+    api.post<void>(`/admin/payments/${id}/refund`, { reason }),
+
+  export: (filters?: PaymentFilters) =>
+    api.get<{ url: string }>('/admin/payments/export', filters),
 };
 
-/* =====================================================
-   OPERATIONS
-===================================================== */
+// ============ SUBSCRIPTION ENDPOINTS ============
+export const subscriptionsApi = {
+  list: (tenantId?: string) =>
+    api.get<PaginatedResponse<Subscription>>('/admin/subscriptions', { tenantId }),
+
+  get: (id: string) => api.get<Subscription>(`/admin/subscriptions/${id}`),
+
+  cancel: (id: string, reason: string) =>
+    api.post<void>(`/admin/subscriptions/${id}/cancel`, { reason }),
+};
+
+// ============ MERCADOPAGO ENDPOINTS ============
+export const mercadoPagoApi = {
+  getConfig: (tenantId: string) =>
+    api.get<MercadoPagoConfig>(`/admin/mercadopago/${tenantId}/config`),
+
+  updateConfig: (tenantId: string, data: Partial<MercadoPagoConfig>) =>
+    api.put<void>(`/admin/mercadopago/${tenantId}/config`, data),
+
+  testConnection: (tenantId: string) =>
+    api.post<{ success: boolean; message: string }>(`/admin/mercadopago/${tenantId}/test`),
+
+  getTransactions: (tenantId: string, filters?: PaymentFilters) =>
+    api.get<PaginatedResponse<Payment>>(
+      `/admin/mercadopago/${tenantId}/transactions`,
+      filters
+    ),
+};
+
+// ============ OPERATIONS ENDPOINTS ============
 export const operationsApi = {
-  listOrders: (filters?: unknown) => api.get('/admin/operations/orders', filters),
-  getOrder: (id: string) => api.get(`/admin/operations/orders/${id}`),
+  listOrders: (filters?: OperationFilters) =>
+    api.get<PaginatedResponse<Order>>('/admin/operations/orders', filters),
+
+  getOrder: (id: string) => api.get<Order>(`/admin/operations/orders/${id}`),
+
+  exportOrders: (filters?: OperationFilters) =>
+    api.get<{ url: string }>('/admin/operations/orders/export', filters),
 };
 
-/* =====================================================
-   AUDIT
-===================================================== */
+// ============ AUDIT ENDPOINTS ============
 export const auditApi = {
-  list: (filters?: unknown) => api.get('/admin/audit', filters),
+  list: (filters?: AuditFilters) =>
+    api.get<PaginatedResponse<AuditLog>>('/admin/audit', filters),
+
+  export: (filters?: AuditFilters) =>
+    api.get<{ url: string }>('/admin/audit/export', filters),
+};
+
+// ============ CONFIG ENDPOINTS ============
+export const configApi = {
+  getTenantSettings: (tenantId: string) =>
+    api.get<TenantSettings>(`/admin/config/${tenantId}`),
+
+  updateTenantSettings: (tenantId: string, data: Partial<TenantSettings>) =>
+    api.put<void>(`/admin/config/${tenantId}`, data),
+
+  getSystemHealth: () =>
+    api.get<{ status: string; services: Record<string, { status: string; latency: number }> }>(
+      '/admin/config/health'
+    ),
 };
