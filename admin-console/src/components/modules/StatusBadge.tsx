@@ -53,7 +53,11 @@ const statusConfig: Record<
 };
 
 export function StatusBadge({ status, showIcon = true, size = 'md' }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] ?? {
+    label: status,
+    variant: 'secondary',
+    icon: AlertCircle,
+  };
   const Icon = config.icon;
 
   return (
