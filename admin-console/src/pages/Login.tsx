@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, User, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,13 +13,7 @@ import { authApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'El usuario es requerido')
-    .refine(
-      (value) => value === 'admin' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-      'Usuario inválido'
-    ),
+  username: z.string().min(1, 'El usuario es requerido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
@@ -39,8 +33,8 @@ export function LoginPage() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin',
-      password: 'admin123',
+      username: 'admin',
+      password: 'admin628',
     },
   });
 
@@ -49,7 +43,7 @@ export function LoginPage() {
     setError(null);
 
     try {
-      const response = await authApi.login(data.email, data.password);
+      const response = await authApi.login(data.username, data.password);
       login(response.user, response.token);
       toast({
         title: 'Bienvenido',
@@ -101,9 +95,7 @@ export function LoginPage() {
         <Card className="shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle>Iniciar Sesión</CardTitle>
-            <CardDescription>
-              Ingresa tus credenciales para acceder al panel
-            </CardDescription>
+            <CardDescription>Ingresa tu usuario y contraseña</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -115,19 +107,19 @@ export function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Usuario</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@example.com"
+                    id="username"
+                    type="text"
+                    placeholder="admin"
                     className="pl-9"
-                    {...register('email')}
+                    {...register('username')}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-xs text-red-500">{errors.email.message}</p>
+                {errors.username && (
+                  <p className="text-xs text-red-500">{errors.username.message}</p>
                 )}
               </div>
 
