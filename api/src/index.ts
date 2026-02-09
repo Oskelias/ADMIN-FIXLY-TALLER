@@ -18,10 +18,17 @@ const app = new Hono<{ Bindings: Env }>();
 // Global middleware
 app.use('*', logger());
 
-// CORS - Only allow admin frontend
+// CORS - Allow admin frontend and app domains
 app.use('*', async (c, next) => {
   const corsMiddleware = cors({
-    origin: [c.env.ADMIN_URL, 'http://localhost:5173'],
+    origin: [
+      c.env.ADMIN_URL,
+      'https://admin.fixlytaller.com',
+      'https://app.fixlytaller.com',
+      'https://fixlytaller.com',
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     credentials: true,

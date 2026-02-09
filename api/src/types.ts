@@ -6,6 +6,7 @@ export interface Env {
   MP_PUBLIC_KEY: string;
   MP_WEBHOOK_SECRET?: string;
   ADMIN_URL: string;
+  ADMIN_BOOTSTRAP_EMAIL?: string;
   ENVIRONMENT: 'development' | 'staging' | 'production';
 }
 
