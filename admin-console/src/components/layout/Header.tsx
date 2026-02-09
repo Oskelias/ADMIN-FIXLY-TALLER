@@ -76,7 +76,7 @@ export function Header() {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={user?.avatar} />
                   <AvatarFallback className="bg-white/20 text-white text-sm">
-                    {user ? getInitials(user.name) : 'U'}
+                    {getInitials(user?.name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-left hidden md:block">
