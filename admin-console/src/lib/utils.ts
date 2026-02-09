@@ -64,13 +64,15 @@ export function slugify(text: string): string {
     .replace(/(^-|-$)+/g, '');
 }
 
-export function getInitials(name: string): string {
+export function getInitials(name?: string | null): string {
+  if (!name) return 'U';
   return name
     .split(' ')
     .map(part => part[0])
+    .filter(Boolean)
     .join('')
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2) || 'U';
 }
 
 export function getStatusColor(status: string): string {
