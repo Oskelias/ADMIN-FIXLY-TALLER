@@ -96,6 +96,35 @@ export function requireSuperAdmin() {
 }
 
 /**
+ * Middleware to require admin or superadmin role
+ * Also supports ADMIN_BOOTSTRAP_EMAIL env var for initial setup
+ */
+export function requireAdmin() {
+  return async (c: Context<{ Bindings: Env }>, next: Next) => {
+    const user = c.get('user');
+
+    if (!user) {
+      return c.json({ ok: false, error: 'forbidden' }, 403);
+    }
+
+    // Allow superadmin or admin roles
+    if (user.role === 'superadmin' || user.role === 'admin') {
+      await next();
+      return;
+    }
+
+    // Bootstrap: allow if email matches ADMIN_BOOTSTRAP_EMAIL
+    const bootstrapEmail = c.env.ADMIN_BOOTSTRAP_EMAIL;
+    if (bootstrapEmail && user.email?.toLowerCase() === bootstrapEmail.toLowerCase()) {
+      await next();
+      return;
+    }
+
+    return c.json({ ok: false, error: 'forbidden' }, 403);
+  };
+}
+
+/**
  * Middleware to check tenant status
  * Used by the app (not admin) to enforce suspension
  * Returns 403 with code TENANT_SUSPENDED if tenant is suspended

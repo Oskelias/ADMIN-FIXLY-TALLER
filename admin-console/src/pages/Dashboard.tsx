@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Users,
   Building2,
@@ -8,82 +9,17 @@ import {
   RefreshCw,
   CheckCircle,
   Clock,
+  AlertCircle,
+  ShieldAlert,
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KPICard } from '@/components/modules/KPICard';
-import { StatusBadge } from '@/components/modules/StatusBadge';
 import { dashboardApi } from '@/services/api';
 import { useAuthStore } from '@/store/auth';
 import { formatCurrency, formatRelativeTime } from '@/lib/utils';
-import type { DashboardStats, AuditLog } from '@/types';
-
-// Mock data for development
-const mockStats: DashboardStats = {
-  totalTenants: 45,
-  activeTenants: 38,
-  totalUsers: 234,
-  activeUsers: 189,
-  totalRevenue: 892500,
-  monthlyRevenue: 125000,
-  totalPayments: 156,
-  pendingPayments: 12,
-  approvedPayments: 132,
-  rejectedPayments: 12,
-  revenueByMonth: [
-    { month: 'Ene', revenue: 85000 },
-    { month: 'Feb', revenue: 92000 },
-    { month: 'Mar', revenue: 78000 },
-    { month: 'Abr', revenue: 105000 },
-    { month: 'May', revenue: 115000 },
-    { month: 'Jun', revenue: 125000 },
-  ],
-  paymentsByStatus: [
-    { status: 'approved', count: 132, amount: 780000 },
-    { status: 'pending', count: 12, amount: 45000 },
-    { status: 'rejected', count: 12, amount: 67500 },
-  ],
-  tenantsByPlan: [
-    { plan: 'free', count: 15 },
-    { plan: 'starter', count: 18 },
-    { plan: 'professional', count: 10 },
-    { plan: 'enterprise', count: 2 },
-  ],
-  recentActivity: [
-    {
-      id: '1',
-      userId: 'u1',
-      userName: 'Juan Pérez',
-      userEmail: 'juan@example.com',
-      action: 'user.login',
-      resourceType: 'user',
-      resourceId: 'u1',
-      createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '2',
-      userId: 'u2',
-      userName: 'María García',
-      userEmail: 'maria@example.com',
-      tenantId: 't1',
-      action: 'payment.created',
-      resourceType: 'payment',
-      resourceId: 'p123',
-      createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '3',
-      userId: 'u3',
-      userName: 'Carlos López',
-      userEmail: 'carlos@example.com',
-      action: 'tenant.created',
-      resourceType: 'tenant',
-      resourceId: 't456',
-      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    },
-  ] as AuditLog[],
-};
+import type { DashboardStats } from '@/types';
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 const PLAN_COLORS = ['#6b7280', '#3b82f6', '#8b5cf6', '#f59e0b'];
@@ -91,17 +27,25 @@ const PLAN_COLORS = ['#6b7280', '#3b82f6', '#8b5cf6', '#f59e0b'];
 export function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
   const { isSuperAdmin } = useAuthStore();
+  const navigate = useNavigate();
 
   const fetchStats = async () => {
     setIsLoading(true);
+    setError(null);
+    setIsForbidden(false);
     try {
       const data = await dashboardApi.getStats();
       setStats(data);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      // Use mock data in development
-      setStats(mockStats);
+    } catch (err: any) {
+      console.error('Error fetching stats:', err);
+      if (err?.code === 'forbidden' || err?.message?.includes('forbidden')) {
+        setIsForbidden(true);
+      } else {
+        setError(err?.message || 'Error al cargar estadísticas');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -127,13 +71,52 @@ export function DashboardPage() {
     return labels[action] || action;
   };
 
-  if (isLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-fixly-purple-200 border-t-fixly-purple-600 rounded-full animate-spin" />
           <p className="text-gray-500">Cargando dashboard...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (isForbidden) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <ShieldAlert className="h-16 w-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Acceso Restringido</h2>
+            <p className="text-gray-500 mb-6">
+              No tienes permisos para acceder al panel de administración.
+            </p>
+            <Button onClick={() => navigate('/login')} variant="outline">
+              Ir al Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="max-w-md w-full">
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Error al Cargar</h2>
+            <p className="text-gray-500 mb-6">
+              {error || 'No se pudieron cargar las estadísticas.'}
+            </p>
+            <Button onClick={fetchStats} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reintentar
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
