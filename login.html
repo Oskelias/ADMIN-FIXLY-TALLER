@@ -1,107 +1,240 @@
-<script>
-  function showStatus(message, type) {
-    const statusDiv = document.getElementById('statusMessage');
-    const statusText = document.getElementById('statusText');
 
-    statusText.textContent = message;
-    statusDiv.classList.remove('hidden');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixly Admin - Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .floating-shapes::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: 10%;
+            right: 10%;
+            animation: float 6s ease-in-out infinite;
+        }
+        .floating-shapes::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 30%;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: 20%;
+            left: 15%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg relative overflow-hidden floating-shapes">
+    
+    <!-- Contenido Principal -->
+    <div class="min-h-screen flex items-center justify-center px-4">
+        <div class="max-w-md w-full">
+            
+            <!-- Logo y Título -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-tools text-4xl text-white mr-3"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Fixly Admin</h1>
+                        <p class="text-blue-200">Panel de Administración</p>
+                    </div>
+                </div>
+            </div>
 
-    statusDiv.querySelector('div').className = type === 'success'
-      ? 'p-4 rounded-lg bg-green-50 border border-green-200'
-      : 'p-4 rounded-lg bg-red-50 border border-red-200';
+            <!-- Formulario de Login -->
+            <div class="bg-white rounded-2xl shadow-2xl p-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Iniciar Sesión</h2>
+                    <p class="text-gray-600">Ingresa tus credenciales</p>
+                </div>
 
-    statusText.className = type === 'success'
-      ? 'text-sm text-green-800'
-      : 'text-sm text-red-800';
-  }
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user mr-2"></i>Usuario
+                        </label>
+                        <input 
+                            type="text" 
+                            id="loginUsername"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-lg"
+                            placeholder="admin"
+                            value="admin"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-lock mr-2"></i>Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            id="loginPassword"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-lg"
+                            placeholder="Admin628"
+                            required
+                        >
+                    </div>
 
-  function hideStatus() {
-    document.getElementById('statusMessage').classList.add('hidden');
-  }
+                    <button 
+                        type="submit"
+                        id="submitBtn"
+                        class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition duration-200 font-semibold"
+                    >
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Iniciar Sesión
+                    </button>
+                </form>
 
-  // API base: usa VITE_API_URL si existe (Pages), si no usa el dominio productivo
-  function getApiBase() {
-    // Si en algún momento lo inyectás en build, esto te lo respeta
-    const envApi = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
-      ? import.meta.env.VITE_API_URL
-      : '';
-    const base = (envApi || 'https://api.fixlytaller.com').replace(/\/$/, '');
-    return base;
-  }
+                <!-- Mensaje de Estado -->
+                <div id="statusMessage" class="mt-6 hidden">
+                    <div class="p-4 rounded-lg">
+                        <p id="statusText" class="text-sm"></p>
+                    </div>
+                </div>
 
-  async function safeReadJson(response) {
-    const text = await response.text();
-    try {
-      return { json: JSON.parse(text), text };
-    } catch {
-      return { json: null, text };
-    }
-  }
+                <!-- Enlaces adicionales -->
+                <div class="mt-8 text-center space-y-2">
+                    <p class="text-sm text-gray-600">
+                        ¿No tienes una cuenta? 
+                        <a href="https://filxlylanding.netlify.app/" class="text-purple-600 hover:underline">
+                            Regístrate aquí
+                        </a>
+                    </p>
+                </div>
+            </div>
 
-  async function handleLogin(username, password) {
-    hideStatus();
+            <!-- Información adicional -->
+            <div class="mt-6 text-center">
+                <p class="text-blue-200 text-sm">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Conexión segura SSL • Datos protegidos
+                </p>
+            </div>
+        </div>
+    </div>
 
-    const API = getApiBase();
-    const url = `${API}/api/auth/login`;
+    <script>
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = message;
+            statusDiv.classList.remove('hidden');
+            statusDiv.querySelector('div').className = type === 'success'
+                ? 'p-4 rounded-lg bg-green-50 border border-green-200'
+                : 'p-4 rounded-lg bg-red-50 border border-red-200';
+            statusText.className = type === 'success'
+                ? 'text-sm text-green-800'
+                : 'text-sm text-red-800';
+        }
 
-    console.log('[login] POST', url);
+        function hideStatus() {
+            document.getElementById('statusMessage').classList.add('hidden');
+        }
 
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
+        // API base: usa VITE_API_URL si existe (Pages), si no usa el dominio productivo
+        function getApiBase() {
+            // Si en algún momento lo inyectás en build, esto te lo respeta
+            const envApi = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL)
+                ? import.meta.env.VITE_API_URL
+                : '';
+            const base = (envApi || 'https://api.fixlytaller.com').replace(/\/$/, '');
+            return base;
+        }
 
-      const { json, text } = await safeReadJson(response);
+        async function safeReadJson(response) {
+            const text = await response.text();
+            try {
+                return { json: JSON.parse(text), text };
+            } catch {
+                return { json: null, text };
+            }
+        }
 
-      console.log('[login] status:', response.status);
-      console.log('[login] body:', json ?? text);
+        async function handleLogin(username, password) {
+            hideStatus();
+            const API = getApiBase();
+            const url = `${API}/api/auth/login`;
+            console.log('[login] POST', url);
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
 
-      // Aceptamos varias formas de respuesta:
-      // 1) { success:true, token, user }
-      // 2) { token, user }
-      // 3) errores: { error: "..."} o texto
-      const token = json?.token;
-      const user = json?.user;
-      const okBySuccessFlag = json?.success === true;
-      const okByToken = typeof token === 'string' && token.length > 10;
+                const { json, text } = await safeReadJson(response);
+                console.log('[login] status:', response.status);
+                console.log('[login] body:', json ?? text);
 
-      if (response.ok && (okBySuccessFlag || okByToken)) {
-        localStorage.setItem('token', token);
-        if (user) localStorage.setItem('user', JSON.stringify(user));
-        window.location.href = 'index.html';
-        return;
-      }
+                // Aceptamos varias formas de respuesta:
+                // 1) { success:true, token, user }
+                // 2) { token, user }
+                // 3) errores: { error: "..."} o texto
+                const token = json?.token;
+                const user = json?.user;
+                const okBySuccessFlag = json?.success === true;
+                const okByToken = typeof token === 'string' && token.length > 10;
 
-      const msg =
-        json?.error ||
-        json?.message ||
-        (typeof text === 'string' && text.trim() ? text : null) ||
-        'Error al iniciar sesión';
+                if (response.ok && (okBySuccessFlag || okByToken)) {
+                    localStorage.setItem('token', token);
+                    if (user) localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = 'index.html';
+                    return;
+                }
 
-      showStatus(msg, 'error');
-    } catch (err) {
-      console.error('[login] fetch error:', err);
-      showStatus('Error de conexión con el servidor', 'error');
-    }
-  }
+                const msg =
+                    json?.error ||
+                    json?.message ||
+                    (typeof text === 'string' && text.trim() ? text : null) ||
+                    'Error al iniciar sesión';
+                showStatus(msg, 'error');
+            } catch (err) {
+                console.error('[login] fetch error:', err);
+                showStatus('Error de conexión con el servidor', 'error');
+            }
+        }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('loginUsername');
-    const passwordInput = document.getElementById('loginPassword');
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[login] DOM loaded');
+            const form = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
 
-    if (!form || !usernameInput || !passwordInput) {
-      console.error('[login] form/inputs not found');
-      return;
-    }
+            console.log('[login] Elements found:', { form: !!form, username: !!usernameInput, password: !!passwordInput });
 
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-      handleLogin(username, password);
-    });
-  });
-</script>
+            if (!form || !usernameInput || !passwordInput) {
+                console.error('[login] form/inputs not found');
+                return;
+            }
+
+            form.addEventListener('submit', (event) => {
+                console.log('[login] Form submitted');
+                event.preventDefault();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value;
+                console.log('[login] Credentials:', { username, passwordLength: password.length });
+                handleLogin(username, password);
+            });
+
+            console.log('[login] Event listener added');
+        });
+    </script>
+
+</body>
+</html>
