@@ -137,6 +137,7 @@ export const api = new ApiClient();
 // AUTH
 // =====================================================
 export const authApi = {
+  // Backend ACTUAL (según tu captura): /auth/login (sin /api)
   login: (username: string, password: string) =>
     api.post<{ user: User; token: string }>('/auth/login', { username, password }),
 
@@ -151,58 +152,67 @@ export const authApi = {
   changePassword: (currentPassword: string, newPassword: string) =>
     api.post<void>('/auth/change-password', { currentPassword, newPassword }),
 
-  // Public signup - creates new tenant + user
+  // Public register - backend nuevo: /auth/public/register
   signup: (data: { email: string; password: string; businessName: string; phone?: string }) =>
-    api.post<{ user: User; token: string }>('/auth/public/signup', data),
+    api.post<{ ok: boolean; message?: string; user?: User; token?: string }>(
+      '/auth/public/register',
+      data
+    ),
 };
 
 // =====================================================
 // DASHBOARD
 // =====================================================
 export const dashboardApi = {
-  getStats: () => api.get<DashboardStats>('/admin/dashboard/stats'),
+  // Backend nuevo: GET /api/admin/stats
+  getStats: () => api.get<DashboardStats>('/api/admin/stats'),
+
+  // Este endpoint no lo vimos confirmado; lo dejo pero bajo /api para que no apunte a rutas viejas.
+  // Si no existe, lo podés comentar hasta implementarlo.
   getRecentActivity: (limit = 10) =>
-    api.get<AuditLog[]>('/admin/dashboard/activity', { limit }),
+    api.get<AuditLog[]>('/api/admin/dashboard/activity', { limit }),
 };
 
 // =====================================================
 // TENANTS
 // =====================================================
 export const tenantsApi = {
-  list: (filters?: TenantFilters) => api.get<PaginatedResponse<Tenant>>('/admin/tenants', filters),
-  get: (id: string) => api.get<Tenant>(`/admin/tenants/${id}`),
-  create: (data: unknown) => api.post<Tenant>('/admin/tenants', data),
-  update: (id: string, data: unknown) => api.put<Tenant>(`/admin/tenants/${id}`, data),
-  delete: (id: string) => api.delete<void>(`/admin/tenants/${id}`),
-  suspend: (id: string, reason: string) => api.post(`/admin/tenants/${id}/suspend`, { reason }),
-  activate: (id: string) => api.post(`/admin/tenants/${id}/activate`),
+  list: (filters?: TenantFilters) => api.get<PaginatedResponse<Tenant>>('/api/admin/tenants', filters),
+  get: (id: string) => api.get<Tenant>(`/api/admin/tenants/${id}`),
+  create: (data: unknown) => api.post<Tenant>('/api/admin/tenants', data),
+  update: (id: string, data: unknown) => api.put<Tenant>(`/api/admin/tenants/${id}`, data),
+  delete: (id: string) => api.delete<void>(`/api/admin/tenants/${id}`),
+  suspend: (id: string, reason: string) => api.post(`/api/admin/tenants/${id}/suspend`, { reason }),
+  activate: (id: string) => api.post(`/api/admin/tenants/${id}/activate`),
 };
 
 // =====================================================
 // USERS
 // =====================================================
 export const usersApi = {
-  list: (filters?: UserFilters) => api.get<PaginatedResponse<User>>('/admin/users', filters),
-  get: (id: string) => api.get<User>(`/admin/users/${id}`),
-  create: (data: unknown) => api.post<User>('/admin/users', data),
-  update: (id: string, data: unknown) => api.put<User>(`/admin/users/${id}`, data),
-  delete: (id: string) => api.delete<void>(`/admin/users/${id}`),
-  getSessions: (id: string) => api.get<Session[]>(`/admin/users/${id}/sessions`),
+  list: (filters?: UserFilters) => api.get<PaginatedResponse<User>>('/api/admin/users', filters),
+  get: (id: string) => api.get<User>(`/api/admin/users/${id}`),
+  create: (data: unknown) => api.post<User>('/api/admin/users', data),
+  update: (id: string, data: unknown) => api.put<User>(`/api/admin/users/${id}`, data),
+  delete: (id: string) => api.delete<void>(`/api/admin/users/${id}`),
+  getSessions: (id: string) => api.get<Session[]>(`/api/admin/users/${id}/sessions`),
   terminateSession: (userId: string, sessionId: string) =>
-    api.delete<void>(`/admin/users/${userId}/sessions/${sessionId}`),
-  resetPassword: (id: string) => api.post<void>(`/admin/users/${id}/reset-password`),
-  block: (id: string, reason: string) => api.post<void>(`/admin/users/${id}/block`, { reason }),
-  unblock: (id: string) => api.post<void>(`/admin/users/${id}/unblock`),
-  invite: (data: { email: string; role: UserRole }) => api.post<void>('/admin/users/invite', data),
+    api.delete<void>(`/api/admin/users/${userId}/sessions/${sessionId}`),
+  resetPassword: (id: string) => api.post<void>(`/api/admin/users/${id}/reset-password`),
+  block: (id: string, reason: string) => api.post<void>(`/api/admin/users/${id}/block`, { reason }),
+  unblock: (id: string) => api.post<void>(`/api/admin/users/${id}/unblock`),
+  invite: (data: { email: string; role: UserRole }) => api.post<void>('/api/admin/users/invite', data),
 };
 
 // =====================================================
 // PAYMENTS
 // =====================================================
 export const paymentsApi = {
-  list: (filters?: PaymentFilters) => api.get<PaginatedResponse<Payment>>('/admin/payments', filters),
-  get: (id: string) => api.get<Payment>(`/admin/payments/${id}`),
-  refund: (id: string, reason: string) => api.post<void>(`/admin/payments/${id}/refund`, { reason }),
+  list: (filters?: PaymentFilters) =>
+    api.get<PaginatedResponse<Payment>>('/api/admin/payments', filters),
+  get: (id: string) => api.get<Payment>(`/api/admin/payments/${id}`),
+  refund: (id: string, reason: string) =>
+    api.post<void>(`/api/admin/payments/${id}/refund`, { reason }),
 };
 
 // =====================================================
@@ -210,15 +220,15 @@ export const paymentsApi = {
 // =====================================================
 export const operationsApi = {
   listOrders: (filters?: OperationFilters) =>
-    api.get<PaginatedResponse<Order>>('/admin/operations/orders', filters),
-  getOrder: (id: string) => api.get<Order>(`/admin/operations/orders/${id}`),
+    api.get<PaginatedResponse<Order>>('/api/admin/operations/orders', filters),
+  getOrder: (id: string) => api.get<Order>(`/api/admin/operations/orders/${id}`),
 };
 
 // =====================================================
 // AUDIT
 // =====================================================
 export const auditApi = {
-  list: (filters?: AuditFilters) => api.get<PaginatedResponse<AuditLog>>('/admin/audit', filters),
+  list: (filters?: AuditFilters) => api.get<PaginatedResponse<AuditLog>>('/api/admin/audit', filters),
 };
 
 // =====================================================
@@ -226,12 +236,12 @@ export const auditApi = {
 // =====================================================
 export const configApi = {
   getTenantSettings: (tenantId: string) =>
-    api.get<TenantSettings>(`/admin/config/${tenantId}/settings`),
+    api.get<TenantSettings>(`/api/admin/config/${tenantId}/settings`),
   updateTenantSettings: (tenantId: string, settings: TenantSettings) =>
-    api.put<TenantSettings>(`/admin/config/${tenantId}/settings`, settings),
+    api.put<TenantSettings>(`/api/admin/config/${tenantId}/settings`, settings),
   getSystemHealth: () =>
     api.get<{ status: string; services: Record<string, { status: string; latency: number }> }>(
-      '/admin/config/health'
+      '/api/admin/config/health'
     ),
 };
 
@@ -240,7 +250,9 @@ export const configApi = {
 // =====================================================
 export const mercadoPagoApi = {
   getConfig: (tenantId: string) =>
-    api.get<MercadoPagoConfig>(`/admin/mercadopago/${tenantId}/config`),
+    api.get<MercadoPagoConfig>(`/api/admin/mercadopago/${tenantId}/config`),
   testConnection: (tenantId: string) =>
-    api.post<{ success: boolean; message?: string }>(`/admin/mercadopago/${tenantId}/test-connection`),
+    api.post<{ success: boolean; message?: string }>(
+      `/api/admin/mercadopago/${tenantId}/test-connection`
+    ),
 };
